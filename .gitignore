@@ -1,0 +1,7 @@
+data/
+wandb/
+slurm_output/
+wandb_on_slurm/
+wandb/
+wandb_on_slurm/
+pyg-venv/
