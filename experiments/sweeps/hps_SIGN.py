@@ -19,9 +19,7 @@ hyperparameter_defaults = dict(
     batch_norm=1,
     batch_size=256,
 )
-# %% 
-import torch
-# %% 
+
 wandb.init(config=hyperparameter_defaults)
 config = wandb.config
 
@@ -65,9 +63,9 @@ def main(config):
     trigger_times = 0
 
     for epoch in range(config.epochs):
-        train_output = training_step(model, data, optimizer, train_dl)
-        val_output = testing_step(model, data, val_dl)
-        test_output = testing_step(model, data, test_dl)
+        train_output, train_time, train_mem = training_step(model, data, optimizer, train_dl)
+        val_output, val_time, val_mem = testing_step(model, data, val_dl)
+        test_output, test_time, test_mem = testing_step(model, data, test_dl)
 
         scheduler.step(val_output['loss'])
 
@@ -75,6 +73,16 @@ def main(config):
         log_dict.update({'epoch-train_'+k: v for k, v in train_output.items()})
         log_dict.update({'epoch-val_'+k: v for k, v in val_output.items()})
         log_dict.update({'epoch-test_'+k: v for k, v in test_output.items()})
+        
+        log_dict.update({
+            'epoch-train_time': train_time,
+            'epoch-val_time': val_time,
+            'epoch-test_time': test_time,
+            'epoch-train_mem': train_mem,
+            'epoch-val_mem': val_mem,
+            'epoch-test_mem': test_mem,
+        })
+
         wandb.log(log_dict)
 
         # early stopping

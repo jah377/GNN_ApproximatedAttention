@@ -182,6 +182,9 @@ def main(args):
     with open(args.YAML_FILE, 'w') as outfile:
         yaml.dump(sweep_config, outfile, default_flow_style=False)
 
+    # print final dictionary
+    print(yaml.dump(sweep_config))
+
 
 if __name__ == "__main__":
     main(args)

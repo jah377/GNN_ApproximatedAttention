@@ -1,20 +1,21 @@
 #!/bin/bash
-#SBATCH --job-name="gpu_trial"
+#SBATCH --job-name="SIGNgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:05:00
+#SBATCH --time=12:00:00
 #SBATCH --gpus=1
-#SBATCH --partition=gpu_shared
+#SBATCH --partition=gpu
 #SBATCH --output=%x.%j.out
-
+# SBATCH --mail-user=jharris@student.uva.nl
+# SBATCH --mail-type=BEGIN,END,FAIL
 date;hostname;id;pwd
 
 # sweep variables 
 dataset='pubmed'
-method='random'              # sweep type (grid, bayes, random)
-run_trial=true               # if True, reduce param values for quick test
-sweep_iterations=5           # number of sweep iterations
-FOLDER='gpu_dump'            # name of folder on scratch
+method='random'                # sweep type (grid, bayes, random)
+run_trial=false                # if True, reduce param values for quick test
+sweep_iterations=300           # number of sweep iterations
+FOLDER='SIGNgpu'               # name of folder on scratch
 
 
 # copy files to scratch
@@ -31,6 +32,7 @@ module load CUDA/11.3.1
 source $TMPDIR/$FOLDER/venvs/GPU_venv/bin/activate
 which python
 
+echo ''
 echo 'Check if packages installed correctly'
 python -c "import torch; print(f'Torch: {torch.__version__}')"
 python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
@@ -63,6 +65,7 @@ do
     echo 'config:' $yaml_file
     echo 'train_file:' $train_file
     echo 'project_name:' $project_name
+    echo ''
 
     # build yaml file 
     python general/slurm/build_yaml.py \
