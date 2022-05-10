@@ -3,5 +3,5 @@ wandb/
 slurm_output/
 wandb_on_slurm/
 wandb/
-pyg-venv/
+venvs/
 HIDDEN/

@@ -1,0 +1,14 @@
+# uninstall miniconda3
+rm -rf ~/miniconda3                         # remove entire directory
+~/.bash_profile                             # remove from path environment
+rm -rf ~/.condarc ~/.conda ~/.continuum     # remove hidden folders
+
+
+# modules available in LISA
+module load 2021
+module load GCCcore/10.3.0
+module load CUDA/11.3.1
+module load Python/3.9.5-GCCcore-10.3.0
+module load Miniconda3/4.9.2 
+module load PyTorch/1.11.0-foss-2021a-CUDA-11.3.1
+
