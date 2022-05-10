@@ -1,12 +1,14 @@
 import wandb
 import torch
-import os.path as osp
-
 
 from general.models.SIGN import net as SIGN
-from general.transforms_dotproduct import transform_wAttention
+from general.transforms.transforms_dotproduct import transform_wAttention
 from general.utils import set_seeds, build_DataLoader, build_optimizer, build_scheduler
 from general.epoch_steps.steps_SIGN import training_step, testing_step
+
+#################################################################
+########## THIS SHOULD BE IDENTICAL TO HPS_SIGN_MHA.PY ##########
+#################################################################
 
 
 hyperparameter_defaults = dict(
@@ -21,6 +23,8 @@ hyperparameter_defaults = dict(
     K=1,
     batch_norm=1,
     batch_size=256,
+    attn_heads=1,
+    mha_bias=1
 )
 
 wandb.init(config=hyperparameter_defaults)
@@ -34,23 +38,21 @@ def main(config):
 
     # data
     path = f'data/{config.dataset}_sign_k{config.K}.pth'
-    transform_path = path.replace('k0.', f'k{config.K}_{1}heads_transform.')
 
-    if not osp.isfile(transform_path):
-        # single head attention -- default attn_heads=1
-        data, trans_time, trans_mem = transform_wAttention(torch.load(path), config.K)
-        
-        torch.save(data, transform_path)
-        print('\n~~~ TRANSFORM PERFORMED ~~~\n')
-        
-        wandb.log({
-            'precomp-transform_time': trans_time,
-            'precomp-transform_mem': trans_mem,
-        })
-    else:
-        data = torch.load(transform_path)
+    data, trans_time, trans_mem = transform_wAttention(
+        torch.load(path), 
+        config.K, 
+        config.attn_heads, 
+        config.mha_bias,
+        )
 
     train_dl, val_dl, test_dl = build_DataLoader(data, config.batch_size)
+
+    wandb.log({
+        'precomp-transform_time': trans_time,
+        'precomp-transform_mem': trans_mem,
+    })
+
 
     # model
     model = SIGN(
@@ -62,9 +64,9 @@ def main(config):
         config.batch_norm).to(device)
 
     # log number of trainable parameters
-    log_dict = {
-        'trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad)
-    }
+    wandb.log({
+        'trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad),
+    })
 
     optimizer = build_optimizer(
         model,
@@ -87,7 +89,7 @@ def main(config):
 
         scheduler.step(val_output['loss'])
 
-        log_dict.update({'epoch': epoch})
+        log_dict = {'epoch': epoch}
         log_dict.update({'epoch-train_'+k: v for k, v in train_output.items()})
         log_dict.update({'epoch-val_'+k: v for k, v in val_output.items()})
         log_dict.update({'epoch-test_'+k: v for k, v in test_output.items()})

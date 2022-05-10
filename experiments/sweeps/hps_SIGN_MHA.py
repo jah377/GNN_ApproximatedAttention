@@ -2,9 +2,13 @@ import wandb
 import torch
 
 from general.models.SIGN import net as SIGN
+from general.transforms.transforms_dotproduct import transform_wAttention
 from general.utils import set_seeds, build_DataLoader, build_optimizer, build_scheduler
 from general.epoch_steps.steps_SIGN import training_step, testing_step
 
+#################################################################
+########## THIS SHOULD BE IDENTICAL TO HPS_SIGN_SHA.PY ##########
+#################################################################
 
 hyperparameter_defaults = dict(
     dataset='cora',
@@ -18,6 +22,8 @@ hyperparameter_defaults = dict(
     K=1,
     batch_norm=1,
     batch_size=256,
+    attn_heads=1,
+    mha_bias=1
 )
 
 wandb.init(config=hyperparameter_defaults)
@@ -31,8 +37,21 @@ def main(config):
 
     # data
     path = f'data/{config.dataset}_sign_k{config.K}.pth'
-    data = torch.load(path)
+
+    data, trans_time, trans_mem = transform_wAttention(
+        torch.load(path), 
+        config.K, 
+        config.attn_heads, 
+        config.mha_bias,
+        )
+
     train_dl, val_dl, test_dl = build_DataLoader(data, config.batch_size)
+
+    wandb.log({
+        'precomp-transform_time': trans_time,
+        'precomp-transform_mem': trans_mem,
+    })
+
 
     # model
     model = SIGN(

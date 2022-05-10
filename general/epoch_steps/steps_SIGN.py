@@ -56,8 +56,8 @@ def training_step(model, data, optimizer, loader):
         'f1': cum_correct/cum_n,
     }
 
-@torch.no_grad()
 @resources
+@torch.no_grad()
 def testing_step(model, data, loader):
     """ Document validation or test loss and accuracy
     Args:

@@ -10,7 +10,7 @@ from torch_sparse import SparseTensor
 
 class net(nn.Module):
 
-    def __init__(self, d_m: int, num_heads: int = 1, bias: bool = True):
+    def __init__(self, d_m: int, num_heads: int = 1, bias: bool = 1):
         """
           d_m:          feature embedding dimension
           num_heads:    attn heads (default=1)
@@ -24,12 +24,14 @@ class net(nn.Module):
         self.scale = 1.0/np.sqrt(d_m)   # scaling factor per head
         self.qkv_lin = nn.Linear(d_m, 3*self.d_k, bias=bias) # stacked q,k,v for efficiency
 
+
     def _reset_parameters(self):
         # original transformer initialization, see PyTorch documentation
         nn.init.xavier_uniform_(self.qkv_proj.weight)
 
-        if self.bias == True:
+        if self.bias == 1:
             self.qkv_proj.bias.data.fill_(0)
+
 
     def forward(self, x, edge_index):
         """
@@ -68,6 +70,6 @@ class net(nn.Module):
         return SparseTensor(
             row=attn.indices()[0], 
             col=attn.indices()[1], 
-            value=attn.values(),
+            value=attn.values().detach(),
             sparse_sizes=attn.size()
             ) # to replace adj

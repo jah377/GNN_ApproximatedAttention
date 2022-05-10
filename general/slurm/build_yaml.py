@@ -38,9 +38,9 @@ def main(args):
     assert args.TRAIN_FILE != None
     assert args.YAML_FILE != None
 
-    GAT_models = ['gat_fullbatch', 'gat_loader', 'sgcomb']
-    SIGN_models = ['sign', 'sgcomb', 'sgsep_fullbatch', 'sgsep_loader', 'sdpa']
-    DPA_models = ['sdpa', 'singleheadattention', 'multiheadattention']
+    GAT_models = ['gat_fullbatch', 'gat_loader']
+    SIGN_models = ['sign', 'sign_sha', 'sign_mha']
+    DPA_models = ['sign_sha', 'sign_mha']
 
     include_gat_params = args.MODEL.lower() in GAT_models
     include_sign_params = args.MODEL.lower() in SIGN_models
@@ -149,13 +149,29 @@ def main(args):
         })
 
     if include_dpa_params:
+        if args.MODEL.lower()=='sign_mha':
+            param_dict.update({
+                'attn_heads': {
+                    'distribution': 'int_uniform',
+                    'min': 1,
+                    'max': 9,
+                },
+            })
+        elif args.MODEL.lower()=='sign_sha':
+            param_dict.update({
+                'seed': {
+                    'distribution': 'constant',
+                    'value': 1
+                },
+            })
+
         param_dict.update({
-            'attn_heads': {
+            'mha_bias': {
                 'distribution': 'int_uniform',
-                'min': 1,
-                'max': 9,
+                'min': 0,
+                'max': 1,
             },
-        })
+        }) 
 
     # reduce complexity for trialing
     if args.RUN_TRIAL:

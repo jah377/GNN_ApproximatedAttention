@@ -1,12 +1,12 @@
 import torch
 from torch_sparse import SparseTensor
 
-from general.models.DotProductAttention import MultiheadAttention
+from general.models.DotProductAttention import net as MultiheadAttention
 from general.utils import resources  # wrapper
 
 
 @resources
-def transform_wAttention(data, K: int, attn_heads: int = 1):
+def transform_wAttention(data, K: int, attn_heads: int = 1, mha_bias: int = 1):
     """
     Args:
         data:           data object
@@ -36,8 +36,7 @@ def transform_wAttention(data, K: int, attn_heads: int = 1):
     # =========== not part of T.SIGN(K) ===========
 
     # replace adj with DotProductAttention weights
-
-    adj_t = extract_attention(data.x, data.edge_index, attn_heads)
+    adj_t = extract_attention(data.x, data.edge_index, attn_heads, mha_bias)
     adj_t = deg_inv_sqrt.view(-1, 1) * adj_t * deg_inv_sqrt.view(1, -1)
 
     # =========== not part of T.SIGN(K) ===========
@@ -53,18 +52,19 @@ def transform_wAttention(data, K: int, attn_heads: int = 1):
     return data
 
 
-def extract_attention(x, edge_index, attn_heads):
+def extract_attention(x, edge_index, attn_heads, mha_bias):
     """ calculate dotproduct attention
     Args:
         x:              feature embeddings [n nodes x emb]
         edge_index:     connections
         attn_heads:     number of attention heads
+        mha_bias:       learn additive bias (default=True) 
 
     Returns:
         torch.sparse_coo_matrix of attention weights
     """
 
     d_m = x.shape[1]  # feature embedding dimension
-    MHA = MultiheadAttention(d_m, attn_heads)
+    MHA = MultiheadAttention(d_m, attn_heads, mha_bias)
 
     return MHA(x, edge_index)

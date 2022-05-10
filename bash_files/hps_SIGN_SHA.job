@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="SIGNgpu"
+#SBATCH --job-name="SHAgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=12:00:00
@@ -15,7 +15,7 @@ dataset='pubmed'
 method='random'                # sweep type (grid, bayes, random)
 run_trial=false                # if True, reduce param values for quick test
 sweep_iterations=300           # number of sweep iterations
-FOLDER='SIGNgpu'               # name of folder on scratch
+FOLDER='SHAgpu'               # name of folder on scratch
 
 
 # copy files to scratch
@@ -46,7 +46,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN' 
+for model in  'SIGN_SHA' 
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep
