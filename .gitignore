@@ -5,3 +5,4 @@ wandb_on_slurm/
 wandb/
 venvs/
 HIDDEN/
+archive/
