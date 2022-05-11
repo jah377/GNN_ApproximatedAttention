@@ -6,7 +6,7 @@
 #SBATCH --gpus=1
 #SBATCH --partition=gpu
 #SBATCH --output=%x.%j.out
-# SBATCH --mail-user=jharris@student.uva.nl
+# SBATCH --mail-user=jon.harris@student.uva.nl
 # SBATCH --mail-type=BEGIN,END,FAIL
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
@@ -93,5 +93,5 @@ let DIFF=END-START
 let HOURS=DIFF/3600
 let MINUTES=(DIFF/60)%60
 
-printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $hours $minutes
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

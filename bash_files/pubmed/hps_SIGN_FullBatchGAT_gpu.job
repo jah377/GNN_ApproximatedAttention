@@ -1,24 +1,21 @@
 #!/bin/bash
-#SBATCH --job-name="SIGNgpu"
+#SBATCH --job-name="SFBGATgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=12:00:00
-#SBATCH --gpus=1
-#SBATCH --partition=gpu
+#SBATCH --partition=normal
 #SBATCH --output=%x.%j.out
-# SBATCH --mail-user=jharris@student.uva.nl
+# SBATCH --mail-user=jon.harris@student.uva.nl
 # SBATCH --mail-type=BEGIN,END,FAIL
-
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
-
 
 # sweep variables 
 dataset='pubmed'
 method='random'                # sweep type (grid, bayes, random)
 run_trial=false                # if True, reduce param values for quick test
 sweep_iterations=300           # number of sweep iterations
-FOLDER='SIGNgpu'               # name of folder on scratch
+FOLDER='SFBGATgpu'                # name of folder on scratch
 
 
 # copy files to scratch
@@ -49,7 +46,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN' 
+for model in  'SIGN_FullBatchGAT' 
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep
@@ -88,9 +85,6 @@ do
         --PROJ_NAME $project_name
 done
 
-
-
-
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
 END=`date +%s`;
 
@@ -98,5 +92,5 @@ let DIFF=END-START
 let HOURS=DIFF/3600
 let MINUTES=(DIFF/60)%60
 
-printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $hours $minutes
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
