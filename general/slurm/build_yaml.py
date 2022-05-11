@@ -38,8 +38,8 @@ def main(args):
     assert args.TRAIN_FILE != None
     assert args.YAML_FILE != None
 
-    GAT_models = ['gat_fullbatch', 'gat_loader']
-    SIGN_models = ['sign', 'sign_sha', 'sign_mha']
+    GAT_models = ['fullbatchgat', 'samplergat']
+    SIGN_models = ['sign', 'sign_fullbatchgat', 'sign_sha', 'sign_mha']
     DPA_models = ['sign_sha', 'sign_mha']
 
     include_gat_params = args.MODEL.lower() in GAT_models
@@ -121,7 +121,7 @@ def main(args):
         })
 
     if include_gat_params:
-        if args.MODEL.lower() == 'gat_loader':
+        if args.MODEL.lower() == 'samplergat':
             param_dict.update({
                 'batch_size': {
                     'distribution': 'q_uniform',
@@ -149,7 +149,7 @@ def main(args):
         })
 
     if include_dpa_params:
-        if args.MODEL.lower()=='sign_mha':
+        if args.MODEL.lower() == 'sign_mha':
             param_dict.update({
                 'attn_heads': {
                     'distribution': 'int_uniform',
@@ -157,7 +157,7 @@ def main(args):
                     'max': 9,
                 },
             })
-        elif args.MODEL.lower()=='sign_sha':
+        elif args.MODEL.lower() == 'sign_sha':
             param_dict.update({
                 'seed': {
                     'distribution': 'constant',
@@ -171,7 +171,7 @@ def main(args):
                 'min': 0,
                 'max': 1,
             },
-        }) 
+        })
 
     # reduce complexity for trialing
     if args.RUN_TRIAL:

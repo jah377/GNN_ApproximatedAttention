@@ -1,15 +1,15 @@
 import wandb
 import torch
+import os.path as osp
 
 from general.models.SIGN import net as SIGN
-from general.transforms.transforms_dotproduct import transform_wAttention
+from general.transforms.transforms_DotProduct import transform_wAttention
 from general.utils import set_seeds, build_DataLoader, build_optimizer, build_scheduler
 from general.epoch_steps.steps_SIGN import training_step, testing_step
 
 #################################################################
 ########## THIS SHOULD BE IDENTICAL TO HPS_SIGN_MHA.PY ##########
 #################################################################
-
 
 hyperparameter_defaults = dict(
     dataset='cora',
@@ -36,23 +36,27 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def main(config):
     set_seeds(config.seed)
 
-    # data
-    path = f'data/{config.dataset}_sign_k{config.K}.pth'
+    # import or transform data
+    path = f'data/{config.dataset}_sign_k0.pth'
+    transform_path = f'data/{config.dataset}_sign_k0_heads{config.attn_heads}_transformed.pth'
 
-    data, trans_time, trans_mem = transform_wAttention(
-        torch.load(path), 
-        config.K, 
-        config.attn_heads, 
-        config.mha_bias,
+    if not osp.isfile(transform_path):
+        data, trans_resources = transform_wAttention(
+            torch.load(path),
+            config.K,
+            config.attn_heads
         )
 
+        wandb.log({'precomp-transform_'+k: v for k,
+                  v in trans_resources.items()})
+
+        torch.save(data, transform_path)
+        print('\n~~~ TRANSFORM PERFORMED ~~~\n')
+    else:
+        data = torch.load(transform_path)
+
+    # dataloader
     train_dl, val_dl, test_dl = build_DataLoader(data, config.batch_size)
-
-    wandb.log({
-        'precomp-transform_time': trans_time,
-        'precomp-transform_mem': trans_mem,
-    })
-
 
     # model
     model = SIGN(
@@ -83,7 +87,8 @@ def main(config):
     trigger_times = 0
 
     for epoch in range(config.epochs):
-        train_output, train_time, train_mem = training_step(model, data, optimizer, train_dl)
+        train_output, train_time, train_mem = training_step(
+            model, data, optimizer, train_dl)
         val_output, val_time, val_mem = testing_step(model, data, val_dl)
         test_output, test_time, test_mem = testing_step(model, data, test_dl)
 
@@ -93,7 +98,7 @@ def main(config):
         log_dict.update({'epoch-train_'+k: v for k, v in train_output.items()})
         log_dict.update({'epoch-val_'+k: v for k, v in val_output.items()})
         log_dict.update({'epoch-test_'+k: v for k, v in test_output.items()})
-        
+
         log_dict.update({
             'epoch-train_time': train_time,
             'epoch-val_time': val_time,

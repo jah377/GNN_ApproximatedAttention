@@ -6,7 +6,6 @@ from general.utils import resources  # wrapper
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-
 @resources
 def training_step(model, data, optimizer, loader):
     """ Perform forward and backward pass on SIGN
@@ -55,6 +54,7 @@ def training_step(model, data, optimizer, loader):
         'loss': cum_loss/cum_n,
         'f1': cum_correct/cum_n,
     }
+
 
 @resources
 @torch.no_grad()

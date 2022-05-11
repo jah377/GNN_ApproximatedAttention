@@ -26,7 +26,7 @@ def resources(func):
     """
 
     def memory():
-        
+
         if torch.cuda.is_available():
             return torch.cuda.max_memory_allocated(device)
 
@@ -42,10 +42,16 @@ def resources(func):
 
         output = func(*args, **kwargs)
 
-        delta_memory = memory() - memory_initial  # bytes
-        delta_time = time.time() - time_initial         # seconds
+        resource_dict = {
+            'time': time.time() - time_initial,  # seconds,
+            'mem':  memory() - memory_initial,  # bytes
+        }
 
-        return output, delta_time, delta_memory
+        # unpack tuple if func returns multiple outputs
+        if isinstance(output, tuple):
+            return *output, resource_dict
+
+        return output, resource_dict
 
     return wrapper
 
@@ -150,7 +156,7 @@ def build_DataLoader(data, batch_size: int):
             get_idx(data, split),
             batch_size=batch_size,
             shuffle=(split == 'train'),     # shuffle if training loader
-            drop_last=(split == 'train'),   # remove the final incomplete batch 
+            drop_last=(split == 'train'),   # remove the final incomplete batch
         )
 
     return [loader(data, split) for split in ['train', 'val', 'test']]

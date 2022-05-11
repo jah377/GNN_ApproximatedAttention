@@ -61,10 +61,10 @@ def extract_attention(x, edge_index, attn_heads, mha_bias):
         mha_bias:       learn additive bias (default=True) 
 
     Returns:
-        torch.sparse_coo_matrix of attention weights
+        SparseTensor containing attention weights
     """
 
     d_m = x.shape[1]  # feature embedding dimension
-    MHA = MultiheadAttention(d_m, attn_heads, mha_bias)
+    model = MultiheadAttention(d_m, attn_heads, mha_bias)
 
-    return MHA(x, edge_index)
+    return model(x, edge_index)
