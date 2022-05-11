@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="SHAgpu"
+#SBATCH --job-name='MHAgpu'
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=12:00:00
@@ -8,14 +8,16 @@
 #SBATCH --output=%x.%j.out
 # SBATCH --mail-user=jharris@student.uva.nl
 # SBATCH --mail-type=BEGIN,END,FAIL
+
 date;hostname;id;pwd
+START=`date +%s`                # will record .job runtime
 
 # sweep variables 
 dataset='pubmed'
 method='random'                # sweep type (grid, bayes, random)
 run_trial=false                # if True, reduce param values for quick test
 sweep_iterations=300           # number of sweep iterations
-FOLDER='SHAgpu'               # name of folder on scratch
+FOLDER='MHAgpu'                # name of folder on scratch
 
 
 # copy files to scratch
@@ -34,8 +36,8 @@ which python
 
 echo ''
 echo 'Check if packages installed correctly'
-python -c "import torch; print(f'Torch: {torch.__version__}')"
-python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
+python -c 'import torch; print(f'Torch: {torch.__version__}')'
+python -c 'import torch_geometric; print(f'PyG: {torch_geometric.__version__}')'
 echo ''
 
 
@@ -46,7 +48,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN_SHA' 
+for model in  'SIGN_MHA' 
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep
@@ -85,4 +87,12 @@ do
         --PROJ_NAME $project_name
 done
 
-echo "++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
+END=`date +%s`;
+
+let DIFF=END-START
+let HOURS=DIFF/3600
+let MINUTES=(DIFF/60)%60
+
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $hours $minutes
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

@@ -8,6 +8,7 @@
 #SBATCH --output=%x.%j.out
 
 date;hostname;id;pwd
+START=`date +%s`                # will record .job runtime
 
 # sweep variables 
 dataset='pubmed'
@@ -81,6 +82,15 @@ do
     python general/slurm/run_slurm.py \
         --YAML_FILE $yaml_file \
         --PROJ_NAME $project_name
+        
 done
 
-echo "++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
+END=`date +%s`;
+
+let DIFF=END-START
+let HOURS=DIFF/3600
+let MINUTES=(DIFF/60)%60
+
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $hours $minutes
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
