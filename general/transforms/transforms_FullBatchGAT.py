@@ -8,7 +8,8 @@ from general.utils import resources  # wrapper
 from general.utils import build_optimizer, build_scheduler
 from general.epoch_steps.steps_FullBatchGAT import training_step, testing_step
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+### Always perform on CPU ###
 
 
 @resources
@@ -68,7 +69,6 @@ def extract_attention(data, GATtransform_params):
     Returns:
         SparseTensor containing attention weights
     """
-    device = torch.device('cpu')
 
     # model
     model = GAT(
@@ -79,7 +79,7 @@ def extract_attention(data, GATtransform_params):
         GATtransform_params['nlayers'],
         GATtransform_params['heads_in'],
         GATtransform_params['heads_out'],
-    ).to(device)
+    )
 
     # log number of trainable parameters
     wandb.log({

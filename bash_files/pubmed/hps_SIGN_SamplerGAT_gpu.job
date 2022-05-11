@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="SFBGATcpu"
+#SBATCH --job-name="SLGATgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=24:00:00
+#SBATCH --time=12:00:00
 #SBATCH --partition=normal
 #SBATCH --output=%x.%j.out
 # SBATCH --mail-user=jon.harris@student.uva.nl
@@ -15,7 +15,7 @@ dataset='pubmed'
 method='random'                # sweep type (grid, bayes, random)
 run_trial=false                # if True, reduce param values for quick test
 sweep_iterations=300           # number of sweep iterations
-FOLDER='SFBGATcpu'             # name of folder on scratch
+FOLDER='SLGATgpu'               # name of folder on scratch
 
 
 # copy files to scratch
@@ -27,7 +27,9 @@ cd $TMPDIR/$FOLDER
 
 
 # activate venv
-source $TMPDIR/$FOLDER/venvs/CPU_venv/bin/activate
+module load 2021
+module load CUDA/11.3.1
+source $TMPDIR/$FOLDER/venvs/GPU_venv/bin/activate
 which python
 
 echo ''
@@ -44,7 +46,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN_FullBatchGAT' 
+for model in  'SIGN_SamplerGAT' 
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep

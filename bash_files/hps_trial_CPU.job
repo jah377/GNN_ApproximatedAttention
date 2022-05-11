@@ -15,7 +15,7 @@ START=`date +%s`                # will record .job runtime
 dataset='pubmed'
 method='random'              # sweep type (grid, bayes, random)
 run_trial=true               # if True, reduce param values for quick test
-sweep_iterations=5           # number of sweep iterations
+sweep_iterations=3           # number of sweep iterations
 FOLDER='cpu_dump'            # name of folder on scratch
 
 
@@ -45,7 +45,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # PERFORM SWEEP
-for model in  'SIGN_FullBatchGAT' 
+for model in  'SIGN' 'SIGN_FullBatchGAT' 
 do 
     # sweep inputs
     yaml_file=$model'.yaml'         # desired yaml name; built later

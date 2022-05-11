@@ -3,7 +3,7 @@ import torch.nn.functional as F
 
 from general.utils import resources  # wrapper
 
-device = torch.device('cpu')  # always perform full batch on CPU
+### Always perform on CPU ###
 
 
 @resources
@@ -25,11 +25,14 @@ def training_step(model, data, optimizer):
     mask = data.train_mask
 
     # forward pass
-    logits = model(data.x.to(device), data.edge_index.to(device))
+    logits = model(
+        data.x,
+        data.edge_index
+    )
 
     # store metrics
     mask_logits = logits[mask]
-    mask_y = data.y[mask].to(device)
+    mask_y = data.y[mask]
     mask_labels = mask_logits.argmax(dim=-1)
 
     loss = F.nll_loss(mask_logits, mask_y)
@@ -65,11 +68,11 @@ def testing_step(model, data, mask, logits=None):
 
     # only predict if not done so
     if isinstance(logits, type(None)):
-        logits = model(data.x.to(device), data.edge_index.to(device))
+        logits = model(data.x, data.edge_index)
 
     # store metrics
     mask_logits = logits[mask]
-    mask_y = data.y[mask].to(device)
+    mask_y = data.y[mask]
     mask_labels = mask_logits.argmax(dim=-1)
 
     loss = F.nll_loss(mask_logits, mask_y)
