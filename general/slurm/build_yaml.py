@@ -39,7 +39,8 @@ def main(args):
     assert args.YAML_FILE != None
 
     GAT_models = ['fullbatchgat', 'samplergat']
-    SIGN_models = ['sign', 'sign_fullbatchgat', 'sign_sha', 'sign_mha']
+    SIGN_models = ['sign', 'sign_fullbatchgat',
+                   'sign_samplergat', 'sign_sha', 'sign_mha']
     DPA_models = ['sign_sha', 'sign_mha']
 
     include_gat_params = args.MODEL.lower() in GAT_models

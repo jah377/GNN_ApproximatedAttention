@@ -32,7 +32,8 @@ def main(config):
     # data
     path = f'data/{config.dataset}_sign_k{config.K}.pth'
     data = torch.load(path)
-    train_dl, val_dl, test_dl = build_DataLoader(data, config.batch_size)
+    train_dl, val_dl, test_dl = build_DataLoader(
+        data, config.batch_size, dataset_name=config.dataset)
 
     # model
     model = SIGN(

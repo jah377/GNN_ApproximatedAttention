@@ -56,7 +56,8 @@ def main(config):
         data = torch.load(transform_path)
 
     # dataloader
-    train_dl, val_dl, test_dl = build_DataLoader(data, config.batch_size)
+    train_dl, val_dl, test_dl = build_DataLoader(
+        data, config.batch_size, dataset_name=config.dataset)
 
     # model
     model = SIGN(
