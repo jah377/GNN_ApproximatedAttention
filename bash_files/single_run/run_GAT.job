@@ -11,7 +11,7 @@ date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
 
 
-# sweep variables 
+# define variables 
 dataset='pubmed'
 
 

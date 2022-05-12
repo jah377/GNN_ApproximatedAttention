@@ -36,7 +36,7 @@ def training_step(model, data, optimizer):
     mask_labels = mask_logits.argmax(dim=-1)
 
     loss = F.nll_loss(mask_logits, mask_y)
-    f1 = sum(mask_labels == mask_y)/mask.numel()
+    f1 = sum(mask_labels == mask_y)/mask.sum()
 
     # backward pass
     optimizer.zero_grad()
@@ -76,7 +76,7 @@ def testing_step(model, data, mask, logits=None):
     mask_labels = mask_logits.argmax(dim=-1)
 
     loss = F.nll_loss(mask_logits, mask_y)
-    f1 = sum(mask_labels == mask_y)/mask.numel()
+    f1 = sum(mask_labels == mask_y)/mask.sum()
 
     outputs = {
         'loss': float(loss),

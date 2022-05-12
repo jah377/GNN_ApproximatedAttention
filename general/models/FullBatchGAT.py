@@ -65,13 +65,13 @@ class net(torch.nn.Module):
     def extract_features(self, x, edge_index, return_attention_weights: bool = False):
 
         for i, conv in enumerate(self.convs):
+
             # for all but last GATConv layer
             if i < len(self.convs) - 1:
                 x = conv(x, edge_index)
                 x = F.relu(x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
 
-        # extract x, (attn_index, attn_weights)
         if return_attention_weights == True:
             return conv(x, edge_index, return_attention_weights=True)
 
