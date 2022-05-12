@@ -1,0 +1,202 @@
+Thu 12 May 2022 11:24:41 AM CEST
+r30n7.lisa.surfsara.nl
+uid=55639(jharris) gid=55199(jharris) groups=55199(jharris),46457(lisa_uva_gpu),50488(ssh_forwarding)
+/home/jharris/Desktop/approx_attention
+/home/jharris/Desktop/approx_attention/venvs/GPU_venv/bin/python
+
+Check if packages installed correctly
+Torch: 1.11.0+cu113
+PyG: 2.0.4
+
+
+==================================================
+============== START SWEEP: SIGN_SamplerGAT ==================
+==================================================
+dataset: pubmed
+method: random
+model: SIGN_SamplerGAT
+iterations: 5
+run_trial: true
+config: SIGN_SamplerGAT.yaml
+train_file: hps_SIGN_SamplerGAT.py
+project_name: dump
+method: random
+metric:
+  goal: minimize
+  name: epoch-val_loss
+parameters:
+  dataset:
+    distribution: constant
+    value: pubmed
+  dropout:
+    value: 0.6
+  epochs:
+    value: 5
+  hidden_channel:
+    value: 32
+  optimizer_decay:
+    value: 0.001
+  optimizer_lr:
+    value: 0.001
+  optimizer_type:
+    distribution: constant
+    value: Adam
+  seed:
+    distribution: constant
+    value: 42
+program: hps_SIGN_SamplerGAT.py
+
+==================================================
+
+wandb: Currently logged in as: jah377. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.12.16
+wandb: Run data is saved locally in /scratch/gpu_dump/wandb/run-20220512_112516-3pyixnpn
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run winter-bush-77
+wandb:  View project at https://wandb.ai/jah377/dump
+wandb:  View run at https://wandb.ai/jah377/dump/runs/3pyixnpn
+wandb: Starting wandb agent \U0001f575\ufe0f
+2022-05-12 11:25:25,852 - wandb.wandb_agent - INFO - Running runs: []
+2022-05-12 11:25:26,147 - wandb.wandb_agent - INFO - Agent received command: run
+2022-05-12 11:25:26,148 - wandb.wandb_agent - INFO - Agent starting run with config:
+	dataset: pubmed
+	dropout: 0.6
+	epochs: 5
+	hidden_channel: 32
+	optimizer_decay: 0.001
+	optimizer_lr: 0.001
+	optimizer_type: Adam
+	seed: 42
+2022-05-12 11:25:26,152 - wandb.wandb_agent - INFO - About to run command: /usr/bin/env python hps_SIGN_SamplerGAT.py --dataset=pubmed --dropout=0.6 --epochs=5 --hidden_channel=32 --optimizer_decay=0.001 --optimizer_lr=0.001 --optimizer_type=Adam --seed=42
+wandb: Currently logged in as: jah377. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.12.16
+wandb: Run data is saved locally in /scratch/gpu_dump/wandb/run-20220512_112529-xy5rhrvh
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run solar-sweep-1
+wandb:  View project at https://wandb.ai/jah377/dump
+wandb:  View sweep at https://wandb.ai/jah377/dump/sweeps/vuwo5umk
+wandb:  View run at https://wandb.ai/jah377/dump/runs/xy5rhrvh
+2022-05-12 11:25:31,163 - wandb.wandb_agent - INFO - Running runs: ['xy5rhrvh']
+Traceback (most recent call last):
+  File "/scratch/gpu_dump/hps_SIGN_SamplerGAT.py", line 160, in <module>
+    main(config)
+  File "/scratch/gpu_dump/hps_SIGN_SamplerGAT.py", line 42, in main
+    data, trans_resources = transform_wAttention(
+  File "/scratch/gpu_dump/general/utils.py", line 43, in wrapper
+    output = func(*args, **kwargs)
+  File "/scratch/gpu_dump/general/transforms/transforms_SamplerGAT.py", line 48, in transform_wAttention
+    adj_t = extract_attention(data, GATtransform_params.get(dataset))
+  File "/scratch/gpu_dump/general/transforms/transforms_SamplerGAT.py", line 181, in extract_attention
+    attn_sparse = model.extract_features(data.x, subgraph_loader)
+  File "/home/jharris/Desktop/approx_attention/venvs/GPU_venv/lib/python3.9/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/scratch/gpu_dump/general/models/SamplerGAT.py", line 151, in extract_features
+    attn_sparse = SparseTensor(
+TypeError: __init__() got an unexpected keyword argument 'values'
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: - 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: \ 0.003 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: | 0.003 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: / 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: - 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: \ 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: | 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: / 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: - 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb:                    precomp-epoch 37
+wandb:            precomp-epoch-test_f1 827.0
+wandb:          precomp-epoch-test_loss 0.57596
+wandb:           precomp-epoch-test_mem 30720
+wandb:          precomp-epoch-test_time 0.00057
+wandb:           precomp-epoch-train_f1 0.79881
+wandb:         precomp-epoch-train_loss 22.27847
+wandb:          precomp-epoch-train_mem 55902720
+wandb:         precomp-epoch-train_time 1.49627
+wandb:             precomp-epoch-val_f1 426.0
+wandb:  precomp-epoch-val_inference_mem 9654272
+wandb: precomp-epoch-val_inference_time 0.44865
+wandb:           precomp-epoch-val_loss 0.56119
+wandb:            precomp-epoch-val_mem 9654272
+wandb:           precomp-epoch-val_time 0.44993
+wandb: 
+wandb: Synced solar-sweep-1: https://wandb.ai/jah377/dump/runs/xy5rhrvh
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20220512_112529-xy5rhrvh/logs
+2022-05-12 11:27:09,404 - wandb.wandb_agent - INFO - Cleaning up finished run: xy5rhrvh
+2022-05-12 11:27:09,681 - wandb.wandb_agent - INFO - Agent received command: run
+2022-05-12 11:27:09,681 - wandb.wandb_agent - INFO - Agent starting run with config:
+	dataset: pubmed
+	dropout: 0.6
+	epochs: 5
+	hidden_channel: 32
+	optimizer_decay: 0.001
+	optimizer_lr: 0.001
+	optimizer_type: Adam
+	seed: 42
+2022-05-12 11:27:09,686 - wandb.wandb_agent - INFO - About to run command: /usr/bin/env python hps_SIGN_SamplerGAT.py --dataset=pubmed --dropout=0.6 --epochs=5 --hidden_channel=32 --optimizer_decay=0.001 --optimizer_lr=0.001 --optimizer_type=Adam --seed=42
+wandb: Currently logged in as: jah377. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.12.16
+wandb: Run data is saved locally in /scratch/gpu_dump/wandb/run-20220512_112712-wwqh4d5l
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run misty-sweep-2
+wandb:  View project at https://wandb.ai/jah377/dump
+wandb:  View sweep at https://wandb.ai/jah377/dump/sweeps/vuwo5umk
+wandb:  View run at https://wandb.ai/jah377/dump/runs/wwqh4d5l
+2022-05-12 11:27:14,699 - wandb.wandb_agent - INFO - Running runs: ['wwqh4d5l']
+Traceback (most recent call last):
+  File "/scratch/gpu_dump/hps_SIGN_SamplerGAT.py", line 160, in <module>
+    main(config)
+  File "/scratch/gpu_dump/hps_SIGN_SamplerGAT.py", line 42, in main
+    data, trans_resources = transform_wAttention(
+  File "/scratch/gpu_dump/general/utils.py", line 43, in wrapper
+    output = func(*args, **kwargs)
+  File "/scratch/gpu_dump/general/transforms/transforms_SamplerGAT.py", line 48, in transform_wAttention
+    adj_t = extract_attention(data, GATtransform_params.get(dataset))
+  File "/scratch/gpu_dump/general/transforms/transforms_SamplerGAT.py", line 181, in extract_attention
+    attn_sparse = model.extract_features(data.x, subgraph_loader)
+  File "/home/jharris/Desktop/approx_attention/venvs/GPU_venv/lib/python3.9/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/scratch/gpu_dump/general/models/SamplerGAT.py", line 151, in extract_features
+    attn_sparse = SparseTensor(
+TypeError: __init__() got an unexpected keyword argument 'values'
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: - 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: \ 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: | 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: / 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: - 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: \ 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: | 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: / 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb: - 0.004 MB of 0.004 MB uploaded (0.000 MB deduped)wandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb:                    precomp-epoch 37
+wandb:            precomp-epoch-test_f1 826.0
+wandb:          precomp-epoch-test_loss 0.57531
+wandb:           precomp-epoch-test_mem 30720
+wandb:          precomp-epoch-test_time 0.00057
+wandb:           precomp-epoch-train_f1 0.79925
+wandb:         precomp-epoch-train_loss 22.26
+wandb:          precomp-epoch-train_mem 55902720
+wandb:         precomp-epoch-train_time 1.52787
+wandb:             precomp-epoch-val_f1 426.0
+wandb:  precomp-epoch-val_inference_mem 9654272
+wandb: precomp-epoch-val_inference_time 0.43374
+wandb:           precomp-epoch-val_loss 0.56036
+wandb:            precomp-epoch-val_mem 9654272
+wandb:           precomp-epoch-val_time 0.435
+wandb: 
+wandb: Synced misty-sweep-2: https://wandb.ai/jah377/dump/runs/wwqh4d5l
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20220512_112712-wwqh4d5l/logs
+2022-05-12 11:28:51,325 - wandb.wandb_agent - INFO - Cleaning up finished run: wwqh4d5l
+2022-05-12 11:28:54,251 - wandb.wandb_agent - INFO - Agent received command: run
+2022-05-12 11:28:54,251 - wandb.wandb_agent - INFO - Agent starting run with config:
+	dataset: pubmed
+	dropout: 0.6
+	epochs: 5
+	hidden_channel: 32
+	optimizer_decay: 0.001
+	optimizer_lr: 0.001
+	optimizer_type: Adam
+	seed: 42
+2022-05-12 11:28:54,256 - wandb.wandb_agent - INFO - About to run command: /usr/bin/env python hps_SIGN_SamplerGAT.py --dataset=pubmed --dropout=0.6 --epochs=5 --hidden_channel=32 --optimizer_decay=0.001 --optimizer_lr=0.001 --optimizer_type=Adam --seed=42
+wandb: Currently logged in as: jah377. Use `wandb login --relogin` to force relogin
+2022-05-12 11:28:59,267 - wandb.wandb_agent - INFO - Running runs: ['hd8l7qvb']
+wandb: Tracking run with wandb version 0.12.16
+wandb: Run data is saved locally in /scratch/gpu_dump/wandb/run-20220512_112857-hd8l7qvb
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run tough-sweep-3
+wandb:  View project at https://wandb.ai/jah377/dump
+wandb:  View sweep at https://wandb.ai/jah377/dump/sweeps/vuwo5umk
+wandb:  View run at https://wandb.ai/jah377/dump/runs/hd8l7qvb
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 9119471.0 ON r30n7 CANCELLED AT 2022-05-12T11:30:04 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 9119471 ON r30n7 CANCELLED AT 2022-05-12T11:30:04 DUE TO TIME LIMIT ***

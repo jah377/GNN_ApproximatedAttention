@@ -73,7 +73,7 @@ def testing_step(model, data, subgraph_loader, mask, logits=None):
     # only predict if not done so
     if isinstance(logits, type(None)):
         logits, inf_resources = model.inference(data.x, subgraph_loader)
-        outputs.update({'inference_'+k: v for k, v in inf_resources})
+        outputs.update({'inference_'+k: v for k, v in inf_resources.items()})
 
     # validation or testing metrics
     mask_logits = logits[mask].to(device)

@@ -60,10 +60,9 @@ def make_products(folder_path):
             'ogbn-products', 
             root='/tmp/Products', 
             transform=transform)
-        data = dataset[0]
-
+        
         filename = osp.join(folder_path, f'products_sign_k{K}.pth')
-        torch.save(data, filename)
+        torch.save(dataset, filename)
 
 
 if __name__ == '__main__':

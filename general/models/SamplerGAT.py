@@ -96,7 +96,6 @@ class net(torch.nn.Module):
 
         return F.log_softmax(x_all, dim=-1)
 
-    @resources
     @torch.no_grad()
     def extract_features(self, x_all, subgraph_loader):
         """
@@ -107,8 +106,8 @@ class net(torch.nn.Module):
 
         # to store edge_index attention weights and occurances
         dim = subgraph_loader.data.num_nodes
-        attn_sum = torch.sparse_coo_tensor(size=(dim, dim)).to(cpu)
-        count_sum = torch.sparse_coo_tensor(size=(dim, dim)).to(cpu)
+        attn_coo = torch.sparse_coo_tensor(size=(dim, dim)).to(cpu)
+        count_total = torch.sparse_coo_tensor(size=(dim, dim)).to(cpu)
 
         for i, conv in enumerate(self.convs):
             xs = []
@@ -132,7 +131,7 @@ class net(torch.nn.Module):
                     indices = batch.n_id[attn_i].to(cpu)
                     values = attn_w.mean(dim=1).detach().to(cpu)
 
-                    attn_total += torch.sparse_coo_tensor(
+                    attn_coo += torch.sparse_coo_tensor(
                         indices,
                         values,
                         size=(dim, dim)
@@ -148,14 +147,13 @@ class net(torch.nn.Module):
             x_all = torch.cat(xs, dim=0)
 
         # average attention = attn_total / count_total
-        attn_sum = attn_sum.multiply(count_sum.float_power(-1)).coalesce()
+        attn_coo = attn_coo.multiply(count_total.float_power(-1)).coalesce()
 
-        # convert to SparseTensor to replace adj_t
-        attn_sparse = SparseTensor(
-            row=attn_sum.indices()[0],
-            col=attn_sum.indices()[1],
-            values=attn_sum.values(),
+        r, c = attn_coo.indices()
+
+        return SparseTensor(
+            row=r,
+            col=c,
+            value=attn_coo.values().detach(),
             sparse_sizes=(dim, dim)
-        )
-
-        return attn_sparse
+        )  # to replace adj_t

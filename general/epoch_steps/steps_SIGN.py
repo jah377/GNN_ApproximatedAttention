@@ -25,7 +25,7 @@ def training_step(model, data, optimizer, loader):
     """
     model.train()
 
-    cum_n = cum_loss = cum_correct = 0
+    total_examples = total_loss = total_correct = 0
 
     for idx in loader:
 
@@ -36,23 +36,21 @@ def training_step(model, data, optimizer, loader):
         y = data.y[idx].to(device)              # move target to device
 
         # forward pass
-        batch_logits = model(xs)
-        batch_labels = batch_logits.argmax(dim=-1)
-        batch_loss = F.nll_loss(batch_logits, y)
+        out = model(xs)
+        loss = F.nll_loss(out, y)
 
-        # store
-        cum_n += idx.numel()
-        cum_loss += float(batch_loss) * cum_n
-        cum_correct += sum(batch_labels == y)
+        total_examples += idx.numel()
+        total_loss += float(loss) * idx.numel()
+        total_correct += sum(out.argmax(dim=-1) == y)
 
         # backward pass
         optimizer.zero_grad()
-        batch_loss.backward()
+        loss.backward()
         optimizer.step()
 
     return {
-        'loss': cum_loss/cum_n,
-        'f1': cum_correct/cum_n,
+        'loss': total_loss/total_examples,
+        'f1': total_correct/total_examples,
     }
 
 
@@ -73,27 +71,25 @@ def testing_step(model, data, loader):
     """
     model.eval()
 
-    cum_n = cum_loss = cum_correct = 0
+    total_examples = total_loss = total_correct = 0
 
     for idx in loader:
 
-        # organize
+        # organize data
         xs = [data.x[idx].to(device)]           # add x[idx] to device
         xs += [data[f'x{i}'][idx].to(device)
                for i in range(1, model.K + 1)]  # add each A^K*X[idx] to xs
         y = data.y[idx].to(device)              # move target to device
 
-        # predict
-        batch_logits = model(xs)
-        batch_labels = batch_logits.argmax(dim=-1)
-        batch_loss = F.nll_loss(batch_logits, y)
+        # forward pass
+        out = model(xs)
+        loss = F.nll_loss(out, y)
 
-        # store
-        cum_n += idx.numel()
-        cum_loss += float(batch_loss) * cum_n
-        cum_correct += sum(batch_labels == y)
+        total_examples += idx.numel()
+        total_loss += float(loss) * idx.numel()
+        total_correct += sum(out.argmax(dim=-1) == y)
 
     return {
-        'loss': cum_loss/cum_n,
-        'f1': cum_correct/cum_n,
+        'loss': total_loss/total_examples,
+        'f1': total_correct/total_examples,
     }

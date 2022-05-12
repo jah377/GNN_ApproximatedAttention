@@ -72,25 +72,6 @@ def set_seeds(seed_value: int):
         torch.cuda.manual_seed_all(seed_value)
 
 
-# def get_data(dataset_name, transform=None):
-#     dataset_name = dataset_name.lower()
-#     assert dataset_name in ['cora', 'pubmed']
-
-#     path = os.path.join(os. getcwd(), 'data', 'test')
-
-#     if dataset_name == 'pubmed':
-#         datamodule = Planetoid(root=path,
-#                                name='PubMed',
-#                                split='full',
-#                                transform=transform)[0]
-#     elif dataset_name == 'cora':
-#         datamodule = Planetoid(root=path,
-#                                name='Cora',
-#                                split='full',
-#                                transform=transform)[0]
-#     return datamodule
-
-
 def build_optimizer(model, name: str, learning_rate: float, weight_decay: float):
     """ build optimizer
     Args:
@@ -132,11 +113,11 @@ def build_scheduler(optimizer):
     )
 
 
-def build_DataLoader(data, batch_size: int):
+def build_DataLoader(data, batch_size: int, dataset_name: str = None):
     """ Create train/val/test DataLoader for SIGN
 
     Args:
-        data:           data object
+        idx:            all idx values
         batch_size:     int, batch_size
 
     Returns:
@@ -145,18 +126,23 @@ def build_DataLoader(data, batch_size: int):
         test_loader:
     """
 
-    def get_idx(data, split):
-        return eval(
-            f"data.{split}_mask.nonzero(as_tuple=False).view(-1)"
-        )
+    if dataset_name == 'products':
+        split_idx = data.get_idx_split()
+        def get_idx(_, split): return split_idx[split]
+    else:
+        def get_idx(data, split): return eval(
+            f"data.{split}_mask.nonzero(as_tuple=False).view(-1)")
 
     def loader(data, split):
+        if dataset_name == 'product':
+            if split == 'val':
+                split = 'valid'
 
-        return DataLoader(
-            get_idx(data, split),
-            batch_size=batch_size,
-            shuffle=(split == 'train'),     # shuffle if training loader
-            drop_last=(split == 'train'),   # remove the final incomplete batch
-        )
+            return DataLoader(
+                get_idx(data, split),
+                batch_size=batch_size,
+                shuffle=(split == 'train'),   # shuffle if training loader
+                drop_last=(split == 'train'), # remove final incomplete
+            )
 
     return [loader(data, split) for split in ['train', 'val', 'test']]

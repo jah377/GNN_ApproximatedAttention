@@ -176,7 +176,7 @@ def extract_attention(data, GATtransform_params):
             trigger_times = 0
         previous_loss = current_loss
 
-    # get attention torch.sparse_coo_matrix
+    # get attention SparseTensor
     model.eval()
     attn_sparse = model.extract_features(data.x, subgraph_loader)
 

@@ -10,7 +10,7 @@ from torch_sparse import SparseTensor
 
 class net(nn.Module):
 
-    def __init__(self, d_m: int, num_heads: int = 1, bias: bool = 1):
+    def __init__(self, d_m: int, num_heads: int = 1):
         """
           d_m:          feature embedding dimension
           num_heads:    attn heads (default=1)
@@ -22,16 +22,7 @@ class net(nn.Module):
         self.num_heads = num_heads
         self.d_k = num_heads * d_m      # hidden dim. of proj. subspace
         self.scale = 1.0/np.sqrt(d_m)   # scaling factor per head
-        self.qkv_lin = nn.Linear(d_m, 3*self.d_k, bias=bias) # stacked q,k,v for efficiency
-
-
-    def _reset_parameters(self):
-        # original transformer initialization, see PyTorch documentation
-        nn.init.xavier_uniform_(self.qkv_proj.weight)
-
-        if self.bias == 1:
-            self.qkv_proj.bias.data.fill_(0)
-
+        self.qkv_lin = nn.Linear(d_m, 3*self.d_k) # stacked q,k,v for efficiency
 
     def forward(self, x, edge_index):
         """
@@ -60,7 +51,9 @@ class net(nn.Module):
               torch.ones_like(edge_index[1]),
               size=attn.shape[1:], # L x L
               ).coalesce() # sparse mask for single head 
+
         S = torch.stack([S for _ in range(self.num_heads)]).coalesce() # sparse mask for all heads
+
         attn = attn.sparse_mask(S).to_dense() # mask non-edge attn values per head
 
         attn = attn.div( reduce(attn, 'h Li Lj -> h Li 1', 'sum') ) # normalize by row
