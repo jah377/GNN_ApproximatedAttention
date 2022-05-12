@@ -121,6 +121,25 @@ def main(args):
             },
         })
 
+        if args.MODEL.lower() == 'sign_samplergat':
+            param_dict.update({
+                'heads_in': {
+                    'distribution': 'int_uniform',
+                    'min': 1,
+                    'max': 9,
+                },
+                'heads_out': {
+                    'distribution': 'int_uniform',
+                    'min': 1,
+                    'max': 9,
+                },
+                'nlayers': {
+                    'distribution': 'int_uniform',
+                    'min': 2,
+                    'max': 4,
+                },
+            })
+
     if include_gat_params:
         if args.MODEL.lower() == 'samplergat':
             param_dict.update({
