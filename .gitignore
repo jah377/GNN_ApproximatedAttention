@@ -1,8 +1,6 @@
 data/
 wandb/
-slurm_output/
 wandb_on_slurm/
-wandb/
 venvs/
 HIDDEN/
 archive/

@@ -2,7 +2,7 @@
 #SBATCH --job-name="SFBGATgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=12:00:00
+#SBATCH --time=14:00:00
 #SBATCH --partition=normal
 #SBATCH --output=%x.%j.out
 # SBATCH --mail-user=jon.harris@student.uva.nl
