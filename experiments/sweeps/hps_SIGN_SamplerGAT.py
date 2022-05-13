@@ -1,14 +1,14 @@
 import wandb
-import copy
 import os.path as osp
 
 import torch
-from torch_geometric.loader import NeighborLoader
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.SIGN import net as SIGN
-from general.transforms.transforms_SamplerGAT import transform_wAttention
-from general.utils import set_seeds, build_optimizer, build_scheduler
+from general.utils import set_seeds, standardize_dataset, build_DataLoader
 from general.epoch_steps.steps_SIGN import training_step, testing_step
+
+from general.transforms.transforms_SamplerGAT import transform_wAttention
 from general.best_configs.SamplerGAT_configs import params_dict as GATtransform_params
 
 hyperparameter_defaults = dict(
@@ -39,6 +39,7 @@ def main(config):
     transform_path = f'data/{config.dataset}_sign_k0_transformed.pth'
 
     if not osp.isfile(transform_path):
+        data = standardize_dataset(torch.load(path), config.dataset)
         data, trans_resources = transform_wAttention(
             torch.load(path),
             config.dataset,
@@ -54,94 +55,67 @@ def main(config):
     else:
         data = torch.load(transform_path)
 
-    # create loaders
-    train_loader = NeighborLoader(
+    # BUILD DATALOADER
+    train_dl, val_dl, test_dl = build_DataLoader(
         data,
-        input_nodes=data.train_mask,
-        num_neighbors=[-1]*config.nlayers,
-        shuffle=True,
-        batch_size=config.batch_size,
+        config.batch_size,
+        dataset_name=config.dataset
     )
 
-    subgraph_loader = NeighborLoader(
-        copy.copy(data),
-        input_nodes=None,
-        num_neighbors=[-1],
-        shuffle=False,
-        batch_size=config.batch_size,
-    )
-
-    # no need to maintain features during evaluation
-    del subgraph_loader.data.x, subgraph_loader.data.y
-
-    # add global node index information
-    subgraph_loader.data.num_nodes = data.num_nodes
-    subgraph_loader.data.n_id = torch.arange(data.num_nodes)
-
-    # model
+    # BUILD MODEL
     model = SIGN(
-        data.x.shape[1],       # in_channel
-        len(data.y.unique()),  # out_channel
+        data.num_features,  # in_channel
+        data.num_classes,   # out_channel
         config.hidden_channel,
         config.dropout,
         config.K,
         config.batch_norm).to(device)
 
-    # log number of trainable parameters
-    wandb.log({
-        'trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad),
-    })
+    n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    wandb.log({'trainable_params': n_params})  # log number of params
 
-    optimizer = build_optimizer(
-        model,
-        config.optimizer_type,
+    # BUILD OPTIMIZER
+    optimizer = torch.optim.Adam(
+        model.parameters(),
         config.optimizer_lr,
         config.optimizer_decay
     )
 
-    scheduler = build_scheduler(optimizer)
+    # BUILD SCHEDULER (modulates learning rate)
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        mode='min',     # nll_loss expected to decrease over epochs
+        factor=0.1,     # lr reduction factor
+        patience=5,     # reduce lr after _ epochs of no improvement
+        min_lr=1e-6,    # min learning rate
+        verbose=False,  # do not monitor lr updates
+    )
 
-    # train & evaluate
+    # RUN THROUGH EPOCHS
+    # params for early termination
     previous_loss = 1e10
     patience = 5
     trigger_times = 0
 
     for epoch in range(config.epochs):
+
         train_output, train_resources = training_step(
-            model,
-            optimizer,
-            train_loader
-        )
+            model, data, optimizer, train_dl)
+        val_output, val_resources = testing_step(model, data, val_dl)
+        test_output, test_resources = testing_step(model, data, test_dl)
 
-        val_output, logits, val_resources = testing_step(
-            model,
-            data,
-            subgraph_loader,
-            data.val_mask,
-            logits=None,  # must model.inference
-        )
+        scheduler.step(val_output['loss'])  # modulate learning rate
 
-        test_output, _, test_resources = testing_step(
-            model,
-            data,
-            subgraph_loader,
-            data.test_mask,
-            logits=logits  # use prev. pred
-        )
-
-        scheduler.step(val_output['loss'])
-
+        # log results
         log_dict = {'epoch': epoch}
         log_dict.update({'epoch-train_'+k: v for k, v in train_output.items()})
         log_dict.update({'epoch-val_'+k: v for k, v in val_output.items()})
         log_dict.update({'epoch-test_'+k: v for k, v in test_output.items()})
-
         log_dict.update({'epoch-train_'+k: v for k,
                         v in train_resources.items()})
         log_dict.update({'epoch-val_'+k: v for k, v in val_resources.items()})
         log_dict.update({'epoch-test_'+k: v for k,
                         v in test_resources.items()})
-
         wandb.log(log_dict)
 
         # early stopping

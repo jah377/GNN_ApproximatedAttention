@@ -31,6 +31,7 @@ params_dict = {
         'nlayers': 2,
         'heads_in': 8,
         'heads_out': 8,
-        'batch_size': 256,  # must correct
+        'batch_size': 256,  # must determine
+        'nNeighbors': -1,   # must determine
     },
 }

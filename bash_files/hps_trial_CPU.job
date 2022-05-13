@@ -2,7 +2,7 @@
 #SBATCH --job-name="cpu_trial"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:10:00
+#SBATCH --time=00:30:00
 #SBATCH --partition=normal
 #SBATCH --output=%x.%j.out
 
@@ -45,7 +45,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # PERFORM SWEEP
-for model in  'SIGN' 'SIGN_FullBatchGAT' 
+for model in  'SIGN_FullBatchGAT' 
 do 
     # sweep inputs
     yaml_file=$model'.yaml'         # desired yaml name; built later

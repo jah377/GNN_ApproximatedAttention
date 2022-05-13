@@ -10,6 +10,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 @resources
 def training_step(model, optimizer, train_loader):
     """ Perform forward and backward pass
+    https://github.com/pyg-team/pytorch_geometric/blob/master/examples/reddit.py
+
     Args:
         model:          GAT_loader model
         optimizer:      optimizer object
@@ -17,74 +19,77 @@ def training_step(model, optimizer, train_loader):
 
     Returns:
         train_loss:     loss @ epoch
-        train_f1:       f1 @ epoch
         delta_time:     from wrapper
         delta_mem:      from wrapper
     """
     model.train()
 
-    cum_n = cum_loss = cum_correct = 0
+    total_nodes = total_correct = total_loss = 0
 
     for batch in train_loader:
-
-        # organize data
-        y = batch.y[:batch.batch_size].to(device)
+        batch_size = batch.batch_size
 
         # forward pass
-        logits = model(batch.x.to(device), batch.edge_index.to(device))
-        batch_loss = F.nll_loss(logits[:batch.batch_size], y)
+        logits = model(
+            batch.x.to(model.device),
+            batch.edge_index.to(model.device)
+        )[:batch_size]
+
+        y = batch.y[:batch_size].to(logits.device)
+        loss = F.nll_loss(logits, y)
 
         # store metrics
-        cum_n += batch.batch_size
-        cum_loss += float(batch_loss) * cum_n
-        cum_correct += sum(logits[:batch.batch_size].argmax(dim=-1) == y)
+        total_nodes += batch_size
+        total_loss += float(loss) * batch_size
+        total_correct += int(sum(logits.argmax(dim=-1) == y))
 
         # backward pass
         optimizer.zero_grad()
-        batch_loss.backward()
+        loss.backward()
         optimizer.step()
 
     outputs = {
-        'loss': float(cum_loss/cum_n),
-        'f1': float(cum_correct/cum_n),
+        'train_loss': float(total_loss/total_nodes),
+        'train_f1': float(total_correct/total_nodes),
     }
 
     return outputs
 
 
-@resources
 @torch.no_grad()
-def testing_step(model, data, subgraph_loader, mask, logits=None):
-    """ Document validation/testing loss and accuracy
+def testing_step(model, data, subgraph_loader):
+    """ Perform forward and backward pass
+    https://github.com/pyg-team/pytorch_geometric/blob/master/examples/reddit.py
+
     Args:
-        model:              trained GAT model
-        data:               data object
-        subgraph_loader:    
-        mask:               validation or testing mask
-        logits:             only predict if not done before 
+        model:              GAT_loader model
+        data:               data
+        subgraph_loader:    contain batch indices
 
     Returns:
-        loss:       loss @ epoch
-        f1:         f1 @ epoch
+        output:
+            .inf_time
+            .inf_mem
+            .train_loss
+            .val_loss
+            .train_f1
+            .val_f1
     """
     model.eval()
-    outputs = {}
 
-    # only predict if not done so
-    if isinstance(logits, type(None)):
-        logits, inf_resources = model.inference(data.x, subgraph_loader)
-        outputs.update({'inference_'+k: v for k, v in inf_resources.items()})
+    logits, inf_resources = model.inference(data.x, subgraph_loader)
+    output = {f'inf_{k}:{v}' for k, v in inf_resources.items()}
 
-    # validation or testing metrics
-    mask_logits = logits[mask].to(device)
-    mask_y = data.y[mask].to(device)
+    for split in ['train', 'val']:
 
-    loss = F.nll_loss(mask_logits, mask_y)
-    f1 = int((mask_logits.argmax(dim=-1) == mask_y).sum())
+        mask = eval(f'data.{split}_mask')
+        mask_logits = logits[mask]
+        mask_yhat = mask_logits.argmax(dim=-1)
+        mask_y = data.y[mask].to(mask_logits.device)
 
-    outputs.update({
-        'loss': float(loss),
-        'f1': float(f1),
-    })
+        output.update({
+            f'{split}_loss': F.nll_loss(mask_logits, mask_y),
+            f'{split}_f1': sum(mask_yhat == mask_y).div(len(mask))
+        })
 
-    return outputs, logits
+    return output

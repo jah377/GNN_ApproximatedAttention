@@ -1,11 +1,15 @@
 import wandb
-import torch
 import os.path as osp
 
+import torch
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
 from general.models.SIGN import net as SIGN
-from general.transforms.transforms_DotProduct import transform_wAttention
-from general.utils import set_seeds, build_DataLoader, build_optimizer, build_scheduler
+from general.utils import set_seeds, standardize_dataset, build_DataLoader
 from general.epoch_steps.steps_SIGN import training_step, testing_step
+
+from general.transforms.transforms_DotProduct import transform_wAttention
+
 
 #################################################################
 ########## THIS SHOULD BE IDENTICAL TO HPS_SIGN_SHA.PY ##########
@@ -24,7 +28,6 @@ hyperparameter_defaults = dict(
     batch_norm=1,
     batch_size=256,
     attn_heads=1,
-    mha_bias=1
 )
 
 wandb.init(config=hyperparameter_defaults)
@@ -36,13 +39,14 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def main(config):
     set_seeds(config.seed)
 
-    # import or transform data
+    # IMPORT & STANDARDIZE DATA
     path = f'data/{config.dataset}_sign_k0.pth'
     transform_path = f'data/{config.dataset}_sign_k0_heads{config.attn_heads}_transformed.pth'
 
     if not osp.isfile(transform_path):
+        data = standardize_dataset(torch.load(path), config.dataset)
         data, trans_resources = transform_wAttention(
-            torch.load(path),
+            data,
             config.K,
             config.attn_heads
         )
@@ -53,61 +57,69 @@ def main(config):
         torch.save(data, transform_path)
         print('\n~~~ TRANSFORM PERFORMED ~~~\n')
     else:
-        data = torch.load(transform_path)
+        data = torch.load(transform_path)  # already standardized
 
-    # dataloader
-    train_dl, val_dl, test_dl = build_DataLoader(data, config.batch_size, dataset_name=config.dataset)
+    # BUILD DATALOADER
+    train_dl, val_dl, test_dl = build_DataLoader(
+        data,
+        config.batch_size,
+        dataset_name=config.dataset
+    )
 
-    # model
+    # BUILD MODEL
     model = SIGN(
-        data.x.shape[1],       # in_channel
-        len(data.y.unique()),  # out_channel
+        data.num_features,  # in_channel
+        data.num_classes,   # out_channel
         config.hidden_channel,
         config.dropout,
         config.K,
         config.batch_norm).to(device)
 
-    # log number of trainable parameters
-    wandb.log({
-        'trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad),
-    })
+    n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    wandb.log({'trainable_params': n_params})  # log number of params
 
-    optimizer = build_optimizer(
-        model,
-        config.optimizer_type,
+    # BUILD OPTIMIZER
+    optimizer = torch.optim.Adam(
+        model.parameters(),
         config.optimizer_lr,
         config.optimizer_decay
     )
 
-    scheduler = build_scheduler(optimizer)
+    # BUILD SCHEDULER (modulates learning rate)
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        mode='min',     # nll_loss expected to decrease over epochs
+        factor=0.1,     # lr reduction factor
+        patience=5,     # reduce lr after _ epochs of no improvement
+        min_lr=1e-6,    # min learning rate
+        verbose=False,  # do not monitor lr updates
+    )
 
-    # train & evaluate
+    # RUN THROUGH EPOCHS
+    # params for early termination
     previous_loss = 1e10
     patience = 5
     trigger_times = 0
 
     for epoch in range(config.epochs):
-        train_output, train_time, train_mem = training_step(
+
+        train_output, train_resources = training_step(
             model, data, optimizer, train_dl)
-        val_output, val_time, val_mem = testing_step(model, data, val_dl)
-        test_output, test_time, test_mem = testing_step(model, data, test_dl)
+        val_output, val_resources = testing_step(model, data, val_dl)
+        test_output, test_resources = testing_step(model, data, test_dl)
 
-        scheduler.step(val_output['loss'])
+        scheduler.step(val_output['loss'])  # modulate learning rate
 
+        # log results
         log_dict = {'epoch': epoch}
         log_dict.update({'epoch-train_'+k: v for k, v in train_output.items()})
         log_dict.update({'epoch-val_'+k: v for k, v in val_output.items()})
         log_dict.update({'epoch-test_'+k: v for k, v in test_output.items()})
-
-        log_dict.update({
-            'epoch-train_time': train_time,
-            'epoch-val_time': val_time,
-            'epoch-test_time': test_time,
-            'epoch-train_mem': train_mem,
-            'epoch-val_mem': val_mem,
-            'epoch-test_mem': test_mem,
-        })
-
+        log_dict.update({'epoch-train_'+k: v for k,
+                        v in train_resources.items()})
+        log_dict.update({'epoch-val_'+k: v for k, v in val_resources.items()})
+        log_dict.update({'epoch-test_'+k: v for k,
+                        v in test_resources.items()})
         wandb.log(log_dict)
 
         # early stopping

@@ -2,12 +2,13 @@ import wandb
 import copy
 
 import torch
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
 from torch_sparse import SparseTensor
 from torch_geometric.loader import NeighborLoader
 
 from general.models.SamplerGAT import net as GAT
 from general.utils import resources  # wrapper
-from general.utils import build_optimizer, build_scheduler
 from general.epoch_steps.steps_SamplerGAT import training_step, testing_step
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -61,122 +62,109 @@ def transform_wAttention(data, dataset: str, K: int, GATtransform_params):
     return data
 
 
-def extract_attention(data, GATtransform_params):
-    """ calculate dotproduct attention
+def extract_attention(data, GATdict):
+    """ train GAT model and extract attention
     Args:
-        x:                      feature embeddings [n nodes x emb]
-        edge_index:             connections
+        data:
         GATtransform_params:     number of attention heads
 
     Returns:
         SparseTensor containing attention weights
     """
-    # create loaders
+
+    # CREATE TRAINING AND SUBGRAPH LOADERS
+    # [n_neighbors] = hyperparameter
     train_loader = NeighborLoader(
         data,
-        input_nodes=data.train_mask,
-        num_neighbors=[-1]*GATtransform_params['nlayers'],
+        input_nodes=data.train_mask,  # can be bool or n_id indices
+        num_neighbors=[GATdict['nNeighbors']]*GATdict['nlayers'],
         shuffle=True,
-        batch_size=GATtransform_params['batch_size'],
+        batch_size=GATdict['batch_size'],
+        drop_last=True,  # remove final batch if incomplete
     )
 
     subgraph_loader = NeighborLoader(
         copy.copy(data),
         input_nodes=None,
-        num_neighbors=[-1],
-        shuffle=False,
-        batch_size=GATtransform_params['batch_size'],
+        num_neighbors=[-1]*GATdict['nlayers'],  # sample all neighbors
+        shuffle=False,                          # :batch_size in sequential order
+        batch_size=GATdict['batch_size'],
+        drop_last=False,
     )
-
-    # no need to maintain features during evaluation
-    del subgraph_loader.data.x, subgraph_loader.data.y
-
-    # add global node index information
     subgraph_loader.data.num_nodes = data.num_nodes
-    subgraph_loader.data.n_id = torch.arange(data.num_nodes)
+    del subgraph_loader.data.x, subgraph_loader.data.y  # only need indices
 
-    # model
+    # BUILD MODEL
     model = GAT(
-        data.x.shape[1],       # in_channel
-        len(data.y.unique()),  # out_channel
-        GATtransform_params['hidden_channel'],
-        GATtransform_params['dropout'],
-        GATtransform_params['nlayers'],
-        GATtransform_params['heads_in'],
-        GATtransform_params['heads_out'],
+        data.num_features,  # in_channel
+        data.num_classes,  # out_channel
+        GATdict['hidden_channel'],
+        GATdict['dropout'],
+        GATdict['nlayers'],
+        GATdict['heads_in'],
+        GATdict['heads_out'],
     ).to(device)
 
-    # log number of trainable parameters
-    log_dict = {
-        'precomp-trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad)
-    }
+    n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    wandb.log({'precomp-trainable_params': n_params})  # size of model
 
-    optimizer = build_optimizer(
-        model,
-        GATtransform_params['optimizer_type'],
-        GATtransform_params['optimizer_lr'],
-        GATtransform_params['optimizer_decay']
+    # BUILD OPTIMIZER
+    optimizer = torch.optim.Adam(
+        model.parameters(),
+        lr=GATdict['optimizer_lr'],
+        weight_decay=GATdict['optimizer_decay'],
     )
 
-    scheduler = build_scheduler(optimizer)
+    # BUILD SCHEDULER (modulates learning rate)
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        mode='min',     # nll_loss expected to decrease over epochs
+        factor=0.1,     # lr reduction factor
+        patience=5,     # reduce lr after _ epochs of no improvement
+        min_lr=1e-6,    # min learning rate
+        verbose=False,  # do not monitor lr updates
+    )
 
-    # train & evaluate
+    # RUN THROUGH EPOCHS
+    # params for early termination
     previous_loss = 1e10
     patience = 5
     trigger_times = 0
 
-    for epoch in range(GATtransform_params['epochs']):
+    for epoch in range(GATdict['epochs']):
 
-        train_output, train_resources = training_step(
+        train_out, train_resources = training_step(
             model,
             optimizer,
             train_loader
         )
 
-        val_output, logits, val_resources = testing_step(
-            model,
-            data,
-            subgraph_loader,
-            data.val_mask,
-            logits=None,  # must model.inference
-        )
+        test_out = testing_step(model, optimizer, data, subgraph_loader)
 
-        test_output, _, test_resources = testing_step(
-            model,
-            data,
-            subgraph_loader,
-            data.test_mask,
-            logits=logits  # use prev. pred
-        )
-
-        scheduler.step(val_output['loss'])
+        val_loss = test_out['val_loss']
+        scheduler.step(val_loss)
 
         # log results
         s = 'precomp-epoch'
         log_dict = {f'{s}': epoch}
-        log_dict.update({f'{s}-train_'+k: v for k, v in train_output.items()})
-        log_dict.update({f'{s}-val_'+k: v for k, v in val_output.items()})
-        log_dict.update({f'{s}-test_'+k: v for k, v in test_output.items()})
-
-        log_dict.update({f'{s}-train_'+k: v for k,
+        log_dict.update({f'{s}-'+k: v for k, v in train_out.items()})
+        log_dict.update({f'{s}-train-'+k: v for k,
                         v in train_resources.items()})
-        log_dict.update({f'{s}-val_'+k: v for k, v in val_resources.items()})
-        log_dict.update({f'{s}-test_'+k: v for k,
-                        v in test_resources.items()})
-
+        log_dict.update({f'{s}-'+k: v for k, v in test_out.items()})
         wandb.log(log_dict)
 
         # early stopping
-        current_loss = val_output['loss']
+        current_loss = val_loss
         if current_loss > previous_loss:
             trigger_times += 1
             if trigger_times >= patience:
+                print('~~~ early stop triggered ~~~')
                 break
         else:
             trigger_times = 0
         previous_loss = current_loss
 
-    # get attention SparseTensor
+    # EXTRACT ATTENTION MATRIX
     model.eval()
     attn_sparse = model.extract_features(data.x, subgraph_loader)
 

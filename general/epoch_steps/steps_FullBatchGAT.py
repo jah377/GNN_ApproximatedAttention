@@ -9,6 +9,8 @@ from general.utils import resources  # wrapper
 @resources
 def training_step(model, data, optimizer):
     """ Perform forward and backward pass
+    https://github.com/pyg-team/pytorch_geometric/blob/master/examples/gat.py
+
     Args:
         model:      trained GAT model
         data:       data object
@@ -32,55 +34,60 @@ def training_step(model, data, optimizer):
 
     # store metrics
     mask_logits = logits[mask]
-    mask_y = data.y[mask]
-    mask_labels = mask_logits.argmax(dim=-1)
-
+    mask_yhat = mask_logits.argmax(dim=-1)
+    mask_y = data.y[mask].to(mask_logits.device)
     loss = F.nll_loss(mask_logits, mask_y)
-    f1 = sum(mask_labels == mask_y)/mask.sum()
+
+    output = {
+        'train_loss': loss,
+        'train_f1': sum(mask_yhat == mask_y).div(len(mask))
+    }
 
     # backward pass
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
 
-    return {
-        'loss': loss,
-        'f1': f1
-    }
+    return output
 
 
-@resources
 @torch.no_grad()
-def testing_step(model, data, mask, logits=None):
+def testing_step(model, data):
     """ Document validation/testing loss and accuracy
+    https://github.com/pyg-team/pytorch_geometric/blob/master/examples/gat.py
+
     Args:
         model:      trained GAT model
         data:       data object
-        mask:       val or test sets
-        logits:     only predict once, use logits if exist 
 
     Returns:
-        loss:       loss @ epoch
-        f1:         f1 @ epoch
-        logits:      
+        output:
+            .inf_time
+            .inf_mem
+            .train_loss
+            .val_loss
+            .train_f1
+            .val_f1 
     """
     model.eval()
 
-    # only predict if not done so
-    if isinstance(logits, type(None)):
-        logits = model(data.x, data.edge_index)
+    @resources
+    def inference(model, data):
+        return model(data.x.to(model.device), data.edge_index.to(model.device))
 
-    # store metrics
-    mask_logits = logits[mask]
-    mask_y = data.y[mask]
-    mask_labels = mask_logits.argmax(dim=-1)
+    logits, inf_resources = inference(model, data)
+    output = {f'inf_{k}:{v}' for k, v in inf_resources.items()}
 
-    loss = F.nll_loss(mask_logits, mask_y)
-    f1 = sum(mask_labels == mask_y)/mask.sum()
+    for split in ['train', 'val']:
 
-    outputs = {
-        'loss': float(loss),
-        'f1': float(f1)
-    }
+        mask = eval(f'data.{split}_mask')
+        mask_logits = logits[mask]
+        mask_yhat = mask_logits.argmax(dim=-1)
+        mask_y = data.y[mask].to(mask_logits.device)
 
-    return outputs, logits
+        output.update({
+            f'{split}_loss': F.nll_loss(mask_logits, mask_y),
+            f'{split}_f1': sum(mask_yhat == mask_y).div(len(mask))
+        })
+
+    return output

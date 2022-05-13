@@ -179,19 +179,11 @@ def main(args):
             })
         elif args.MODEL.lower() == 'sign_sha':
             param_dict.update({
-                'seed': {
+                'attn_heads': {
                     'distribution': 'constant',
                     'value': 1
                 },
             })
-
-        param_dict.update({
-            'mha_bias': {
-                'distribution': 'int_uniform',
-                'min': 0,
-                'max': 1,
-            },
-        })
 
     # reduce complexity for trialing
     if args.RUN_TRIAL:

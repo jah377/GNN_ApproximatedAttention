@@ -5,12 +5,10 @@ from general.utils import resources  # wrapper
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
 @resources
 def training_step(model, data, optimizer, loader):
     """ Perform forward and backward pass on SIGN
-    https://torchmetrics.readthedocs.io/en/latest/pages/overview.html?highlight=collection#metriccollection
-
+    https://github.com/pyg-team/pytorch_geometric/blob/master/examples/sign.py
     Args:
         model:      SIGN model
         data:       data object
@@ -39,8 +37,9 @@ def training_step(model, data, optimizer, loader):
         out = model(xs)
         loss = F.nll_loss(out, y)
 
-        total_examples += idx.numel()
-        total_loss += float(loss) * idx.numel()
+        batch_size = idx.numel()
+        total_examples += batch_size
+        total_loss += float(loss) * batch_size
         total_correct += sum(out.argmax(dim=-1) == y)
 
         # backward pass
@@ -58,6 +57,8 @@ def training_step(model, data, optimizer, loader):
 @torch.no_grad()
 def testing_step(model, data, loader):
     """ Document validation or test loss and accuracy
+    https://github.com/pyg-team/pytorch_geometric/blob/master/examples/sign.py
+
     Args:
         model:      trained GAT model
         data:       data object
@@ -85,8 +86,9 @@ def testing_step(model, data, loader):
         out = model(xs)
         loss = F.nll_loss(out, y)
 
-        total_examples += idx.numel()
-        total_loss += float(loss) * idx.numel()
+        batch_size = idx.numel()
+        total_examples += batch_size
+        total_loss += float(loss) * batch_size
         total_correct += sum(out.argmax(dim=-1) == y)
 
     return {

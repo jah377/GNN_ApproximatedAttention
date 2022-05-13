@@ -5,7 +5,6 @@ import numpy as np
 
 import torch
 from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -72,45 +71,28 @@ def set_seeds(seed_value: int):
         torch.cuda.manual_seed_all(seed_value)
 
 
-def build_optimizer(model, name: str, learning_rate: float, weight_decay: float):
-    """ build optimizer
-    Args:
-        model:              model object
-        name:               name of optimizer
-        learning_rate:      
-        weight_decay:
-    Return:
-        optimizer object
-    """
-    name = name.title()
-    assert name in ['Adam']
+def standardize_dataset(data_obj, data_str):
+    assert data_str.lower() in ['cora', 'pubmed', 'products']
 
-    if name == 'Adam':
-        optimizer = eval(f'torch.optim.{name}')
+    # extract relevant information
+    data = data_obj[0]
+    data.num_classes = data_obj.num_classes
+    data.num_nodes = data.num_nodes
+    data.num_features = data.num_node_features
+    data.n_id = torch.arange(data.num_nodes)  # global node id
 
-    return optimizer(
-        model.parameters(),
-        lr=learning_rate,
-        weight_decay=weight_decay,
-    )
+    # standardize mask -- node idx, not bool mask
+    if data_str.lower() == 'products':
+        masks = data_obj.get_idx_split()
+        data.train_mask = masks['train']
+        data.val_mask = masks['valid']
+        data.test_mask = masks['test']
+    else:
+        data.train_mask = torch.where(data.train_mask)[0]
+        data.val_mask = torch.where(data.val_mask)[0]
+        data.test_mask = torch.where(data.test_mask)[0]
 
-
-def build_scheduler(optimizer):
-    """ build learning rate scheduler
-    Args:
-        optimizer:  object
-
-    Return:
-        scheduler:  object
-    """
-    return ReduceLROnPlateau(
-        optimizer,
-        mode='min',
-        factor=0.1,
-        patience=5,
-        min_lr=1e-6,
-        verbose=False
-    )
+    return data
 
 
 def build_DataLoader(data, batch_size: int, dataset_name: str = None):
@@ -142,7 +124,7 @@ def build_DataLoader(data, batch_size: int, dataset_name: str = None):
                 get_idx(data, split),
                 batch_size=batch_size,
                 shuffle=(split == 'train'),   # shuffle if training loader
-                drop_last=(split == 'train'), # remove final incomplete
+                drop_last=(split == 'train'),  # remove final incomplete
             )
 
     return [loader(data, split) for split in ['train', 'val', 'test']]

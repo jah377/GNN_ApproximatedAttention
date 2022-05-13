@@ -1,10 +1,11 @@
 import wandb
+
 import torch
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.SIGN import net as SIGN
-from general.utils import set_seeds, build_DataLoader, build_optimizer, build_scheduler
 from general.epoch_steps.steps_SIGN import training_step, testing_step
-
+from general.utils import set_seeds, standardize_dataset, build_DataLoader
 
 hyperparameter_defaults = dict(
     dataset='cora',
@@ -29,41 +30,55 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def main(config):
     set_seeds(config.seed)
 
-    # data
+    # IMPORT & STANDARDIZE DATA
     path = f'data/{config.dataset}_sign_k{config.K}.pth'
     data = torch.load(path)
-    train_dl, val_dl, test_dl = build_DataLoader(
-        data, config.batch_size, dataset_name=config.dataset)
+    data = standardize_dataset(data, config.dataset)
 
-    # model
+    # BUILD DATALOADER
+    train_dl, val_dl, test_dl = build_DataLoader(
+        data,
+        config.batch_size,
+        dataset_name=config.dataset
+    )
+
+    # BUILD MODEL
     model = SIGN(
-        data.x.shape[1],       # in_channel
-        len(data.y.unique()),  # out_channel
+        data.num_features,  # in_channel
+        data.num_classes,   # out_channel
         config.hidden_channel,
         config.dropout,
         config.K,
         config.batch_norm).to(device)
 
-    # log number of trainable parameters
-    wandb.log({
-        'trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad),
-    })
+    n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    wandb.log({'trainable_params': n_params})  # log number of params
 
-    optimizer = build_optimizer(
-        model,
-        config.optimizer_type,
+    # BUILD OPTIMIZER
+    optimizer = torch.optim.Adam(
+        model.parameters(),
         config.optimizer_lr,
         config.optimizer_decay
     )
 
-    scheduler = build_scheduler(optimizer)
+    # BUILD SCHEDULER (modulates learning rate)
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        mode='min',     # nll_loss expected to decrease over epochs
+        factor=0.1,     # lr reduction factor
+        patience=5,     # reduce lr after _ epochs of no improvement
+        min_lr=1e-6,    # min learning rate
+        verbose=False,  # do not monitor lr updates
+    )
 
-    # train & evaluate
+    # RUN THROUGH EPOCHS
+    # params for early termination
     previous_loss = 1e10
     patience = 5
     trigger_times = 0
 
     for epoch in range(config.epochs):
+
         train_output, train_resources = training_step(
             model, data, optimizer, train_dl)
         val_output, val_resources = testing_step(model, data, val_dl)

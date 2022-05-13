@@ -6,7 +6,7 @@ from general.utils import resources  # wrapper
 
 
 @resources
-def transform_wAttention(data, K: int, attn_heads: int = 1, mha_bias: int = 1):
+def transform_wAttention(data, K: int, attn_heads: int = 1):
     """
     Args:
         data:           data object
@@ -36,7 +36,7 @@ def transform_wAttention(data, K: int, attn_heads: int = 1, mha_bias: int = 1):
     # =========== not part of T.SIGN(K) ===========
 
     # replace adj with DotProductAttention weights
-    adj_t = extract_attention(data.x, data.edge_index, attn_heads, mha_bias)
+    adj_t = extract_attention(data, attn_heads)
     adj_t = deg_inv_sqrt.view(-1, 1) * adj_t * deg_inv_sqrt.view(1, -1)
 
     # =========== not part of T.SIGN(K) ===========
@@ -52,7 +52,7 @@ def transform_wAttention(data, K: int, attn_heads: int = 1, mha_bias: int = 1):
     return data
 
 
-def extract_attention(x, edge_index, attn_heads, mha_bias):
+def extract_attention(data, attn_heads):
     """ calculate dotproduct attention
     Args:
         x:              feature embeddings [n nodes x emb]
@@ -64,7 +64,6 @@ def extract_attention(x, edge_index, attn_heads, mha_bias):
         SparseTensor containing attention weights
     """
 
-    d_m = x.shape[1]  # feature embedding dimension
-    model = MultiheadAttention(d_m, attn_heads, mha_bias)
+    model = MultiheadAttention(data.num_features, attn_heads)
 
-    return model(x, edge_index)
+    return model(data.x, data.edge_index)

@@ -59,7 +59,7 @@ def transform_wAttention(data, dataset: str, K: int, GATtransform_params):
     return data
 
 
-def extract_attention(data, GATtransform_params):
+def extract_attention(data, GATdict):
     """ calculate dotproduct attention
     Args:
         x:                      feature embeddings [n nodes x emb]
@@ -70,81 +70,83 @@ def extract_attention(data, GATtransform_params):
         SparseTensor containing attention weights
     """
 
-    # model
+    # BUILD MODEL
     model = GAT(
-        data.x.shape[1],       # in_channel
-        len(data.y.unique()),  # out_channel
-        GATtransform_params['hidden_channel'],
-        GATtransform_params['dropout'],
-        GATtransform_params['nlayers'],
-        GATtransform_params['heads_in'],
-        GATtransform_params['heads_out'],
+        data.num_features,  # in_channel
+        data.num_classes,  # out_channel
+        GATdict['hidden_channel'],
+        GATdict['dropout'],
+        GATdict['nlayers'],
+        GATdict['heads_in'],
+        GATdict['heads_out'],
+    ).cpu()
+
+    n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    wandb.log({'precomp-trainable_params': n_params})  # size of model
+
+    # BUILD OPTIMIZER
+    optimizer = torch.optim.Adam(
+        model.parameters(),
+        lr=GATdict['optimizer_lr'],
+        weight_decay=GATdict['optimizer_decay'],
     )
 
-    # log number of trainable parameters
-    wandb.log({
-        'trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad),
-    })
-
-    optimizer = build_optimizer(
-        model,
-        GATtransform_params['optimizer_type'],
-        GATtransform_params['optimizer_lr'],
-        GATtransform_params['optimizer_decay']
+    # BUILD SCHEDULER (modulates learning rate)
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        mode='min',     # nll_loss expected to decrease over epochs
+        factor=0.1,     # lr reduction factor
+        patience=5,     # reduce lr after _ epochs of no improvement
+        min_lr=1e-6,    # min learning rate
+        verbose=False,  # do not monitor lr updates
     )
 
-    scheduler = build_scheduler(optimizer)
+    # RUN THROUGH EPOCHS
+    # params for early termination
+    previous_loss = 1e10
+    patience = 5
+    trigger_times = 0
 
-    # train & evaluate
-    for epoch in range(GATtransform_params['epochs']):
+    for epoch in range(GATdict['epochs']):
 
-        # perform training and testing step
-        train_output, train_resources = training_step(
-            model,
-            data,
-            optimizer
-        )
-        val_output, logits, val_resources = testing_step(
-            model,
-            data,
-            data.val_mask,
-            logits=None,
-        )
-        test_output, _, test_resources = testing_step(
-            model,
-            data,
-            data.test_mask,
-            logits=logits,
-        )
+        train_out, train_resources = training_step(model, data, optimizer)
+        test_out = testing_step(model, data)
 
-        scheduler.step(val_output['loss'])  # dynamic learning rate
+        val_loss = test_out['val_loss']
+        scheduler.step(val_loss)
 
         # log results
         s = 'precomp-epoch'
         log_dict = {f'{s}': epoch}
-        log_dict.update({f'{s}-train_'+k: v for k, v in train_output.items()})
-        log_dict.update({f'{s}-val_'+k: v for k, v in val_output.items()})
-        log_dict.update({f'{s}-test_'+k: v for k, v in test_output.items()})
-
-        log_dict.update({f'{s}-train_'+k: v for k,
+        log_dict.update({f'{s}-'+k: v for k, v in train_out.items()})
+        log_dict.update({f'{s}-train-'+k: v for k,
                         v in train_resources.items()})
-        log_dict.update({f'{s}-val_'+k: v for k, v in val_resources.items()})
-        log_dict.update({f'{s}-test_'+k: v for k,
-                        v in test_resources.items()})
-
+        log_dict.update({f'{s}-'+k: v for k, v in test_out.items()})
         wandb.log(log_dict)
+
+        # early stopping
+        current_loss = val_loss
+        if current_loss > previous_loss:
+            trigger_times += 1
+            if trigger_times >= patience:
+                print('~~~ early stop triggered ~~~')
+                break
+        else:
+            trigger_times = 0
+        previous_loss = current_loss
 
     # extract attention
     model.eval()
-    _, att_weights = model.extract_features(
+    _, (attn_i, attn_w) = model.extract_features(
         data.x,
         data.edge_index,
         return_attention_weights=True)
-    dim = data.x.shape[0]  # number of nodes
+
+    dim = data.num_nodes  # number of nodes
 
     return SparseTensor(
-        row=att_weights[0][0],  # edge_indices (row)
-        col=att_weights[0][1],  # edge indices (col0)
-        value=att_weights[1].mean(axis=1).detach(),
+        row=attn_i[0],  # edge_indices (row)
+        col=attn_i[1],  # edge indices (col0)
+        value=attn_w.mean(axis=1).detach(),
         sparse_sizes=(dim, dim)
     )  # to replace adj_t
