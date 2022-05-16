@@ -101,20 +101,19 @@ def extract_attention(data, K, batch_size):
 
         count_total += torch.sparse_coo_tensor(
             batch.edge_index,
-            torch.ones_like(values),
+            torch.ones_like(values).cpu(),
             size=(dim, dim)
         )
 
     # average CosineSimilarity per edge_index
-    cs_coo = cs_coo.multiply(count_total.float_power(-1)).coalesce()
+    cs_coo = cs_coo.multiply(count_total.float_power(-1)).coalesce().cpu()
 
     # convert to SparseTensor
     row, col = cs_coo.indices()
-    values = cs_coo.values().detach()
     cs_sparse = SparseTensor(
         row=row,
         col=col,
-        value=values,
+        value=cs_coo.values(),
         sparse_sizes=(dim, dim)
     )
 

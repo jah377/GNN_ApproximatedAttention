@@ -1,22 +1,22 @@
 #!/bin/bash
-#SBATCH --job-name="SHAgpu"
+#SBATCH --job-name="arxiv_SHAgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=12:00:00
+#SBATCH --time=10:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu
 #SBATCH --output=%x.%j.out
-# SBATCH --mail-user=jon.harris@student.uva.nl
-# SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=jon.harris@student.uva.nl
+#SBATCH --mail-type=BEGIN,END,FAIL
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
 
 # sweep variables 
-dataset='pubmed'
+dataset='arxiv'
 method='random'                # sweep type (grid, bayes, random)
 run_trial=false                # if True, reduce param values for quick test
-sweep_iterations=300           # number of sweep iterations
-FOLDER='SHAgpu'               # name of folder on scratch
+sweep_iterations=200           # number of sweep iterations
+FOLDER=$dataset'_SHAgpu'                # name of folder on scratch
 
 
 # copy files to scratch
@@ -51,7 +51,7 @@ for model in  'SIGN_SHA'
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep
-    project_name=$dataset_$FOLDER             # wandb project name
+    project_name=$FOLDER             # wandb project name
 
     echo ''
     echo '=================================================='

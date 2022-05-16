@@ -77,7 +77,7 @@ def testing_step(model, data):
         return model(data.x.to(cpu), data.edge_index.to(cpu))
 
     logits, inf_resources = inference(model, data)
-    output = {f'inf_{k}:{v}' for k, v in inf_resources.items()}
+    output = {f'inf_{k}': v for k, v in inf_resources.items()}
 
     for split in ['train', 'val']:
 
@@ -87,8 +87,8 @@ def testing_step(model, data):
         mask_y = data.y[mask].to(mask_logits.device)
 
         output.update({
-            f'{split}_loss': F.nll_loss(mask_logits, mask_y),
-            f'{split}_f1': sum(mask_yhat == mask_y).div(len(mask)),
+            f'{split}_loss': F.nll_loss(mask_logits, mask_y).item(),
+            f'{split}_f1': (sum(mask_yhat == mask_y)/len(mask)).item()
         })
 
     return output

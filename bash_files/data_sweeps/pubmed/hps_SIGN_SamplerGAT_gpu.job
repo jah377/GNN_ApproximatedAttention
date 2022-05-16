@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="SFBGATgpu"
+#SBATCH --job-name="SLGATgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=14:00:00
+#SBATCH --time=16:00:00
 #SBATCH --partition=normal
 #SBATCH --output=%x.%j.out
 # SBATCH --mail-user=jon.harris@student.uva.nl
@@ -14,9 +14,8 @@ START=`date +%s`                # will record .job runtime
 dataset='pubmed'
 method='random'                # sweep type (grid, bayes, random)
 run_trial=false                # if True, reduce param values for quick test
-sweep_iterations=300           # number of sweep iterations
-FOLDER='SFBGATgpu'                # name of folder on scratch
-
+sweep_iterations=200           # number of sweep iterations
+FOLDER=$dataset'_SLGATgpu'     # name of folder on scratch
 
 # copy files to scratch
 mkdir -p $TMPDIR/$FOLDER/data
@@ -46,11 +45,11 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN_FullBatchGAT' 
+for model in  'SIGN_SamplerGAT' 
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep
-    project_name=$dataset_$FOLDER             # wandb project name
+    project_name=$FOLDER             # wandb project name
 
     echo ''
     echo '=================================================='

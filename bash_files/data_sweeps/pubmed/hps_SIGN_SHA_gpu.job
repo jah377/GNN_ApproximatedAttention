@@ -1,9 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name="SFBGATcpu"
+#SBATCH --job-name="pubmed_SHAgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=24:00:00
-#SBATCH --partition=normal
+#SBATCH --time=10:00:00
+#SBATCH --gpus=1
+#SBATCH --partition=gpu
 #SBATCH --output=%x.%j.out
 # SBATCH --mail-user=jon.harris@student.uva.nl
 # SBATCH --mail-type=BEGIN,END,FAIL
@@ -14,8 +15,8 @@ START=`date +%s`                # will record .job runtime
 dataset='pubmed'
 method='random'                # sweep type (grid, bayes, random)
 run_trial=false                # if True, reduce param values for quick test
-sweep_iterations=300           # number of sweep iterations
-FOLDER='SFBGATcpu'             # name of folder on scratch
+sweep_iterations=200           # number of sweep iterations
+FOLDER=$dataset'_SHAgpu'                # name of folder on scratch
 
 
 # copy files to scratch
@@ -27,7 +28,9 @@ cd $TMPDIR/$FOLDER
 
 
 # activate venv
-source $TMPDIR/$FOLDER/venvs/CPU_venv/bin/activate
+module load 2021
+module load CUDA/11.3.1
+source $TMPDIR/$FOLDER/venvs/GPU_venv/bin/activate
 which python
 
 echo ''
@@ -44,11 +47,11 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN_FullBatchGAT' 
+for model in  'SIGN_SHA' 
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep
-    project_name=$dataset_$FOLDER             # wandb project name
+    project_name=$FOLDER             # wandb project name
 
     echo ''
     echo '=================================================='

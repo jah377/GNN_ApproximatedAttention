@@ -1,21 +1,21 @@
 #!/bin/bash
-#SBATCH --job-name="gpu_trial"
+#SBATCH --job-name="pubmed_SFBGATgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:15:00
-#SBATCH --gpus=1
-#SBATCH --partition=gpu_shared
+#SBATCH --time=14:00:00
+#SBATCH --partition=normal
 #SBATCH --output=%x.%j.out
-
+# SBATCH --mail-user=jon.harris@student.uva.nl
+# SBATCH --mail-type=BEGIN,END,FAIL
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
 
 # sweep variables 
 dataset='pubmed'
-method='random'              # sweep type (grid, bayes, random)
-run_trial=true               # if True, reduce param values for quick test
-sweep_iterations=2           # number of sweep iterations
-FOLDER='gpu_dump'            # name of folder on scratch
+method='random'                # sweep type (grid, bayes, random)
+run_trial=false                # if True, reduce param values for quick test
+sweep_iterations=200           # number of sweep iterations
+FOLDER=$dataset'_SFBGATgpu'                # name of folder on scratch
 
 
 # copy files to scratch
@@ -46,12 +46,11 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN' 'SIGN_MHA' 'SIGN_SHA' 'SIGN_SamplerGAT' 'SIGN_FullBatchGAT' 'SIGN_CosineSimilarity'
-
+for model in  'SIGN_FullBatchGAT' 
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep
-    project_name='dump'             # wandb project name
+    project_name=$FOLDER            # wandb project name
 
     echo ''
     echo '=================================================='
@@ -66,6 +65,7 @@ do
     echo 'config:' $yaml_file
     echo 'train_file:' $train_file
     echo 'project_name:' $project_name
+    echo ''
 
     # build yaml file 
     python general/slurm/build_yaml.py \
@@ -83,7 +83,6 @@ do
     python general/slurm/run_slurm.py \
         --YAML_FILE $yaml_file \
         --PROJ_NAME $project_name
-        
 done
 
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

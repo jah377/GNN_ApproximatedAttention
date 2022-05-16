@@ -33,7 +33,7 @@ def main(args):
         saved yaml file
     """
     assert args.METHOD.lower() in ['grid', 'random', 'bayes']
-    assert args.DATASET.lower() in ['pubmed', 'cora']
+    assert args.DATASET.lower() in ['pubmed', 'cora', 'arxiv', 'products']
     assert args.MODEL != None
     assert args.TRAIN_FILE != None
     assert args.YAML_FILE != None

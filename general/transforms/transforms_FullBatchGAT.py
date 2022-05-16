@@ -113,8 +113,7 @@ def extract_attention(data, GATdict):
         train_out, train_resources = training_step(model, data, optimizer)
         test_out = testing_step(model, data)
 
-        val_loss = test_out.get('val_loss')
-        scheduler.step(val_loss)
+        scheduler.step(test_out['val_loss'])
 
         # log results
         s = 'precomp-epoch'
@@ -126,7 +125,7 @@ def extract_attention(data, GATdict):
         wandb.log(log_dict)
 
         # early stopping
-        current_loss = val_loss
+        current_loss = test_out['val_loss']
         if current_loss > previous_loss:
             trigger_times += 1
             if trigger_times >= patience:

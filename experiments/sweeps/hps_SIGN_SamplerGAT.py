@@ -62,13 +62,6 @@ def main(config):
         config.batch_size,
     )
 
-    # BUILD OPTIMIZER
-    optimizer = torch.optim.Adam(
-        model.parameters(),
-        lr=config.optimizer_lr,
-        weight_decay=config.optimizer_decay
-    )
-
     # BUILD MODEL
     model = SIGN(
         data.num_features,  # in_channel
