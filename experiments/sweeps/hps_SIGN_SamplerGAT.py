@@ -41,7 +41,7 @@ def main(config):
     if not osp.isfile(transform_path):
         data = standardize_dataset(torch.load(path), config.dataset)
         data, trans_resources = transform_wAttention(
-            torch.load(path),
+            data,
             config.dataset,
             config.K,
             GATtransform_params,
@@ -53,13 +53,20 @@ def main(config):
         torch.save(data, transform_path)
         print('\n~~~ TRANSFORM PERFORMED ~~~\n')
     else:
-        data = torch.load(transform_path)
+        data = torch.load(transform_path)  # already standardized
+        assert hasattr(data, 'edge_index')  # must be torch data object
 
     # BUILD DATALOADER
     train_dl, val_dl, test_dl = build_DataLoader(
         data,
         config.batch_size,
-        dataset_name=config.dataset
+    )
+
+    # BUILD OPTIMIZER
+    optimizer = torch.optim.Adam(
+        model.parameters(),
+        lr=config.optimizer_lr,
+        weight_decay=config.optimizer_decay
     )
 
     # BUILD MODEL

@@ -5,13 +5,11 @@ import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.SIGN import net as SIGN
-from general.transforms.transforms_DotProduct import transform_wAttention
 from general.utils import set_seeds, standardize_dataset, build_DataLoader
 from general.epoch_steps.steps_SIGN import training_step, testing_step
 
-#################################################################
-########## THIS SHOULD BE IDENTICAL TO HPS_SIGN_MHA.PY ##########
-#################################################################
+from general.transforms.transforms_CosineSimilarity import transform_wAttention
+
 
 hyperparameter_defaults = dict(
     dataset='cora',
@@ -39,15 +37,14 @@ def main(config):
 
     # IMPORT & STANDARDIZE DATA
     path = f'data/{config.dataset}_sign_k0.pth'
-    transform_path = f'data/{config.dataset}_sign_k0_heads{config.attn_heads}_transformed.pth'
+    transform_path = f'data/{config.dataset}_sign_k0_transformed.pth'
 
     if not osp.isfile(transform_path):
-        data = torch.load(path)
-        data = standardize_dataset(data, config.dataset)
+        data = standardize_dataset(torch.load(path), config.dataset)
         data, trans_resources = transform_wAttention(
             data,
             config.K,
-            config.attn_heads
+            config.batch_size,
         )
 
         wandb.log({'precomp-transform_'+k: v for k,

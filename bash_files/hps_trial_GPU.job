@@ -2,7 +2,7 @@
 #SBATCH --job-name="gpu_trial"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:30:00
+#SBATCH --time=00:15:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -46,7 +46,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN' 'SIGN_MHA' 'SIGN_SHA' 'SIGN_SamplerGAT' 
+for model in  'SIGN' 'SIGN_MHA' 'SIGN_SHA' 'SIGN_SamplerGAT' 'SIGN_FullBatchGAT' 'SIGN_CosineSimilarity'
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep

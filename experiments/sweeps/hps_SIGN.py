@@ -39,7 +39,6 @@ def main(config):
     train_dl, val_dl, test_dl = build_DataLoader(
         data,
         config.batch_size,
-        dataset_name=config.dataset
     )
 
     # BUILD MODEL
@@ -57,8 +56,8 @@ def main(config):
     # BUILD OPTIMIZER
     optimizer = torch.optim.Adam(
         model.parameters(),
-        config.optimizer_lr,
-        config.optimizer_decay
+        lr=config.optimizer_lr,
+        weight_decay=config.optimizer_decay
     )
 
     # BUILD SCHEDULER (modulates learning rate)

@@ -139,7 +139,7 @@ def extract_attention(data, GATdict):
             train_loader
         )
 
-        test_out = testing_step(model, optimizer, data, subgraph_loader)
+        test_out = testing_step(model, data, subgraph_loader)
 
         val_loss = test_out['val_loss']
         scheduler.step(val_loss)

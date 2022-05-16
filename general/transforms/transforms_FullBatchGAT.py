@@ -2,10 +2,10 @@ import wandb
 
 import torch
 from torch_sparse import SparseTensor
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.FullBatchGAT import net as GAT
 from general.utils import resources  # wrapper
-from general.utils import build_optimizer, build_scheduler
 from general.epoch_steps.steps_FullBatchGAT import training_step, testing_step
 
 
@@ -69,6 +69,7 @@ def extract_attention(data, GATdict):
     Returns:
         SparseTensor containing attention weights
     """
+    cpu = torch.device('cpu')
 
     # BUILD MODEL
     model = GAT(
@@ -79,7 +80,7 @@ def extract_attention(data, GATdict):
         GATdict['nlayers'],
         GATdict['heads_in'],
         GATdict['heads_out'],
-    ).cpu()
+    ).to(cpu)
 
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     wandb.log({'precomp-trainable_params': n_params})  # size of model
@@ -112,7 +113,7 @@ def extract_attention(data, GATdict):
         train_out, train_resources = training_step(model, data, optimizer)
         test_out = testing_step(model, data)
 
-        val_loss = test_out['val_loss']
+        val_loss = test_out.get('val_loss')
         scheduler.step(val_loss)
 
         # log results

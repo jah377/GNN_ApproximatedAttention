@@ -31,8 +31,8 @@ def training_step(model, optimizer, train_loader):
 
         # forward pass
         logits = model(
-            batch.x.to(model.device),
-            batch.edge_index.to(model.device)
+            batch.x.to(device),
+            batch.edge_index.to(device)
         )[:batch_size]
 
         y = batch.y[:batch_size].to(logits.device)

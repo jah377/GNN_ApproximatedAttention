@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from general.utils import resources  # wrapper
 
 ### Always perform on CPU ###
+cpu = torch.device('cpu')
 
 
 @resources
@@ -73,7 +74,7 @@ def testing_step(model, data):
 
     @resources
     def inference(model, data):
-        return model(data.x.to(model.device), data.edge_index.to(model.device))
+        return model(data.x.to(cpu), data.edge_index.to(cpu))
 
     logits, inf_resources = inference(model, data)
     output = {f'inf_{k}:{v}' for k, v in inf_resources.items()}
@@ -87,7 +88,7 @@ def testing_step(model, data):
 
         output.update({
             f'{split}_loss': F.nll_loss(mask_logits, mask_y),
-            f'{split}_f1': sum(mask_yhat == mask_y).div(len(mask))
+            f'{split}_f1': sum(mask_yhat == mask_y).div(len(mask)),
         })
 
     return output

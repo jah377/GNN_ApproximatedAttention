@@ -72,7 +72,7 @@ def set_seeds(seed_value: int):
 
 
 def standardize_dataset(data_obj, data_str):
-    assert data_str.lower() in ['cora', 'pubmed', 'products']
+    assert data_str.lower() in ['cora', 'pubmed', 'products', 'arxiv']
 
     # extract relevant information
     data = data_obj[0]
@@ -82,7 +82,7 @@ def standardize_dataset(data_obj, data_str):
     data.n_id = torch.arange(data.num_nodes)  # global node id
 
     # standardize mask -- node idx, not bool mask
-    if data_str.lower() == 'products':
+    if data_str.lower() in ['products', 'arxiv']:
         masks = data_obj.get_idx_split()
         data.train_mask = masks['train']
         data.val_mask = masks['valid']
@@ -95,7 +95,7 @@ def standardize_dataset(data_obj, data_str):
     return data
 
 
-def build_DataLoader(data, batch_size: int, dataset_name: str = None):
+def build_DataLoader(data, batch_size: int):
     """ Create train/val/test DataLoader for SIGN
 
     Args:
@@ -108,23 +108,12 @@ def build_DataLoader(data, batch_size: int, dataset_name: str = None):
         test_loader:
     """
 
-    if dataset_name == 'products':
-        split_idx = data.get_idx_split()
-        def get_idx(_, split): return split_idx[split]
-    else:
-        def get_idx(data, split): return eval(
-            f"data.{split}_mask.nonzero(as_tuple=False).view(-1)")
-
     def loader(data, split):
-        if dataset_name == 'product':
-            if split == 'val':
-                split = 'valid'
-
-            return DataLoader(
-                get_idx(data, split),
-                batch_size=batch_size,
-                shuffle=(split == 'train'),   # shuffle if training loader
-                drop_last=(split == 'train'),  # remove final incomplete
-            )
+        return DataLoader(
+            eval(f'data.{split}_mask'),
+            batch_size=batch_size,
+            shuffle=(split == 'train'),   # shuffle if training loader
+            drop_last=(split == 'train'),  # remove final incomplete
+        )
 
     return [loader(data, split) for split in ['train', 'val', 'test']]
