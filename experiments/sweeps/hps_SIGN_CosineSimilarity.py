@@ -54,7 +54,7 @@ def main(config):
         print('\n~~~ TRANSFORM PERFORMED ~~~\n')
         print(data)
     else:
-        data = torch.load(transform_path)  # already standardized
+        data = torch.load(transform_path)   # already standardized
         assert hasattr(data, 'edge_index')  # must be torch data object
 
     # BUILD DATALOADER

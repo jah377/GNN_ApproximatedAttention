@@ -36,8 +36,8 @@ def main(config):
 
     # import or transform data
     path = f'data/{config.dataset}_sign_k0.pth'
-    transform_path = f'data/{config.dataset}_sign_k0_transformed.pth'
-
+    transform_path = f'data/{config.dataset}_sign_k{config.K}_transformed.pth'
+    
     if not osp.isfile(transform_path):
         data = standardize_dataset(torch.load(path), config.dataset)
         data, trans_resources = transform_wAttention(

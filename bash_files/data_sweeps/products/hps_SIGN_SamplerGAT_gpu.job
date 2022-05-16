@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name="products_SLGATgpu"
+#SBATCH --job-name="SLGATgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=16:00:00
 #SBATCH --gpus=1
-#SBATCH --partition=gpu
+#SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
 #SBATCH --mail-user=jon.harris@student.uva.nl
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -15,7 +15,7 @@ START=`date +%s`                # will record .job runtime
 dataset='products'
 method='random'                # sweep type (grid, bayes, random)
 run_trial=false                # if True, reduce param values for quick test
-sweep_iterations=200           # number of sweep iterations
+sweep_iterations=100           # number of sweep iterations
 FOLDER=$dataset'_SLGATgpu'     # name of folder on scratch
 
 # copy files to scratch

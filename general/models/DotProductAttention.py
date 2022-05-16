@@ -58,11 +58,13 @@ class net(nn.Module):
 
         attn = attn.div( reduce(attn, 'h Li Lj -> h Li 1', 'sum') ) # normalize by row
         attn = reduce(attn, 'h Li Lj -> Li Lj', 'mean')             # avg across heads
+        
         attn = attn.to_sparse_coo()                                 # convert to sparse
+        r,c = attn.indices()
 
         return SparseTensor(
-            row=attn.indices()[0], 
-            col=attn.indices()[1], 
+            row=r, 
+            col=c, 
             value=attn.values().detach(),
             sparse_sizes=attn.size()
             ) # to replace adj
