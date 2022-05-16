@@ -52,6 +52,8 @@ def main(config):
 
         torch.save(data, transform_path)
         print('\n~~~ TRANSFORM PERFORMED ~~~\n')
+        print(data)
+
     else:
         data = torch.load(transform_path)  # already standardized
         assert hasattr(data, 'edge_index')  # must be torch data object
@@ -77,8 +79,8 @@ def main(config):
     # BUILD OPTIMIZER
     optimizer = torch.optim.Adam(
         model.parameters(),
-        config.optimizer_lr,
-        config.optimizer_decay
+        lr=config.optimizer_lr,
+        weight_decay=config.optimizer_decay
     )
 
     # BUILD SCHEDULER (modulates learning rate)

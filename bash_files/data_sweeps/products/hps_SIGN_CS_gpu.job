@@ -1,22 +1,24 @@
 #!/bin/bash
-#SBATCH --job-name="pubmed_SFBGATgpu"
+#SBATCH --job-name="products_SIGNCSgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=14:00:00
+#SBATCH --time=12:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu
 #SBATCH --output=%x.%j.out
 #SBATCH --mail-user=jon.harris@student.uva.nl
 #SBATCH --mail-type=BEGIN,END,FAIL
+
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
 
+
 # sweep variables 
-dataset='pubmed'
+dataset='products'
 method='random'                # sweep type (grid, bayes, random)
 run_trial=false                # if True, reduce param values for quick test
 sweep_iterations=200           # number of sweep iterations
-FOLDER=$dataset'_SFBGATgpu'                # name of folder on scratch
+FOLDER='SIGNCSgpu'             # name of folder on scratch
 
 
 # copy files to scratch
@@ -47,11 +49,11 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN_FullBatchGAT' 
+for model in  'SIGN_CosineSimilarity' 
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep
-    project_name=$FOLDER            # wandb project name
+    project_name=$dataset_$FOLDER             # wandb project name
 
     echo ''
     echo '=================================================='
@@ -85,6 +87,9 @@ do
         --YAML_FILE $yaml_file \
         --PROJ_NAME $project_name
 done
+
+
+
 
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
 END=`date +%s`;

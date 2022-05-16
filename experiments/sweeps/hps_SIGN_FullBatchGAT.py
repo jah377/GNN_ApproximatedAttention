@@ -52,6 +52,8 @@ def main(config):
 
         torch.save(data, transform_path)
         print('\n~~~ TRANSFORM PERFORMED ~~~\n')
+        print(data)
+
     else:
         data = torch.load(transform_path)  # already standardized
         assert hasattr(data, 'edge_index')  # must be torch data object
