@@ -56,6 +56,7 @@ def transform_wAttention(data, dataset: str, K: int, GATtransform_params):
         xs += [adj_t @ xs[-1]]
         data[f'x{i}'] = xs[-1]
 
+    assert hasattr(data, f'x{K}')
     return data
 
 

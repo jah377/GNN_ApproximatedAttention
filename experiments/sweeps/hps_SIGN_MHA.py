@@ -41,7 +41,7 @@ def main(config):
 
     # IMPORT & STANDARDIZE DATA
     path = f'data/{config.dataset}_sign_k0.pth'
-    transform_path = f'data/{config.dataset}_sign_k0_heads{config.attn_heads}_transformed.pth'
+    transform_path = f'data/{config.dataset}_sign_k{config.K}_heads{config.attn_heads}_transformed.pth'
 
     if not osp.isfile(transform_path):
         data = standardize_dataset(torch.load(path), config.dataset)

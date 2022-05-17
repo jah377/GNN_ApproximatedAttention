@@ -12,7 +12,7 @@ START=`date +%s`                # will record .job runtime
 
 
 # sweep variables 
-dataset='pubmed'
+dataset='arxiv'
 method='random'              # sweep type (grid, bayes, random)
 run_trial=true               # if True, reduce param values for quick test
 sweep_iterations=3           # number of sweep iterations
@@ -45,7 +45,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # PERFORM SWEEP
-for model in  'SIGN_CosineSimilarity' 
+for model in  'SIGN_MHA' 
 do 
     # sweep inputs
     yaml_file=$model'.yaml'         # desired yaml name; built later
