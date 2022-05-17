@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --time=16:00:00
 #SBATCH --gpus=1
-#SBATCH --partition=gpu
+#SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
 
 date;hostname;id;pwd
@@ -13,8 +13,8 @@ START=`date +%s`                # will record .job runtime
 # sweep variables 
 dataset='arxiv'
 method='random'              # sweep type (grid, bayes, random)
-ignore_known=False            # if True, only sweep params not in literature
-sweep_iterations=200           # number of sweep iterations
+ignore_known=false            # if True, only sweep params not in literature
+sweep_iterations=100           # number of sweep iterations
 FOLDER=$dataset'_SamplerGAT'            # name of folder on scratch
 
 

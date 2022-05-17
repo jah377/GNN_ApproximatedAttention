@@ -49,7 +49,10 @@ def transform_wAttention(data, K: int, attn_heads: int = 1):
         xs += [adj_t @ xs[-1]]
         data[f'x{i}'] = xs[-1]
 
-    assert hasattr(data, f'x{K}')
+    # sanity check
+    if K > 0:
+        assert hasattr(data, f'x{K}')
+
     return data
 
 

@@ -174,7 +174,7 @@ def main(args):
                 'attn_heads': {
                     'distribution': 'int_uniform',
                     'min': 1,
-                    'max': 9,
+                    'max': 5,
                 },
             })
         elif args.MODEL.lower() == 'sign_sha':

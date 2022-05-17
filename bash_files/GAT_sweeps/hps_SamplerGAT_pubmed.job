@@ -2,9 +2,9 @@
 #SBATCH --job-name="pubmed_SamplerGAT"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=14:00:00
+#SBATCH --time=4:00:00
 #SBATCH --gpus=1
-#SBATCH --partition=gpu
+#SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
 #SBATCH --mail-user=jon.harris@student.uva.nl
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -14,9 +14,9 @@ START=`date +%s`                # will record .job runtime
 
 # sweep variables 
 dataset='pubmed'
-method='random'              # sweep type (grid, bayes, random)
-ignore_known=True            # if True, only sweep params not in literature
-sweep_iterations=200         # number of sweep iterations
+method='random'               # sweep type (grid, bayes, random)
+ignore_known=true             # if True, only sweep params not in literature
+sweep_iterations=100          # number of sweep iterations
 FOLDER=$dataset'_SamplerGAT'            # name of folder on scratch
 
 
@@ -48,7 +48,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-yaml_file=$model'.yaml'         # yaml name to write to
+yaml_file='SamplerGAT.yaml'         # yaml name to write to
 train_file='hps_SamplerGAT.py'    # model-specific py file used in sweep
 project_name=$FOLDER             # wandb project name
 

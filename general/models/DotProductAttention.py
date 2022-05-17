@@ -22,7 +22,8 @@ class net(nn.Module):
         self.num_heads = num_heads
         self.d_k = num_heads * d_m      # hidden dim. of proj. subspace
         self.scale = 1.0/np.sqrt(d_m)   # scaling factor per head
-        self.qkv_lin = nn.Linear(d_m, 3*self.d_k) # stacked q,k,v for efficiency
+        # stacked q,k,v for efficiency
+        self.qkv_lin = nn.Linear(d_m, 3*self.d_k)
 
     def forward(self, x, edge_index):
         """
@@ -35,36 +36,41 @@ class net(nn.Module):
 
         qkv = rearrange(
             qkv,
-            'L (h hdim) -> L h hdim', 
+            'L (h hdim) -> L h hdim',
             h=self.num_heads,
-            hdim=3*self.d_m # includes q, k, v
+            hdim=3*self.d_m  # includes q, k, v
         )
 
         # dot product attention (Q x K^T)/sqrt(dk)
         q, k, _ = rearrange(qkv, 'L h (split hdim) -> split h L hdim', split=3)
+        del qkv
         attn = (q @ rearrange(k, 'h L dm -> h dm L')) / self.scale
         attn = F.softmax(attn, dim=-1)
 
         # mask attn of non-edges and normalize by row
         S = torch.sparse_coo_tensor(
-              edge_index, 
-              torch.ones_like(edge_index[1]),
-              size=attn.shape[1:], # L x L
-              ).coalesce() # sparse mask for single head 
+            edge_index,
+            torch.ones_like(edge_index[1]),
+            size=attn.shape[1:],  # L x L
+        ).coalesce()  # sparse mask for single head
 
-        S = torch.stack([S for _ in range(self.num_heads)]).coalesce() # sparse mask for all heads
+        S = torch.stack([S for _ in range(self.num_heads)]
+                        ).coalesce()  # sparse mask for all heads
 
-        attn = attn.sparse_mask(S).to_dense() # mask non-edge attn values per head
+        # mask non-edge attn values per head
+        attn = attn.sparse_mask(S).to_dense()
 
-        attn = attn.div( reduce(attn, 'h Li Lj -> h Li 1', 'sum') ) # normalize by row
-        attn = reduce(attn, 'h Li Lj -> Li Lj', 'mean')             # avg across heads
-        
+        # normalize by row
+        attn = attn.div(reduce(attn, 'h Li Lj -> h Li 1', 'sum'))
+        # avg across heads
+        attn = reduce(attn, 'h Li Lj -> Li Lj', 'mean')
+
         attn = attn.to_sparse_coo()                                 # convert to sparse
-        r,c = attn.indices()
+        r, c = attn.indices()
 
         return SparseTensor(
-            row=r, 
-            col=c, 
+            row=r,
+            col=c,
             value=attn.values().detach(),
             sparse_sizes=attn.size()
-            ) # to replace adj
+        )  # to replace adj

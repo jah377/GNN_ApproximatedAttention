@@ -1,3 +1,4 @@
+# %%
 import os
 import os.path as osp
 
@@ -25,7 +26,7 @@ def make_cora(folder_path):
 
         # download
         dataset = Planetoid(
-            root='/tmp/Cora',
+            root=folder_path,
             name='Cora',
             transform=transform,
             split='full',
@@ -50,7 +51,7 @@ def make_pubmed(folder_path):
 
         # download
         dataset = Planetoid(
-            root='/tmp/Pubmed',
+            root=folder_path,
             name='Pubmed',
             transform=transform,
             split='full',
@@ -77,7 +78,7 @@ def make_products(folder_path):
         # download
         dataset = PygNodePropPredDataset(
             'ogbn-products',
-            root='/tmp/Products',
+            root=folder_path,
             transform=transform)
 
         filename = osp.join(folder_path, f'products_sign_k{K}.pth')
@@ -102,12 +103,13 @@ def make_arxiv(folder_path):
         # download
         dataset = PygNodePropPredDataset(
             'ogbn-arxiv',
-            root='/tmp/Arxiv',
+            root=folder_path,
             transform=transform)
 
         filename = osp.join(folder_path, f'arxiv_sign_k{K}.pth')
         torch.save(dataset, filename)
         del transform, dataset
+# %%
 
 
 if __name__ == '__main__':
