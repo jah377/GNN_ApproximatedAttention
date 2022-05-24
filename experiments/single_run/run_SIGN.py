@@ -1,25 +1,13 @@
-import time
+import torch
 import argparse
-import random
-import numpy as np
 import pandas as pd
 from distutils.util import strtobool
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-
-import torch_geometric.transforms as T
-from torch_geometric.datasets import Planetoid
-
-from ogb.nodeproppred import PygNodePropPredDataset
-
 
 from general.models.SIGN import net as SIGN
 from general.utils import set_seeds, download_data, standardize_data, create_loader
 from general.epoch_steps.steps_SIGN import train_epoch, test_epoch
+
 
 # product: https://arxiv.org/pdf/2004.11198v2.pdf
 parser = argparse.ArgumentParser(description='inputs')

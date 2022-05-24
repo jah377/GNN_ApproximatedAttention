@@ -56,7 +56,7 @@ python run_SIGN.py \
 echo 'SIGN Complete'
 
 
-python run_SIGN_GAT.py \
+python run_SIGN_SamplerGAT.py \
     --dataset $dataset \
     --seed 42 \
     --optimizer_lr 0.09911 \

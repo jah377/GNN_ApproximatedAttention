@@ -73,6 +73,7 @@ def main(args):
         args.K,
         params_dict.get(args.dataset),
     )
+    print('-- TRANSFORM COMPLETE ')
 
     train_loader = create_loader(
         data, split='train', batch_size=args.batch_size)

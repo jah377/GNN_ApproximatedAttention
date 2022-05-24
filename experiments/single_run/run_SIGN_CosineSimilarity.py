@@ -40,6 +40,7 @@ def main(args):
     data = standardize_data(data, args.dataset)
     data, transform_time = transform_wAttention(
         data, args.K, args.cs_batch_size)
+    print('-- TRANSFORM COMPLETE ')
 
     train_loader = create_loader(
         data, split='train', batch_size=args.batch_size)

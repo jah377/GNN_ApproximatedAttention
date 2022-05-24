@@ -1,5 +1,5 @@
 import numpy as np
-from einops import rearrange, reduce
+from einops import rearrange
 
 import torch
 import torch.nn as nn
@@ -7,70 +7,103 @@ import torch.nn.functional as F
 
 from torch_sparse import SparseTensor
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 class net(nn.Module):
-
-    def __init__(self, d_m: int, num_heads: int = 1):
+    def __init__(
+            self,
+            num_nodes: int,
+            num_feats: int,
+            num_edges: int,
+            num_heads: int = 1,
+    ):
         """
-          d_m:          feature embedding dimension
+        https://stackoverflow.com/questions/20983882/efficient-dot-products-of-large-memory-mapped-arrays
+
+          num_nodes:    total number of nodes 
+          num_feats:    feature embedding dimension
           num_heads:    attn heads (default=1)
-          bias:         learn additive bias (default=True) 
+
         """
         super().__init__()
+        assert num_heads > 0
 
-        self.d_m = d_m
-        self.num_heads = num_heads
-        self.d_k = num_heads * d_m      # hidden dim. of proj. subspace
-        self.scale = 1.0/np.sqrt(d_m)   # scaling factor per head
-        # stacked q,k,v for efficiency
-        self.qkv_lin = nn.Linear(d_m, 3*self.d_k)
+        # definitions
+        self.num_nodes = int(num_nodes)
+        self.num_feats = int(num_feats)
+        self.num_edges = int(num_edges)
+        self.num_heads = int(num_heads)
+
+        # dot product
+        self.out_shape = (self.num_heads, self.num_nodes,
+                          self.num_nodes)  # attn shape (w/head)
+        self.d_k = self.num_feats * self.num_heads  # hidden dim
+        self.scale = 1.0/np.sqrt(self.num_feats)  # scaling factor per head
+        self.qk_lin = nn.Linear(self.num_feats, 2*self.d_k)
+
+    def reset_parameters(self):
+        self.qk_lin.reset_parameters()
+
+    def _batch_matmul(self, A, B, edge_index):
+
+        # compute dotproduct in batches, across heads
+        h_idx = torch.tensor(range(self.num_heads))
+        values = torch.zeros(self.num_edges*self.num_heads)
+
+        start, end = 0, self.num_heads
+        for i in range(self.num_edges):
+            r_idx, c_idx = edge_index[:, i]
+            A_node = A[:, r_idx, :].unsqueeze(dim=1).to(device)  # to gpu
+            B_node = B[:, :, c_idx].unsqueeze(dim=2).to(device)  # to gpu
+
+            values[start:end] = A_node.matmul(
+                B_node).detach().flatten().cpu()
+            start += self.num_heads
+            end += self.num_heads
+
+        return torch.sparse_coo_tensor(
+            indices=torch.stack([
+                h_idx.repeat(self.num_edges),  # h_idx
+                edge_index[0].repeat_interleave(self.num_heads),  # r_idx
+                edge_index[1].repeat_interleave(self.num_heads),  # c_idx
+            ]),
+            values=values.flatten(),
+            size=self.out_shape,
+        )
 
     def forward(self, x, edge_index):
         """
           x:          feature embeddings per node [L x dm]
           edge_index: connections [row_idx, col_idx]
         """
+        # compute linear layer
+        qk = self.qk_lin(x)
 
-        # linear layer + split into heads
-        qkv = self.qkv_lin(x)
-
-        qkv = rearrange(
-            qkv,
-            'L (h hdim) -> L h hdim',
-            h=self.num_heads,
-            hdim=3*self.d_m  # includes q, k, v
+        # separate attention heads
+        sep_heads = 'L (h hdim) -> L h hdim'
+        qk = rearrange(
+            qk, sep_heads,
+            h=self.num_heads, hdim=2*self.num_feats
         )
 
-        # dot product attention (Q x K^T)/sqrt(dk)
-        q, k, _ = rearrange(qkv, 'L h (split hdim) -> split h L hdim', split=3)
-        del qkv
-        attn = (q @ rearrange(k, 'h L dm -> h dm L')) / self.scale
-        attn = F.softmax(attn, dim=-1)
+        # separate q and k matrices
+        sep_qk = 'L h (split hdim) -> split h L hdim'
+        q, k = rearrange(qk, sep_qk, split=2)
+        del qk
 
-        # mask attn of non-edges and normalize by row
-        S = torch.sparse_coo_tensor(
-            edge_index,
-            torch.ones_like(edge_index[1]),
-            size=attn.shape[1:],  # L x L
-        ).coalesce()  # sparse mask for single head
+        # calculate block dot product attention (Q x K^T)/sqrt(dk)
+        k = k.permute([0, 2, 1])  # h L hdim -> h hdim L
+        attn = self._batch_matmul(q, k, edge_index)
+        del q, k
 
-        S = torch.stack([S for _ in range(self.num_heads)]
-                        ).coalesce()  # sparse mask for all heads
-
-        # mask non-edge attn values per head
-        attn = attn.sparse_mask(S).to_dense()
-
-        # normalize by row
-        attn = attn.div(reduce(attn, 'h Li Lj -> h Li 1', 'sum'))
-        # avg across heads
-        attn = reduce(attn, 'h Li Lj -> Li Lj', 'mean')
-
-        attn = attn.to_sparse_coo()                                 # convert to sparse
-        r, c = attn.indices()
+        # soft max
+        attn = torch.sparse.softmax(attn, dim=2)        # sum(row)=1
+        attn = torch.sparse.sum(attn, dim=0)/self.num_heads  # avg across heads
 
         return SparseTensor(
-            row=r,
-            col=c,
+            row=attn.indices()[0],
+            col=attn.indices()[1],
             value=attn.values().detach(),
             sparse_sizes=attn.size()
-        )  # to replace adj
+        )

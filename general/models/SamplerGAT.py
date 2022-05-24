@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import GATConv
 from torch_sparse import SparseTensor
 
-from general.utils import resources
+from general.utils import time_wrapper
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -74,7 +74,7 @@ class net(torch.nn.Module):
                 x = F.dropout(x, p=self.dropout, training=self.training)
         return F.log_softmax(x, dim=1)
 
-    @resources
+    @time_wrapper
     @torch.no_grad()
     def inference(self, x_all, subgraph_loader):
 
