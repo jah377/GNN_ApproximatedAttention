@@ -41,14 +41,13 @@ def main(config):
 
     if not osp.isfile(transform_path):
         data = standardize_dataset(torch.load(path), config.dataset)
-        data, trans_resources = transform_wAttention(
+        data, transform_time = transform_wAttention(
             data,
             config.K,
             config.batch_size,
         )
 
-        wandb.log({'precomp-transform_'+k: v for k,
-                  v in trans_resources.items()})
+        wandb.log({'precomp-transform_time': transform_time})
 
         torch.save(data, transform_path)
         print('\n~~~ TRANSFORM PERFORMED ~~~\n')
