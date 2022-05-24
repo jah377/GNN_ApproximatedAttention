@@ -42,10 +42,12 @@ def main(args):
     SIGN_models = ['sign', 'sign_fullbatchgat',
                    'sign_samplergat', 'sign_sha', 'sign_mha']
     DPA_models = ['sign_sha', 'sign_mha']
+    CS_models = ['sign_cs']
 
     include_gat_params = args.MODEL.lower() in GAT_models
     include_sign_params = args.MODEL.lower() in SIGN_models
     include_dpa_params = args.MODEL.lower() in DPA_models
+    include_cs_params = args.MODEL.lower() in CS_models
 
     # outline config dictionary
     sweep_config = {
@@ -180,6 +182,14 @@ def main(args):
                     'value': 1
                 },
             })
+
+    if include_cs_params:
+        param_dict.update({
+            'cs_batch_size': {
+                'distribution': 'constant',
+                'value': 50000
+            },
+        })
 
     # reduce complexity for trialing
     if args.RUN_TRIAL:

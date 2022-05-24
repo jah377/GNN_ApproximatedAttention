@@ -55,6 +55,7 @@ do
         --num_workers $num_workers
     echo ' -- PY FILE COMPLETE'
 
+
     # save output
     new_name=$dataset'_'$model'.csv'
     mv output.csv new_name

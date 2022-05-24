@@ -5,14 +5,14 @@ from torch_sparse import SparseTensor
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.FullBatchGAT import net as GAT
-from general.utils import resources  # wrapper
+from general.utils import time_wrapper  # wrapper
 from general.epoch_steps.steps_FullBatchGAT import training_step, testing_step
 
 
 ### Always perform on CPU ###
 
 
-@resources
+@time_wrapper
 def transform_wAttention(data, dataset: str, K: int, GATtransform_params):
     """
     Args:

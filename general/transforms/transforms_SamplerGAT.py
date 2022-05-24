@@ -8,13 +8,12 @@ from torch_sparse import SparseTensor
 from torch_geometric.loader import NeighborLoader
 
 from general.models.SamplerGAT import net as GAT
-from general.utils import resources  # wrapper
-from general.epoch_steps.steps_SamplerGAT import training_step, testing_step
+from general.utils import time_wrapper  # wrapper
+from general.epoch_steps.steps_SamplerGAT import train_epoch, test_epoch
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
-@resources
+@time_wrapper
 def transform_wAttention(data, dataset: str, K: int, GATtransform_params):
     """
     Args:
@@ -137,13 +136,13 @@ def extract_attention(data, GATdict):
 
     for epoch in range(GATdict['epochs']):
 
-        train_out, train_resources = training_step(
+        train_out, train_resources = train_epoch(
             model,
             optimizer,
             train_loader
         )
 
-        test_out = testing_step(model, data, subgraph_loader)
+        test_out = test_epoch(model, data, subgraph_loader)
 
         val_loss = test_out['val_loss']
         scheduler.step(val_loss)

@@ -1,10 +1,10 @@
 # %%
+import copy
 import time
 import argparse
 import random
 import numpy as np
 import pandas as pd
-from einops import rearrange
 from distutils.util import strtobool
 
 import torch
@@ -14,8 +14,11 @@ from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from torch_sparse import SparseTensor
+from torch_geometric.nn import GATConv
 import torch_geometric.transforms as T
 from torch_geometric.datasets import Planetoid
+from torch_geometric.loader import NeighborLoader
+
 
 from ogb.nodeproppred import PygNodePropPredDataset
 
@@ -29,16 +32,66 @@ parser.add_argument('--optimizer_decay', type=float, default=0.0001)
 parser.add_argument('--epochs', type=int, default=20)
 parser.add_argument('--hidden_channel', type=int, default=512)
 parser.add_argument('--dropout', type=float, default=0.5)
-parser.add_argument('--K', type=int, default=2)
+parser.add_argument('--K', type=int, default=1)
 parser.add_argument('--batch_norm', type=strtobool, default=True)
 parser.add_argument('--batch_size', type=int, default=4096)
 parser.add_argument('--n_runs', type=int, default=10)
 parser.add_argument('--num_workers', type=int, default=1)
-parser.add_argument('--attn_heads', type=int,
-                    default=1)  # hyperparameter for MHA
 args = parser.parse_args()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+# pubmed: https://arxiv.org/pdf/1710.10903.pdf
+# cora: https://colab.research.google.com/github/AntonioLonga/PytorchGeometricTutorial/blob/main/Tutorial3/Tutorial3.ipynb?pli=1#scrollTo=FyTEd5HK8_hQ
+params_dict = {
+    'cora': {
+        'optimizer_type': 'Adam',
+        'optimizer_lr': 0.005,
+        'optimizer_decay': 0.0005,
+        'epochs': 100,
+        'hidden_channel': 8,
+        'dropout': 0.6,
+        'nlayers': 2,
+        'heads_in': 8,
+        'heads_out': 1,
+    },
+    'pubmed': {
+        'optimizer_type': 'Adam',
+        'optimizer_lr': 0.01,
+        'optimizer_decay': 0.001,
+        'epochs': 100,
+        'hidden_channel': 8,
+        'dropout': 0.6,
+        'nlayers': 2,
+        'heads_in': 8,
+        'heads_out': 8,
+        'batch_size': 1789,
+        'n_neighbors': 150,
+    },
+}
+
+
+def time_wrapper(func):
+    """ wrapper for recording time
+    Args:
+        func:   function to evaluate
+
+    Return:
+        output:         output of func
+        delta_time:     seconds, time to exec func
+    """
+    def wrapper(*args, **kwargs):
+
+        time_initial = time.time()
+        output = func(*args, **kwargs)
+        time_end = time.time()-time_initial
+
+        # unpack tuple if func returns multiple outputs
+        if isinstance(output, tuple):
+            return *output, time_end
+
+        return output, time_end
+    return wrapper
 
 
 class SIGN(torch.nn.Module):
@@ -107,133 +160,173 @@ class SIGN(torch.nn.Module):
         return h.log_softmax(dim=-1)    # calc final predictions
 
 
-class MHA(nn.Module):
-    def __init__(
-            self,
-            num_nodes: int,
-            num_feats: int,
-            num_edges: int,
-            num_heads: int = 1,
-    ):
+class GAT(nn.Module):
+    def __init__(self,
+                 in_channel,
+                 out_channel,
+                 hidden_channel,
+                 dropout,
+                 nlayers,
+                 heads_in,
+                 heads_out):
         """
-        https://stackoverflow.com/questions/20983882/efficient-dot-products-of-large-memory-mapped-arrays
+        https://github.com/pyg-team/pytorch_geometric/blob/master/examples/reddit.py
 
-          num_nodes:    total number of nodes 
-          num_feats:    feature embedding dimension
-          num_heads:    attn heads (default=1)
 
+        Args:
+            in_channel:         dim of features
+            out_channel:        number of classes
+            hidden_channel:     dim of hidden layers
+            dropout:            dropout percentage
+            nlayers:            total number of layers (min 2)
+            heads_in:           n attention heads at INPUT and HIDDEN layers
+            heads_out:          n attention heads at OUTPUT layers
         """
         super().__init__()
-        assert num_heads > 0
 
-        # definitions
-        self.num_nodes = int(num_nodes)
-        self.num_feats = int(num_feats)
-        self.num_edges = int(num_edges)
-        self.num_heads = int(num_heads)
+        self.in_channel = in_channel
+        self.out_channel = out_channel
+        self.hidden_channel = hidden_channel
+        self.dropout = dropout
+        self.nlayers = max(2, nlayers)
+        self.heads_in = heads_in
+        self.heads_out = heads_out
 
-        # dot product
-        self.out_shape = (self.num_heads, self.num_nodes,
-                          self.num_nodes)  # attn shape (w/head)
-        self.d_k = self.num_feats * self.num_heads  # hidden dim
-        self.scale = 1.0/np.sqrt(self.num_feats)  # scaling factor per head
-        self.qk_lin = nn.Linear(self.num_feats, 2*self.d_k)
+        # convs layers
+        self.convs = torch.nn.ModuleList()
+        self.convs.append(
+            GATConv(
+                self.in_channel,
+                self.hidden_channel,
+                heads=self.heads_in,
+                dropout=self.dropout
+            ))
+        for _ in range(nlayers-2):
+            self.convs.append(
+                GATConv(
+                    self.hidden_channel*self.heads_in,
+                    self.hidden_channel,
+                    heads=self.heads_in,
+                    dropout=self.dropout
+                ))
+        self.convs.append(
+            GATConv(
+                self.hidden_channel*self.heads_in,
+                self.out_channel,
+                heads=self.heads_out,
+                dropout=self.dropout,
+                concat=False,
+            ))
 
     def reset_parameters(self):
-        self.qk_lin.reset_parameters()
-
-    def _batch_matmul(self, A, B, edge_index):
-
-        # compute dotproduct in batches, across heads
-        h_idx = torch.tensor(range(self.num_heads))
-        values = torch.zeros(self.num_edges*self.num_heads)
-
-        start, end = 0, self.num_heads
-        for i in range(self.num_edges):
-            r_idx, c_idx = edge_index[:, i]
-            A_node = A[:, r_idx, :].unsqueeze(dim=1).to(device)  # to gpu
-            B_node = B[:, :, c_idx].unsqueeze(dim=2).to(device)  # to gpu
-
-            values[start:end] = A_node.matmul(
-                B_node).detach().flatten().cpu()
-            start += self.num_heads
-            end += self.num_heads
-
-        return torch.sparse_coo_tensor(
-            indices=torch.stack([
-                h_idx.repeat(self.num_edges),  # h_idx
-                edge_index[0].repeat_interleave(self.num_heads),  # r_idx
-                edge_index[1].repeat_interleave(self.num_heads),  # c_idx
-            ]),
-            values=values.flatten(),
-            size=self.out_shape,
-        )
+        for conv in self.convs:
+            conv.reset_parameters()
 
     def forward(self, x, edge_index):
-        """
-          x:          feature embeddings per node [L x dm]
-          edge_index: connections [row_idx, col_idx]
-        """
-        # compute linear layer
-        qk = self.qk_lin(x)
+        for i, conv in enumerate(self.convs):
+            x = conv(x, edge_index)
+            if i < len(self.convs) - 1:
+                x = x.relu_()
+                x = F.dropout(x, p=self.dropout, training=self.training)
+        return F.log_softmax(x, dim=1)
 
-        # separate attention heads
-        sep_heads = 'L (h hdim) -> L h hdim'
-        qk = rearrange(
-            qk, sep_heads,
-            h=self.num_heads, hdim=2*self.num_feats
+    @time_wrapper
+    @torch.no_grad()
+    def inference(self, x_all, subgraph_loader):
+
+        for i, conv in enumerate(self.convs):
+            xs = []
+
+            for batch in subgraph_loader:
+                global_ids = batch.n_id.to(x_all.device)  # expect cpu
+                x = x_all[global_ids].to(device)          # expect gpu
+                x = conv(x, batch.edge_index.to(x.device))
+
+                # activation for all but final GATConv
+                if i < len(self.convs) - 1:
+                    x = x.relu_()
+
+                # first :batch_size in correct order
+                xs.append(x[:batch.batch_size].cpu())
+
+            x_all = torch.cat(xs, dim=0)
+
+        return F.log_softmax(x_all, dim=-1)
+
+    @torch.no_grad()
+    def extract_features(self, x_all, subgraph_loader):
+        """ extract attention weights from trained model
+
+        Args:
+            x_all:              data.x
+            subgraph_loader:    object
+
+        Returns:
+            SparseTensor  
+
+        """
+
+        # create storage coos for attn and edge_index count
+        dim = subgraph_loader.data.num_nodes
+        attn_coo = torch.sparse_coo_tensor(size=(dim, dim)).cpu()
+        count_total = torch.sparse_coo_tensor(size=(dim, dim)).cpu()
+
+        for i, conv in enumerate(self.convs):
+            xs = []
+
+            for batch in subgraph_loader:
+
+                global_ids = batch.n_id.to(x_all.device)  # expect cpu
+                x = x_all[global_ids].to(device)          # expect gpu
+
+                if i < len(self.convs)-1:
+                    x = conv(x, batch.edge_index.to(x.device))
+                    x = x.relu_()
+                else:
+                    # extract attention weights on final GATConv layer
+                    x, (attn_i, attn_w) = conv(
+                        x,
+                        batch.edge_index.to(x.device),
+                        return_attention_weights=True
+                    )
+
+                    # store returned attn weights and indices
+                    indices = global_ids[attn_i].cpu()
+                    values = attn_w.mean(dim=1).detach().cpu()
+
+                    attn_coo += torch.sparse_coo_tensor(
+                        indices,
+                        values,
+                        size=(dim, dim)
+                    )
+
+                    count_total += torch.sparse_coo_tensor(
+                        indices,
+                        torch.ones_like(values),
+                        size=(dim, dim)
+                    )
+
+                xs.append(x[:batch.batch_size].cpu())
+            x_all = torch.cat(xs, dim=0)
+
+        # average attention = attn_total / count_total
+        attn_coo = attn_coo.multiply(count_total.float_power(-1)).coalesce()
+
+        # convert to SparseTensor
+        row, col = attn_coo.indices()
+        values = attn_coo.values().detach()
+        attn_sparse = SparseTensor(
+            row=row,
+            col=col,
+            value=values,
+            sparse_sizes=(dim, dim)
         )
 
-        # separate q and k matrices
-        sep_qk = 'L h (split hdim) -> split h L hdim'
-        q, k = rearrange(qk, sep_qk, split=2)
-        del qk
-
-        # calculate block dot product attention (Q x K^T)/sqrt(dk)
-        k = k.permute([0, 2, 1])  # h L hdim -> h hdim L
-        attn = self._batch_matmul(q, k, edge_index)
-        del q, k
-
-        # soft max
-        attn = torch.sparse.softmax(attn, dim=2)        # sum(row)=1
-        attn = torch.sparse.sum(attn, dim=0)/self.num_heads  # avg across heads
-
-        return SparseTensor(
-            row=attn.indices()[0],
-            col=attn.indices()[1],
-            value=attn.values().detach(),
-            sparse_sizes=attn.size()
-        )
-
-
-def time_wrapper(func):
-    """wrapper for recording time
-    https://gmpy.dev/blog/2016/real-process-memory-and-environ-in-python
-    https://psutil.readthedocs.io/en/latest/index.html?highlight=virtual%20memory#psutil.virtual_memory
-
-    Args:
-        func:   function to evaluate
-
-    Return:
-        output:         output of func
-        delta_time:     seconds, time to exec func
-    """
-    def wrapper(*args, **kwargs):
-
-        time_initial = time.time()
-        output = func(*args, **kwargs)
-        time_end = time.time()-time_initial
-
-        # unpack tuple if func returns multiple outputs
-        if isinstance(output, tuple):
-            return *output, time_end
-
-        return output, time_end
-    return wrapper
+        return attn_sparse
 
 
 @time_wrapper
-def transform_wAttention(data, K: int, attn_heads: int = 1):
+def transform_wAttention(data, K: int, params_dict):
     """
     Args:
         data:           data object
@@ -262,14 +355,8 @@ def transform_wAttention(data, K: int, attn_heads: int = 1):
 
     # =========== not part of T.SIGN(K) ===========
 
-    # replace adj with DotProductAttention weights
-    model = MHA(
-        data.num_nodes,
-        data.num_features,
-        data.num_edges,
-        attn_heads,
-    )
-    adj_t = model(data.x, data.edge_index)
+    # replace adj with Cosine Similarity weights
+    adj_t = extract_attention(data, params_dict.get(args.dataset))
     adj_t = deg_inv_sqrt.view(-1, 1) * adj_t * deg_inv_sqrt.view(1, -1)
 
     # =========== not part of T.SIGN(K) ===========
@@ -287,6 +374,114 @@ def transform_wAttention(data, K: int, attn_heads: int = 1):
         assert hasattr(data, f'x{K}')
 
     return data
+
+
+def extract_attention(data, GATdict):
+    """ train GAT model and extract attention
+    Args:
+        data:
+        GATtransform_params:     number of attention heads
+
+    Returns:
+        SparseTensor containing attention weights
+    """
+
+    # CREATE TRAINING AND SUBGRAPH LOADERS
+    # [n_neighbors] = hyperparameter
+    train_loader = NeighborLoader(
+        data,
+        input_nodes=data.train_mask,  # can be bool or n_id indices
+        num_neighbors=[GATdict['n_neighbors']]*GATdict['nlayers'],
+        shuffle=True,
+        batch_size=GATdict['batch_size'],
+        drop_last=True,  # remove final batch if incomplete
+    )
+
+    subgraph_loader = NeighborLoader(
+        copy.copy(data),
+        input_nodes=None,
+        num_neighbors=[-1]*GATdict['nlayers'],  # sample all neighbors
+        shuffle=False,                          # :batch_size in sequential order
+        batch_size=GATdict['batch_size'],
+        drop_last=False,
+    )
+    subgraph_loader.data.num_nodes = data.num_nodes
+    del subgraph_loader.data.x, subgraph_loader.data.y  # only need indices
+
+    # BUILD MODEL
+    model = GAT(
+        data.num_features,  # in_channel
+        data.num_classes,  # out_channel
+        GATdict['hidden_channel'],
+        GATdict['dropout'],
+        GATdict['nlayers'],
+        GATdict['heads_in'],
+        GATdict['heads_out'],
+    ).to(device)
+
+    n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+    # BUILD OPTIMIZER
+    optimizer = torch.optim.Adam(
+        model.parameters(),
+        lr=GATdict['optimizer_lr'],
+        weight_decay=GATdict['optimizer_decay'],
+    )
+
+    # BUILD SCHEDULER (modulates learning rate)
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        mode='min',     # nll_loss expected to decrease over epochs
+        factor=0.1,     # lr reduction factor
+        patience=5,     # reduce lr after _ epochs of no improvement
+        min_lr=1e-6,    # min learning rate
+        verbose=False,  # do not monitor lr updates
+    )
+
+    # RUN THROUGH EPOCHS
+    # params for early termination
+    previous_loss = 1e10
+    patience = 5
+    trigger_times = 0
+
+    for epoch in range(GATdict['epochs']):
+
+        train_out, train_resources = training_step(
+            model,
+            optimizer,
+            train_loader
+        )
+
+        test_out = testing_step(model, data, subgraph_loader)
+
+        val_loss = test_out['val_loss']
+        scheduler.step(val_loss)
+
+        # log results
+        s = 'precomp-epoch'
+        log_dict = {f'{s}': epoch}
+        log_dict.update({f'{s}-'+k: v for k, v in train_out.items()})
+        log_dict.update({f'{s}-train-'+k: v for k,
+                        v in train_resources.items()})
+        log_dict.update({f'{s}-'+k: v for k, v in test_out.items()})
+        wandb.log(log_dict)
+
+        # early stopping
+        current_loss = val_loss
+        if current_loss > previous_loss:
+            trigger_times += 1
+            if trigger_times >= patience:
+                print('~~~ early stop triggered ~~~')
+                break
+        else:
+            trigger_times = 0
+        previous_loss = current_loss
+
+    # EXTRACT ATTENTION MATRIX
+    model.eval()
+    attn_sparse = model.extract_features(data.x, subgraph_loader)
+
+    return attn_sparse
 
 
 def set_seeds(seed_value: int):
@@ -352,6 +547,8 @@ def standardize_data(dataset, data_name: str):
         data.train_mask = masks['train']
         data.val_mask = masks['valid']
         data.test_mask = masks['test']
+
+        data.y = data.y.flatten()
     else:
         data.train_mask = torch.where(data.train_mask)[0]
         data.val_mask = torch.where(data.val_mask)[0]
@@ -402,10 +599,10 @@ def train_epoch(model, data, optimizer, loader):
         out = model(xs)
         loss = F.nll_loss(out, y)
 
-        batch_size = idx.numel()
-        total_examples += batch_size
+        batch_size = int(idx.numel())
+        total_examples += int(batch_size)
         total_loss += float(loss) * batch_size
-        total_correct += sum(out.argmax(dim=-1) == y)
+        total_correct += int((out.argmax(dim=-1) == y).sum())
 
         # backward pass
         optimizer.zero_grad()
@@ -455,11 +652,11 @@ def test_epoch(model, data, loader):
         loss = F.nll_loss(out, y)
 
         # store
-        batch_size = idx.numel()
+        batch_size = int(idx.numel())
         total_time += out_time
-        total_examples += batch_size
+        total_examples += int(batch_size)
         total_loss += float(loss) * batch_size
-        total_correct += sum(out.argmax(dim=-1) == y)
+        total_correct += int((out.argmax(dim=-1) == y).sum())
 
     return {
         'f1': total_correct/total_examples,
@@ -468,19 +665,25 @@ def test_epoch(model, data, loader):
     }
 
 
-
 def main(args):
+    assert args.dataset in [
+        'cora', 'pubmed'], f'GAT transformation unavailable for {args.dataset.title()}'
     set_seeds(args.seed)
 
     # data
     data = download_data(args.dataset, K=args.K)
     data = standardize_data(data, args.dataset)
-    data, transform_time = transform_wAttention(data, args.K, args.attn_heads)
-    print('-- TRANSFORM COMPLETE ')
+    data, transform_time = transform_wAttention(
+        data,
+        args.dataset,
+        args.K,
+        params_dict.get(args.dataset),
+    )
 
-    train_loader = create_loader(data, 'train', batch_size=args.batch_size)
-    val_loader = create_loader(data, 'val', batch_size=args.batch_size)
-    test_loader = create_loader(data, 'test', batch_size=args.batch_size)
+    train_loader = create_loader(
+        data, split='train', batch_size=args.batch_size)
+    val_loader = create_loader(data, split='val', batch_size=args.batch_size)
+    test_loader = create_loader(data, split='test', batch_size=args.batch_size)
 
     # model
     model = SIGN(
@@ -532,7 +735,8 @@ def main(args):
                 {f'training_{k}': v for k, v in training_out.items()})
             epoch_dict.update(
                 {f'eval_train_{k}': v for k, v in train_out.items()})
-            epoch_dict.update({f'eval_val_{k}': v for k, v in val_out.items()})
+            epoch_dict.update(
+                {f'eval_val_{k}': v for k, v in val_out.items()})
             epoch_dict.update(
                 {f'eval_test_{k}': v for k, v in test_out.items()})
 
@@ -542,7 +746,7 @@ def main(args):
             )
 
     return store_run.to_csv(
-        f'output.csv',
+        f'{args.dataset}_output.csv',
         sep=',',
         header=True,
         index=False

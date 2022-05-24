@@ -1,14 +1,14 @@
 import torch
 import torch.nn.functional as F
 
-from general.utils import resources  # wrapper
+from general.utils import time_wrapper  # wrapper
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-@resources
-def training_step(model, optimizer, train_loader):
+@time_wrapper
+def train_epoch(model, optimizer, train_loader):
     """ Perform forward and backward pass
     https://github.com/pyg-team/pytorch_geometric/blob/master/examples/reddit.py
 
@@ -57,7 +57,7 @@ def training_step(model, optimizer, train_loader):
 
 
 @torch.no_grad()
-def testing_step(model, data, subgraph_loader):
+def test_epoch(model, data, subgraph_loader):
     """ Perform forward and backward pass
     https://github.com/pyg-team/pytorch_geometric/blob/master/examples/reddit.py
 

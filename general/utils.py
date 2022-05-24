@@ -14,57 +14,33 @@ from ogb.nodeproppred import PygNodePropPredDataset
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def resources(func):
-    # TODO memory consumption incorrect
-    """wrapper for recording time and memory consumption
-    https://gmpy.dev/blog/2016/real-process-memory-and-environ-in-python
-    https://psutil.readthedocs.io/en/latest/index.html?highlight=virtual%20memory#psutil.virtual_memory
-
+def time_wrapper(func):
+    """ wrapper for recording time
     Args:
         func:   function to evaluate
 
     Return:
         output:         output of func
         delta_time:     seconds, time to exec func
-        delta_memory:   bytes, memory consumed by func
     """
-
-    def memory():
-
-        if torch.cuda.is_available():
-            return torch.cuda.max_memory_allocated(device)
-
-        return psutil.virtual_memory().available
-
     def wrapper(*args, **kwargs):
 
-        if torch.cuda.is_available():
-            torch.cuda.reset_peak_memory_stats()
-
-        memory_initial = memory()
         time_initial = time.time()
-
         output = func(*args, **kwargs)
-
-        resource_dict = {
-            'time': time.time() - time_initial,  # seconds,
-            'mem':  memory() - memory_initial,  # bytes
-        }
+        time_end = time.time()-time_initial
 
         # unpack tuple if func returns multiple outputs
         if isinstance(output, tuple):
-            return *output, resource_dict
+            return *output, time_end
 
-        return output, resource_dict
+        return output, time_end
 
     return wrapper
 
 
 def set_seeds(seed_value: int):
-    """ Set seeds across modules
-    Args:
-        seed_value:     int, desired seed value
-    """
+    """ for reproducibility """
+
     torch.manual_seed(seed_value)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
@@ -77,6 +53,8 @@ def set_seeds(seed_value: int):
 
 
 def download_data(data_name, K: int = 0):
+    """ download data from name str """
+
     possible_datasets = ['cora', 'pubmed', 'products', 'arxiv']
     assert data_name.lower() in possible_datasets
     assert isinstance(K, int)
@@ -106,6 +84,8 @@ def download_data(data_name, K: int = 0):
 
 
 def standardize_data(dataset, data_name: str):
+    """ standardize format out data object """
+
     possible_datasets = ['cora', 'pubmed', 'products', 'arxiv']
     assert data_name.lower() in possible_datasets
 
@@ -132,6 +112,8 @@ def standardize_data(dataset, data_name: str):
 
 
 def create_loader(data, split: str, batch_size: int, num_workers: int = 1):
+    """ build DataLoader object based on inputs """
+
     assert split in ['train', 'val', 'test']
 
     return DataLoader(

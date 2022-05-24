@@ -2,10 +2,10 @@ import torch
 from torch_sparse import SparseTensor
 
 from general.models.DotProductAttention import net as MultiheadAttention
-from general.utils import resources  # wrapper
+from general.utils import time_wrapper  # wrapper
 
 
-@resources
+@time_wrapper
 def transform_wAttention(data, K: int, attn_heads: int = 1):
     """
     Args:

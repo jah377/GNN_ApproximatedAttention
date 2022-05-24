@@ -189,3 +189,229 @@ wandb:  View project at https://wandb.ai/jah377/products_SIGNgpu
 wandb:  View sweep at https://wandb.ai/jah377/products_SIGNgpu/sweeps/3svp8tpr
 wandb:  View run at https://wandb.ai/jah377/products_SIGNgpu/runs/c7hdp39s
 2022-05-24 11:44:46,035 - wandb.wandb_agent - INFO - Running runs: ['c7hdp39s']
+$$$ EARLY STOPPING TRIGGERED $$$
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb:            epoch 37
+wandb:    epoch-test_f1 0.26939
+wandb:  epoch-test_loss 3.02129
+wandb:   epoch-test_mem 19599360
+wandb:  epoch-test_time 44.37198
+wandb:   epoch-train_f1 0.30843
+wandb: epoch-train_loss 2.71802
+wandb:  epoch-train_mem 28725760
+wandb: epoch-train_time 4.55871
+wandb:     epoch-val_f1 0.30834
+wandb:   epoch-val_loss 2.7165
+wandb:    epoch-val_mem 19599360
+wandb:   epoch-val_time 0.71084
+wandb: trainable_params 129647
+wandb: 
+wandb: Synced generous-sweep-3: https://wandb.ai/jah377/products_SIGNgpu/runs/c7hdp39s
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20220524_114443-c7hdp39s/logs
+2022-05-24 12:19:38,587 - wandb.wandb_agent - INFO - Cleaning up finished run: c7hdp39s
+2022-05-24 12:19:38,849 - wandb.wandb_agent - INFO - Agent received command: run
+2022-05-24 12:19:38,849 - wandb.wandb_agent - INFO - Agent starting run with config:
+	K: 2
+	batch_norm: 1
+	batch_size: 254
+	dataset: products
+	dropout: 0.7902939366251092
+	epochs: 37
+	hidden_channel: 257
+	optimizer_decay: 0.07587354872526751
+	optimizer_lr: 0.03703720720903146
+	seed: 42
+2022-05-24 12:19:38,856 - wandb.wandb_agent - INFO - About to run command: /usr/bin/env python hps_SIGN.py --K=2 --batch_norm=1 --batch_size=254 --dataset=products --dropout=0.7902939366251092 --epochs=37 --hidden_channel=257 --optimizer_decay=0.07587354872526751 --optimizer_lr=0.03703720720903146 --seed=42
+wandb: Currently logged in as: jah377. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.12.16
+wandb: Run data is saved locally in /scratch/products_SIGNgpu/wandb/run-20220524_121941-x66sga6n
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lunar-sweep-4
+wandb:  View project at https://wandb.ai/jah377/products_SIGNgpu
+wandb:  View sweep at https://wandb.ai/jah377/products_SIGNgpu/sweeps/3svp8tpr
+wandb:  View run at https://wandb.ai/jah377/products_SIGNgpu/runs/x66sga6n
+2022-05-24 12:19:43,871 - wandb.wandb_agent - INFO - Running runs: ['x66sga6n']
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb:            epoch 36
+wandb:    epoch-test_f1 0.26939
+wandb:  epoch-test_loss 3.0213
+wandb:   epoch-test_mem 1971712
+wandb:  epoch-test_time 48.07798
+wandb:   epoch-train_f1 0.30837
+wandb: epoch-train_loss 2.72081
+wandb:  epoch-train_mem 3107328
+wandb: epoch-train_time 6.91434
+wandb:     epoch-val_f1 0.30834
+wandb:   epoch-val_loss 2.71738
+wandb:    epoch-val_mem 1971712
+wandb:   epoch-val_time 0.85098
+wandb: trainable_params 115697
+wandb: 
+wandb: Synced lunar-sweep-4: https://wandb.ai/jah377/products_SIGNgpu/runs/x66sga6n
+wandb: Synced 4 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20220524_121941-x66sga6n/logs
+2022-05-24 12:56:33,208 - wandb.wandb_agent - INFO - Cleaning up finished run: x66sga6n
+2022-05-24 12:56:33,452 - wandb.wandb_agent - INFO - Agent received command: run
+2022-05-24 12:56:33,452 - wandb.wandb_agent - INFO - Agent starting run with config:
+	K: 1
+	batch_norm: 0
+	batch_size: 1543
+	dataset: products
+	dropout: 0.6209557377611499
+	epochs: 22
+	hidden_channel: 14
+	optimizer_decay: 0.026426115109333476
+	optimizer_lr: 0.09911437852822672
+	seed: 42
+2022-05-24 12:56:33,459 - wandb.wandb_agent - INFO - About to run command: /usr/bin/env python hps_SIGN.py --K=1 --batch_norm=0 --batch_size=1543 --dataset=products --dropout=0.6209557377611499 --epochs=22 --hidden_channel=14 --optimizer_decay=0.026426115109333476 --optimizer_lr=0.09911437852822672 --seed=42
+wandb: Currently logged in as: jah377. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.12.16
+wandb: Run data is saved locally in /scratch/products_SIGNgpu/wandb/run-20220524_125636-yrvckxi8
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run swept-sweep-5
+wandb:  View project at https://wandb.ai/jah377/products_SIGNgpu
+wandb:  View sweep at https://wandb.ai/jah377/products_SIGNgpu/sweeps/3svp8tpr
+wandb:  View run at https://wandb.ai/jah377/products_SIGNgpu/runs/yrvckxi8
+2022-05-24 12:56:38,474 - wandb.wandb_agent - INFO - Running runs: ['yrvckxi8']
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb:            epoch 21
+wandb:    epoch-test_f1 0.26939
+wandb:  epoch-test_loss 2.97981
+wandb:   epoch-test_mem 2292736
+wandb:  epoch-test_time 38.23935
+wandb:   epoch-train_f1 0.30835
+wandb: epoch-train_loss 2.61357
+wandb:  epoch-train_mem 2509824
+wandb: epoch-train_time 3.7669
+wandb:     epoch-val_f1 0.30834
+wandb:   epoch-val_loss 2.58734
+wandb:    epoch-val_mem 2292736
+wandb:   epoch-val_time 0.65347
+wandb: trainable_params 4247
+wandb: 
+wandb: Synced swept-sweep-5: https://wandb.ai/jah377/products_SIGNgpu/runs/yrvckxi8
+wandb: Synced 4 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20220524_125636-yrvckxi8/logs
+2022-05-24 13:14:10,432 - wandb.wandb_agent - INFO - Cleaning up finished run: yrvckxi8
+2022-05-24 13:14:10,717 - wandb.wandb_agent - INFO - Agent received command: run
+2022-05-24 13:14:10,717 - wandb.wandb_agent - INFO - Agent starting run with config:
+	K: 3
+	batch_norm: 0
+	batch_size: 1294
+	dataset: products
+	dropout: 0.6418460570526661
+	epochs: 98
+	hidden_channel: 968
+	optimizer_decay: 0.04678665890402051
+	optimizer_lr: 0.008940068782590354
+	seed: 42
+2022-05-24 13:14:10,724 - wandb.wandb_agent - INFO - About to run command: /usr/bin/env python hps_SIGN.py --K=3 --batch_norm=0 --batch_size=1294 --dataset=products --dropout=0.6418460570526661 --epochs=98 --hidden_channel=968 --optimizer_decay=0.04678665890402051 --optimizer_lr=0.008940068782590354 --seed=42
+wandb: Currently logged in as: jah377. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.12.16
+wandb: Run data is saved locally in /scratch/products_SIGNgpu/wandb/run-20220524_131413-40oavyfn
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run serene-sweep-6
+wandb:  View project at https://wandb.ai/jah377/products_SIGNgpu
+wandb:  View sweep at https://wandb.ai/jah377/products_SIGNgpu/sweeps/3svp8tpr
+wandb:  View run at https://wandb.ai/jah377/products_SIGNgpu/runs/40oavyfn
+2022-05-24 13:14:15,742 - wandb.wandb_agent - INFO - Running runs: ['40oavyfn']
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb:            epoch 97
+wandb:    epoch-test_f1 0.26939
+wandb:  epoch-test_loss 2.99377
+wandb:   epoch-test_mem 44512768
+wandb:  epoch-test_time 41.08606
+wandb:   epoch-train_f1 0.30821
+wandb: epoch-train_loss 2.6349
+wandb:  epoch-train_mem 51182080
+wandb: epoch-train_time 4.68123
+wandb:     epoch-val_f1 0.30834
+wandb:   epoch-val_loss 2.63454
+wandb:    epoch-val_mem 44512768
+wandb:   epoch-val_time 0.77616
+wandb: trainable_params 580847
+wandb: 
+wandb: Synced serene-sweep-6: https://wandb.ai/jah377/products_SIGNgpu/runs/40oavyfn
+wandb: Synced 4 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20220524_131413-40oavyfn/logs
+2022-05-24 14:32:56,665 - wandb.wandb_agent - INFO - Cleaning up finished run: 40oavyfn
+2022-05-24 14:32:56,935 - wandb.wandb_agent - INFO - Agent received command: run
+2022-05-24 14:32:56,936 - wandb.wandb_agent - INFO - Agent starting run with config:
+	K: 2
+	batch_norm: 1
+	batch_size: 197
+	dataset: products
+	dropout: 0.7898469886548463
+	epochs: 89
+	hidden_channel: 380
+	optimizer_decay: 0.04742252846613361
+	optimizer_lr: 0.06146198932417494
+	seed: 42
+2022-05-24 14:32:56,943 - wandb.wandb_agent - INFO - About to run command: /usr/bin/env python hps_SIGN.py --K=2 --batch_norm=1 --batch_size=197 --dataset=products --dropout=0.7898469886548463 --epochs=89 --hidden_channel=380 --optimizer_decay=0.04742252846613361 --optimizer_lr=0.06146198932417494 --seed=42
+wandb: Currently logged in as: jah377. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.12.16
+wandb: Run data is saved locally in /scratch/products_SIGNgpu/wandb/run-20220524_143259-xpl8h35h
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run silvery-sweep-7
+wandb:  View project at https://wandb.ai/jah377/products_SIGNgpu
+wandb:  View sweep at https://wandb.ai/jah377/products_SIGNgpu/sweeps/3svp8tpr
+wandb:  View run at https://wandb.ai/jah377/products_SIGNgpu/runs/xpl8h35h
+2022-05-24 14:33:01,959 - wandb.wandb_agent - INFO - Running runs: ['xpl8h35h']
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.002 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.002 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: - 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: \ 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: | 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb: / 0.003 MB of 0.003 MB uploaded (0.000 MB deduped)wandb:                                                                                
+wandb: 
+wandb: Run summary:
+wandb:            epoch 88
+wandb:    epoch-test_f1 0.26939
+wandb:  epoch-test_loss 2.99439
+wandb:   epoch-test_mem 2111488
+wandb:  epoch-test_time 50.41206
+wandb:   epoch-train_f1 0.30837
+wandb: epoch-train_loss 2.63901
+wandb:  epoch-train_mem 3460608
+wandb: epoch-train_time 7.87237
+wandb:     epoch-val_f1 0.30834
+wandb:   epoch-val_loss 2.63623
+wandb:    epoch-val_mem 2111488
+wandb:   epoch-val_time 0.9192
+wandb: trainable_params 171047
+wandb: 
+wandb: Synced silvery-sweep-7: https://wandb.ai/jah377/products_SIGNgpu/runs/xpl8h35h
+wandb: Synced 4 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20220524_143259-xpl8h35h/logs
+2022-05-24 16:10:43,178 - wandb.wandb_agent - INFO - Cleaning up finished run: xpl8h35h
+2022-05-24 16:10:43,517 - wandb.wandb_agent - INFO - Agent received command: run
+2022-05-24 16:10:43,517 - wandb.wandb_agent - INFO - Agent starting run with config:
+	K: 0
+	batch_norm: 0
+	batch_size: 1148
+	dataset: products
+	dropout: 0.26033663702590515
+	epochs: 70
+	hidden_channel: 757
+	optimizer_decay: 0.004247499260641851
+	optimizer_lr: 0.043855149162227075
+	seed: 42
+2022-05-24 16:10:43,523 - wandb.wandb_agent - INFO - About to run command: /usr/bin/env python hps_SIGN.py --K=0 --batch_norm=0 --batch_size=1148 --dataset=products --dropout=0.26033663702590515 --epochs=70 --hidden_channel=757 --optimizer_decay=0.004247499260641851 --optimizer_lr=0.043855149162227075 --seed=42
+wandb: Currently logged in as: jah377. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.12.16
+wandb: Run data is saved locally in /scratch/products_SIGNgpu/wandb/run-20220524_161046-cbvqon47
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vocal-sweep-8
+wandb:  View project at https://wandb.ai/jah377/products_SIGNgpu
+wandb:  View sweep at https://wandb.ai/jah377/products_SIGNgpu/sweeps/3svp8tpr
+wandb:  View run at https://wandb.ai/jah377/products_SIGNgpu/runs/cbvqon47
+2022-05-24 16:10:48,538 - wandb.wandb_agent - INFO - Running runs: ['cbvqon47']

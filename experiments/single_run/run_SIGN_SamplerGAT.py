@@ -1,25 +1,14 @@
-import time
+import torch
 import argparse
-import random
-import numpy as np
 import pandas as pd
 from distutils.util import strtobool
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-
-import torch_geometric.transforms as T
-from torch_geometric.datasets import Planetoid
-
-from ogb.nodeproppred import PygNodePropPredDataset
-
 
 from general.models.SIGN import net as SIGN
 from general.utils import set_seeds, download_data, standardize_data, create_loader
 from general.epoch_steps.steps_SIGN import train_epoch, test_epoch
+from general.transforms.transforms_CosineSimilarity import transform_wAttention
+
 
 # product: https://arxiv.org/pdf/2004.11198v2.pdf
 parser = argparse.ArgumentParser(description='inputs')
@@ -40,17 +29,55 @@ args = parser.parse_args()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+# best GAT params: from literature and independent sweeps
+params_dict = {
+    'cora': {
+        'optimizer_type': 'Adam',
+        'optimizer_lr': 0.005,
+        'optimizer_decay': 0.0005,
+        'epochs': 100,
+        'hidden_channel': 8,
+        'dropout': 0.6,
+        'nlayers': 2,
+        'heads_in': 8,
+        'heads_out': 1,
+    },
+    'pubmed': {
+        'optimizer_type': 'Adam',
+        'optimizer_lr': 0.01,
+        'optimizer_decay': 0.001,
+        'epochs': 100,
+        'hidden_channel': 8,
+        'dropout': 0.6,
+        'nlayers': 2,
+        'heads_in': 8,
+        'heads_out': 8,
+        'batch_size': 1789,
+        'n_neighbors': 150,
+    },
+}
+
 
 def main(args):
+    assert args.dataset in [
+        'cora', 'pubmed'], f'GAT transformation OOM for {args.dataset.title()}'
+
     set_seeds(args.seed)
 
     # data
     data = download_data(args.dataset, K=args.K)
     data = standardize_data(data, args.dataset)
+    data, transform_time = transform_wAttention(
+        data,
+        args.dataset,
+        args.K,
+        params_dict.get(args.dataset),
+    )
 
-    train_loader = create_loader(data, 'train', batch_size=args.batch_size)
-    val_loader = create_loader(data, 'val', batch_size=args.batch_size)
-    test_loader = create_loader(data, 'test', batch_size=args.batch_size)
+    train_loader = create_loader(
+        data, split='train', batch_size=args.batch_size)
+    val_loader = create_loader(data, split='val', batch_size=args.batch_size)
+    test_loader = create_loader(data, split='test', batch_size=args.batch_size)
 
     # model
     model = SIGN(
@@ -95,14 +122,15 @@ def main(args):
 
             # store epoch
             epoch_dict = {
-                'run': run, 'epoch': epoch,
+                'run': run, 'transform_time': transform_time, 'epoch': epoch,
                 'n_params': n_params, 'training_time': training_time
             }
             epoch_dict.update(
                 {f'training_{k}': v for k, v in training_out.items()})
             epoch_dict.update(
                 {f'eval_train_{k}': v for k, v in train_out.items()})
-            epoch_dict.update({f'eval_val_{k}': v for k, v in val_out.items()})
+            epoch_dict.update(
+                {f'eval_val_{k}': v for k, v in val_out.items()})
             epoch_dict.update(
                 {f'eval_test_{k}': v for k, v in test_out.items()})
 
@@ -111,12 +139,15 @@ def main(args):
                 ignore_index=True
             )
 
-    return store_run.to_csv(
-        f'{args.dataset}_output.csv',
-        sep=',',
-        header=True,
-        index=False
-    )
+    if args.return_results:
+        return store_run.to_csv(
+            f'{args.dataset}_output.csv',
+            sep=',',
+            header=True,
+            index=False
+        )
+
+    return '-- RUN COMPLETE '
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name='products_MHAgpu'
+#SBATCH --job-name='prodMHA'
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=12:00:00

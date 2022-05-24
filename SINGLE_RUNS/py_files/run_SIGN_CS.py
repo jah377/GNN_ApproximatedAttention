@@ -42,10 +42,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def time_wrapper(func):
-    """wrapper for recording time
-    https://gmpy.dev/blog/2016/real-process-memory-and-environ-in-python
-    https://psutil.readthedocs.io/en/latest/index.html?highlight=virtual%20memory#psutil.virtual_memory
-
+    """ wrapper for recording time
     Args:
         func:   function to evaluate
 
@@ -184,31 +181,31 @@ def transform_wAttention(data, K: int, cs_batch_size: int = 1):
     return data
 
 
+def create_slices(dim_size, batch_size):
+    """ create generator of index slices """
+
+    count = 0
+    while True:
+        yield slice(count, count + int(batch_size), 1)
+        count += int(batch_size)
+        if count >= int(dim_size):
+            break
+
+
 def extract_attention(x, edge_index, cs_batch_size):
     num_nodes = x.shape[0]
     num_edges = edge_index.shape[1]
 
-    def _batch_slices(num_edges, batch_size):
-        """Generator that yields slice objects for indexing into 
-        sequential blocks of an array along a particular axis
-        """
-        count = 0
-        while True:
-            yield slice(count, count + int(batch_size), 1)
-            count += int(batch_size)
-            if count >= int(num_edges):
-                break
-
     values = torch.tensor(range(num_edges)).cpu()
 
-    for batch in _batch_slices(num_edges, cs_batch_size):
+    for batch in create_slices(num_edges, cs_batch_size):
         A = x[edge_index[0, batch]].to(device)
         B = x[edge_index[1, batch]].to(device)
         values[batch] = F.cosine_similarity(A, B, dim=1).cpu()
 
         del A, B
         if torch.cuda.is_available():
-            torch.cuda.empty()
+            torch.cuda.empty_cache()
 
     return SparseTensor(
         row=edge_index[0],
@@ -281,6 +278,8 @@ def standardize_data(dataset, data_name: str):
         data.train_mask = masks['train']
         data.val_mask = masks['valid']
         data.test_mask = masks['test']
+
+        data.y = data.y.flatten()
     else:
         data.train_mask = torch.where(data.train_mask)[0]
         data.val_mask = torch.where(data.val_mask)[0]
@@ -331,10 +330,10 @@ def train_epoch(model, data, optimizer, loader):
         out = model(xs)
         loss = F.nll_loss(out, y)
 
-        batch_size = idx.numel()
-        total_examples += batch_size
+        batch_size = int(idx.numel())
+        total_examples += int(batch_size)
         total_loss += float(loss) * batch_size
-        total_correct += sum(out.argmax(dim=-1) == y)
+        total_correct += int((out.argmax(dim=-1) == y).sum())
 
         # backward pass
         optimizer.zero_grad()
@@ -384,19 +383,17 @@ def test_epoch(model, data, loader):
         loss = F.nll_loss(out, y)
 
         # store
-        batch_size = idx.numel()
+        batch_size = int(idx.numel())
         total_time += out_time
-        total_examples += batch_size
+        total_examples += int(batch_size)
         total_loss += float(loss) * batch_size
-        total_correct += sum(out.argmax(dim=-1) == y)
+        total_correct += int((out.argmax(dim=-1) == y).sum())
 
     return {
         'f1': total_correct/total_examples,
         'loss': total_loss/total_examples,
         'time': total_time,  # total inference time
     }
-
-# %%
 
 
 def main(args):
@@ -405,11 +402,13 @@ def main(args):
     # data
     data = download_data(args.dataset, K=args.K)
     data = standardize_data(data, args.dataset)
-    data = transform_wAttention(data, args.K, args.cs_batch_size)
+    data, transform_time = transform_wAttention(
+        data, args.K, args.cs_batch_size)
 
-    train_loader = create_loader(data, 'train', batch_size=args.batch_size)
-    val_loader = create_loader(data, 'val', batch_size=args.batch_size)
-    test_loader = create_loader(data, 'test', batch_size=args.batch_size)
+    train_loader = create_loader(
+        data, split='train', batch_size=args.batch_size)
+    val_loader = create_loader(data, split='val', batch_size=args.batch_size)
+    test_loader = create_loader(data, split='test', batch_size=args.batch_size)
 
     # model
     model = SIGN(
@@ -454,14 +453,15 @@ def main(args):
 
             # store epoch
             epoch_dict = {
-                'run': run, 'epoch': epoch,
+                'run': run, 'transform_time': transform_time, 'epoch': epoch,
                 'n_params': n_params, 'training_time': training_time
             }
             epoch_dict.update(
                 {f'training_{k}': v for k, v in training_out.items()})
             epoch_dict.update(
                 {f'eval_train_{k}': v for k, v in train_out.items()})
-            epoch_dict.update({f'eval_val_{k}': v for k, v in val_out.items()})
+            epoch_dict.update(
+                {f'eval_val_{k}': v for k, v in val_out.items()})
             epoch_dict.update(
                 {f'eval_test_{k}': v for k, v in test_out.items()})
 
@@ -471,7 +471,7 @@ def main(args):
             )
 
     return store_run.to_csv(
-        f'{args.dataset}_SIGN_MHA.csv',
+        f'{args.dataset}_output.csv',
         sep=',',
         header=True,
         index=False

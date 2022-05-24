@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="gpu_trial"
+#SBATCH --job-name="TestAllModels"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:10:00
+#SBATCH --time=02:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -11,7 +11,7 @@ date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
 
 # sweep variables 
-dataset='products'
+dataset='pubmed'
 method='random'              # sweep type (grid, bayes, random)
 run_trial=true               # if True, reduce param values for quick test
 sweep_iterations=2           # number of sweep iterations
@@ -46,7 +46,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN_SHA' # 'SIGN' 'SIGN_MHA' 'SIGN_SHA' 'SIGN_SamplerGAT' 'SIGN_FullBatchGAT' 'SIGN_CosineSimilarity'
+for model in  'SIGN' 'SIGN_MHA' 'SIGN_SHA' 'SIGN_SamplerGAT' 'SIGN_CosineSimilarity'
 
 do 
     yaml_file=$model'.yaml'         # yaml name to write to

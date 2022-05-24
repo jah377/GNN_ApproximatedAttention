@@ -6,7 +6,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.SIGN import net as SIGN
 from general.utils import set_seeds, standardize_dataset, create_loader
-from general.epoch_steps.steps_SIGN import training_step, testing_step
+from general.epoch_steps.steps_SIGN import train_epoch, test_epoch
 
 from general.transforms.transforms_CosineSimilarity import transform_wAttention
 
@@ -99,27 +99,40 @@ def main(config):
 
     for epoch in range(config.epochs):
 
-        train_output, train_resources = training_step(
+        training_out, training_time = train_epoch(
             model, data, optimizer, train_loader)
-        val_output, val_resources = testing_step(model, data, val_loader)
-        test_output, test_resources = testing_step(model, data, test_loader)
 
-        scheduler.step(val_output['loss'])  # modulate learning rate
+        train_out = test_epoch(model, data, train_loader)
+        val_out = test_epoch(model, data, val_loader)
+        test_out = test_epoch(model, data, test_loader)
+
+        scheduler.step(val_out['loss'])  # modulate learning rate
 
         # log results
-        log_dict = {'epoch': epoch}
-        log_dict.update({'epoch-train_'+k: v for k, v in train_output.items()})
-        log_dict.update({'epoch-val_'+k: v for k, v in val_output.items()})
-        log_dict.update({'epoch-test_'+k: v for k, v in test_output.items()})
-        log_dict.update({'epoch-train_'+k: v for k,
-                        v in train_resources.items()})
-        log_dict.update({'epoch-val_'+k: v for k, v in val_resources.items()})
-        log_dict.update({'epoch-test_'+k: v for k,
-                        v in test_resources.items()})
+        log_dict = {
+            'epoch': epoch,
+            'epoch-training-train_time': training_time
+        }
+
+        log_dict.update(
+            {'epoch-train-train_'+k: v for k, v in training_out.items()}
+        )
+
+        log_dict.update(
+            {'epoch-eval-train_'+k: v for k, v in train_out.items()}
+        )
+
+        log_dict.update(
+            {'epoch-eval-val_'+k: v for k, v in val_out.items()}
+        )
+
+        log_dict.update(
+            {'epoch-eval-test_'+k: v for k, v in test_out.items()}
+        )
         wandb.log(log_dict)
 
         # early stopping
-        current_loss = val_output['loss']
+        current_loss = val_out['loss']
         if current_loss > previous_loss:
             trigger_times += 1
             if trigger_times >= patience:

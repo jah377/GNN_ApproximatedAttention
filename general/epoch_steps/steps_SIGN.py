@@ -1,12 +1,13 @@
 import torch
 import torch.nn.functional as F
 
-from general.utils import resources  # wrapper
+from general.utils import time_wrapper  # wrapper
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-@resources
-def training_step(model, data, optimizer, loader):
+
+@time_wrapper
+def train_epoch(model, data, optimizer, loader):
     """ Perform forward and backward pass on SIGN
     https://github.com/pyg-team/pytorch_geometric/blob/master/examples/sign.py
     Args:
@@ -19,12 +20,10 @@ def training_step(model, data, optimizer, loader):
         train_loss:     loss @ epoch
         train_f1:       f1 @ epoch
         delta_time:     from wrapper
-        delta_mem:      from wrapper
     """
     model.train()
 
-    total_examples = total_loss = total_correct = 0
-
+    total_examples = total_correct = total_loss = 0
     for idx in loader:
 
         # organize data
@@ -37,10 +36,10 @@ def training_step(model, data, optimizer, loader):
         out = model(xs)
         loss = F.nll_loss(out, y)
 
-        batch_size = idx.numel()
-        total_examples += batch_size
+        batch_size = int(idx.numel())
+        total_examples += int(batch_size)
         total_loss += float(loss) * batch_size
-        total_correct += sum(out.argmax(dim=-1) == y)
+        total_correct += int((out.argmax(dim=-1) == y).sum())
 
         # backward pass
         optimizer.zero_grad()
@@ -48,14 +47,13 @@ def training_step(model, data, optimizer, loader):
         optimizer.step()
 
     return {
-        'loss': total_loss/total_examples,
         'f1': total_correct/total_examples,
+        'loss': total_loss/total_examples,
     }
 
 
-@resources
 @torch.no_grad()
-def testing_step(model, data, loader):
+def test_epoch(model, data, loader):
     """ Document validation or test loss and accuracy
     https://github.com/pyg-team/pytorch_geometric/blob/master/examples/sign.py
 
@@ -68,11 +66,15 @@ def testing_step(model, data, loader):
         loss:       loss @ epoch
         f1:         f1 @ epoch
         delta_time:     from wrapper
-        delta_mem:      from wrapper
     """
     model.eval()
 
-    total_examples = total_loss = total_correct = 0
+    @time_wrapper
+    def predict(model, xs):
+        return model(xs)
+
+    total_time = total_loss = 0
+    total_examples = total_correct = 0
 
     for idx in loader:
 
@@ -83,15 +85,18 @@ def testing_step(model, data, loader):
         y = data.y[idx].to(device)              # move target to device
 
         # forward pass
-        out = model(xs)
+        out, out_time = predict(model, xs)
         loss = F.nll_loss(out, y)
 
-        batch_size = idx.numel()
-        total_examples += batch_size
+        # store
+        batch_size = int(idx.numel())
+        total_time += out_time
+        total_examples += int(batch_size)
         total_loss += float(loss) * batch_size
-        total_correct += sum(out.argmax(dim=-1) == y)
+        total_correct += int((out.argmax(dim=-1) == y).sum())
 
     return {
-        'loss': total_loss/total_examples,
         'f1': total_correct/total_examples,
+        'loss': total_loss/total_examples,
+        'time': total_time,  # total inference time
     }

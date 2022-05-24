@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="products_SIGNgpu"
+#SBATCH --job-name="prodSIGN"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=70:00:00

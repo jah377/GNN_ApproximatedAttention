@@ -1,25 +1,18 @@
-import time
+import torch
 import argparse
-import random
-import numpy as np
 import pandas as pd
 from distutils.util import strtobool
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-
-import torch_geometric.transforms as T
-from torch_geometric.datasets import Planetoid
-
-from ogb.nodeproppred import PygNodePropPredDataset
-
 
 from general.models.SIGN import net as SIGN
 from general.utils import set_seeds, download_data, standardize_data, create_loader
 from general.epoch_steps.steps_SIGN import train_epoch, test_epoch
+from general.transforms.transforms_DotProduct import transform_wAttention
+
+
+#################################################################
+########## THIS SHOULD BE IDENTICAL TO HPS_SIGN_MHA.PY ##########
+#################################################################
 
 # product: https://arxiv.org/pdf/2004.11198v2.pdf
 parser = argparse.ArgumentParser(description='inputs')
@@ -30,11 +23,13 @@ parser.add_argument('--optimizer_decay', type=float, default=0.0001)
 parser.add_argument('--epochs', type=int, default=20)
 parser.add_argument('--hidden_channel', type=int, default=512)
 parser.add_argument('--dropout', type=float, default=0.5)
-parser.add_argument('--K', type=int, default=1)
+parser.add_argument('--K', type=int, default=2)
 parser.add_argument('--batch_norm', type=strtobool, default=True)
 parser.add_argument('--batch_size', type=int, default=4096)
 parser.add_argument('--n_runs', type=int, default=10)
 parser.add_argument('--num_workers', type=int, default=1)
+parser.add_argument('--attn_heads', type=int,
+                    default=1)  # hyperparameter for MHA
 parser.add_argument('--return_results', type=strtobool, default=True)
 args = parser.parse_args()
 
@@ -47,6 +42,8 @@ def main(args):
     # data
     data = download_data(args.dataset, K=args.K)
     data = standardize_data(data, args.dataset)
+    data, transform_time = transform_wAttention(data, args.K, args.attn_heads)
+    print('-- TRANSFORM COMPLETE ')
 
     train_loader = create_loader(data, 'train', batch_size=args.batch_size)
     val_loader = create_loader(data, 'val', batch_size=args.batch_size)
@@ -95,7 +92,7 @@ def main(args):
 
             # store epoch
             epoch_dict = {
-                'run': run, 'epoch': epoch,
+                'run': run, 'transform_time': transform_time, 'epoch': epoch,
                 'n_params': n_params, 'training_time': training_time
             }
             epoch_dict.update(
@@ -111,12 +108,15 @@ def main(args):
                 ignore_index=True
             )
 
-    return store_run.to_csv(
-        f'{args.dataset}_output.csv',
-        sep=',',
-        header=True,
-        index=False
-    )
+    if args.return_results:
+        return store_run.to_csv(
+            f'{args.dataset}_output.csv',
+            sep=',',
+            header=True,
+            index=False
+        )
+
+    return '-- RUN COMPLETE '
 
 
 if __name__ == '__main__':
