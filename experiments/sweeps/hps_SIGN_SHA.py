@@ -6,7 +6,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.SIGN import net as SIGN
 from general.transforms.transforms_DotProduct import transform_wAttention
-from general.utils import set_seeds, standardize_dataset, create_loader
+from general.utils import set_seeds, standardize_data, create_loader
 from general.epoch_steps.steps_SIGN import train_epoch, test_epoch
 
 #################################################################
@@ -43,7 +43,7 @@ def main(config):
 
     if not osp.isfile(transform_path):
         data = torch.load(path)
-        data = standardize_dataset(data, config.dataset)
+        data = standardize_data(data, config.dataset)
         data, transform_time = transform_wAttention(
             data,
             config.K,

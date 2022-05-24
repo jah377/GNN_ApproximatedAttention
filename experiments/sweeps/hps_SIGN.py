@@ -5,7 +5,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.SIGN import net as SIGN
 from general.epoch_steps.steps_SIGN import train_epoch, test_epoch
-from general.utils import set_seeds, standardize_dataset, create_loader
+from general.utils import set_seeds, standardize_data, create_loader
 
 hyperparameter_defaults = dict(
     dataset='cora',
@@ -33,7 +33,7 @@ def main(config):
     # IMPORT & STANDARDIZE DATA
     path = f'data/{config.dataset}_sign_k{config.K}.pth'
     data = torch.load(path)
-    data = standardize_dataset(data, config.dataset)
+    data = standardize_data(data, config.dataset)
 
     # BUILD DATALOADER
     train_loader = create_loader(data, 'train', batch_size=config.batch_size)

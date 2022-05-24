@@ -5,7 +5,7 @@ import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.SIGN import net as SIGN
-from general.utils import set_seeds, standardize_dataset, create_loader
+from general.utils import set_seeds, standardize_data, create_loader
 from general.epoch_steps.steps_SIGN import train_epoch, test_epoch
 
 from general.transforms.transforms_CosineSimilarity import transform_wAttention
@@ -40,7 +40,7 @@ def main(config):
     transform_path = f'data/{config.dataset}_sign_k0_transformed.pth'
 
     if not osp.isfile(transform_path):
-        data = standardize_dataset(torch.load(path), config.dataset)
+        data = standardize_data(torch.load(path), config.dataset)
         data, transform_time = transform_wAttention(
             data,
             config.K,

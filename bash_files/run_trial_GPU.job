@@ -12,13 +12,13 @@ START=`date +%s`                # will record .job runtime
 
 # variables
 dataset='pubmed'
-FOLDER='dump''
+FOLDER='dump'
 num_runs=10
 num_workers=1
 
 # copy files to scratch
 mkdir -p $TMPDIR/$FOLDER
-cp -r experiments/single_run $TMPDIR/$FOLDER
+cp -r experiments/single_run/* $TMPDIR/$FOLDER
 cp -r general venvs $TMPDIR/$FOLDER
 cd $TMPDIR/$FOLDER
 echo ' -- FILES COPIED'
@@ -52,7 +52,7 @@ python run_SIGN.py \
     --batch_size 1338 \
     --n_runs $num_runs \
     --num_workers $num_workers \
-    --return_results false
+    --return_results 0
 echo 'SIGN Complete'
 
 
@@ -69,7 +69,7 @@ python run_SIGN_GAT.py \
     --batch_size 1338 \
     --n_runs $num_runs \
     --num_workers $num_workers \
-    --return_results false
+    --return_results 0
 echo 'SIGN-GAT Complete'
 
 
@@ -87,7 +87,7 @@ python run_SIGN_SHA.py \
     --n_runs $num_runs \
     --num_workers $num_workers \
     --attn_heads 1 \
-    --return_results false
+    --return_results 0
 echo 'SIGN-SHA Complete'
 
 
@@ -105,7 +105,7 @@ python run_SIGN_MHA.py \
     --n_runs $num_runs \
     --num_workers $num_workers \
     --attn_heads 3 \
-    --return_results false
+    --return_results 0
 echo 'SIGN-MHA Complete'
 
 
@@ -123,7 +123,7 @@ python run_SIGN_CosineSimilarity.py \
     --n_runs $num_runs \
     --num_workers $num_workers \
     --cs_batch_size 1000 \
-    --return_results false
+    --return_results 0
 echo 'SIGN-CosineSimilarity Complete'
 
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
