@@ -13,6 +13,7 @@ parser.add_argument('--METHOD', type=str, default='random')
 parser.add_argument('--TRAIN_FILE', type=str, default=None)
 parser.add_argument('--YAML_FILE', type=str, default=None)
 parser.add_argument('--IGNORE_KNOWN', type=strtobool, default=False)
+parser.add_argument('--N_WORKERS', type=int, default=1)
 
 args = parser.parse_args()
 
@@ -34,6 +35,7 @@ def main(args):
     assert args.DATASET.lower() in ['pubmed', 'cora', 'arxiv', 'products']
     assert args.TRAIN_FILE != None
     assert args.YAML_FILE != None
+    assert isinstance(args.N_WORKERS, int)
 
     # outline config dictionary
     sweep_config = {
@@ -51,6 +53,10 @@ def main(args):
         'dataset': {
             'distribution': 'constant',
             'value': args.DATASET.lower()
+        },
+        'num_workers': {
+            'distribution': 'constant',
+            'value': args.N_WORKERS
         },
         'seed': {
             'distribution': 'constant',

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="SLGATgpu"
+#SBATCH --job-name="pubmed_SsampGAT"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=16:00:00

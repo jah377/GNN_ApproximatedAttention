@@ -2,9 +2,10 @@
 #SBATCH --job-name="pubmed_SamplerGAT"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=4:00:00
+#SBATCH --time=5:00:00
+#SBATCH --mem=250G
 #SBATCH --gpus=1
-#SBATCH --partition=gpu_shared
+#SBATCH --partition=gpu
 #SBATCH --output=%x.%j.out
 #SBATCH --mail-user=jon.harris@student.uva.nl
 #SBATCH --mail-type=BEGIN,END,FAIL

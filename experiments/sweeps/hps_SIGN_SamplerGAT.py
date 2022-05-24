@@ -5,7 +5,7 @@ import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.SIGN import net as SIGN
-from general.utils import set_seeds, standardize_dataset, build_DataLoader
+from general.utils import set_seeds, standardize_dataset, create_loader
 from general.epoch_steps.steps_SIGN import training_step, testing_step
 
 from general.transforms.transforms_SamplerGAT import transform_wAttention
@@ -37,7 +37,7 @@ def main(config):
     # import or transform data
     path = f'data/{config.dataset}_sign_k0.pth'
     transform_path = f'data/{config.dataset}_sign_k{config.K}_transformed.pth'
-    
+
     if not osp.isfile(transform_path):
         data = standardize_dataset(torch.load(path), config.dataset)
         data, trans_resources = transform_wAttention(
@@ -59,10 +59,9 @@ def main(config):
         assert hasattr(data, 'edge_index')  # must be torch data object
 
     # BUILD DATALOADER
-    train_dl, val_dl, test_dl = build_DataLoader(
-        data,
-        config.batch_size,
-    )
+    train_loader = create_loader(data, 'train', batch_size=config.batch_size)
+    val_loader = create_loader(data, 'val', batch_size=config.batch_size)
+    test_loader = create_loader(data, 'test', batch_size=config.batch_size)
 
     # BUILD MODEL
     model = SIGN(
@@ -102,9 +101,9 @@ def main(config):
     for epoch in range(config.epochs):
 
         train_output, train_resources = training_step(
-            model, data, optimizer, train_dl)
-        val_output, val_resources = testing_step(model, data, val_dl)
-        test_output, test_resources = testing_step(model, data, test_dl)
+            model, data, optimizer, train_loader)
+        val_output, val_resources = testing_step(model, data, val_loader)
+        test_output, test_resources = testing_step(model, data, test_loader)
 
         scheduler.step(val_output['loss'])  # modulate learning rate
 

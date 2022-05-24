@@ -5,7 +5,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from general.models.SIGN import net as SIGN
 from general.epoch_steps.steps_SIGN import training_step, testing_step
-from general.utils import set_seeds, standardize_dataset, build_DataLoader
+from general.utils import set_seeds, standardize_dataset, create_loader
 
 hyperparameter_defaults = dict(
     dataset='cora',
@@ -36,10 +36,9 @@ def main(config):
     data = standardize_dataset(data, config.dataset)
 
     # BUILD DATALOADER
-    train_dl, val_dl, test_dl = build_DataLoader(
-        data,
-        config.batch_size,
-    )
+    train_loader = create_loader(data, 'train', batch_size=config.batch_size)
+    val_loader = create_loader(data, 'val', batch_size=config.batch_size)
+    test_loader = create_loader(data, 'test', batch_size=config.batch_size)
 
     # BUILD MODEL
     model = SIGN(
@@ -79,23 +78,22 @@ def main(config):
     for epoch in range(config.epochs):
 
         train_output, train_resources = training_step(
-            model, data, optimizer, train_dl)
-        val_output, val_resources = testing_step(model, data, val_dl)
-        test_output, test_resources = testing_step(model, data, test_dl)
+            model, data, optimizer, train_loader)
+        val_output, val_resources = testing_step(model, data, val_loader)
+        test_output, test_resources = testing_step(model, data, test_loader)
 
-        scheduler.step(val_output['loss'])
+        scheduler.step(val_output['loss'])  # modulate learning rate
 
+        # log results
         log_dict = {'epoch': epoch}
         log_dict.update({'epoch-train_'+k: v for k, v in train_output.items()})
         log_dict.update({'epoch-val_'+k: v for k, v in val_output.items()})
         log_dict.update({'epoch-test_'+k: v for k, v in test_output.items()})
-
         log_dict.update({'epoch-train_'+k: v for k,
                         v in train_resources.items()})
         log_dict.update({'epoch-val_'+k: v for k, v in val_resources.items()})
         log_dict.update({'epoch-test_'+k: v for k,
                         v in test_resources.items()})
-
         wandb.log(log_dict)
 
         # early stopping

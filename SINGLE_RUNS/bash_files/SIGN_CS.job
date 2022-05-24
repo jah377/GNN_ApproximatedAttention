@@ -1,0 +1,75 @@
+#!/bin/bash
+#SBATCH --job-name="SIGN_CS"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --time=1:00:00
+#SBATCH --mem=90G
+#SBATCH --gpus=1
+#SBATCH --partition=gpu_shared
+#SBATCH --output=%x.%j.out
+
+date;hostname;id;pwd
+START=`date +%s`                # will record .job runtime
+
+# variables
+model='SIGN_CS'
+FOLDER=$model
+PYFILE='run_'$FOLDER'.py'
+num_runs=10
+num_workers=1
+
+# copy files to scratch
+mkdir -p $TMPDIR/$FOLDER
+cp -r SINGLE_RUNS/py_files/$PYFILE $TMPDIR/$FOLDER
+cp -r venvs $TMPDIR/$FOLDER
+cd $TMPDIR/$FOLDER
+echo ' -- FILES COPIED'
+
+
+# activate venv
+module load 2021
+module load CUDA/11.3.1
+source $TMPDIR/$FOLDER/venvs/GPU_venv/bin/activate
+which python
+echo ' -- VENV ACTIVATED'
+
+echo ''
+echo 'Check if packages installed correctly'
+python -c "import torch; print(f'Torch: {torch.__version__}')"
+python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
+echo ''
+
+for dataset in 'products'
+do
+    # run file 
+    python $PYFILE \
+        --dataset $dataset \
+        --seed 42 \
+        --optimizer_lr 0.09911 \
+        --optimizer_decay 0.05004 \
+        --epochs 33 \
+        --hidden_channel 579 \
+        --dropout 0.3852 \
+        --K 2 \
+        --batch_norm 1 \
+        --batch_size 1338 \
+        --n_runs $num_runs \
+        --num_workers $num_workers \
+        --attn_heads 4
+    echo ' -- PY FILE COMPLETE'
+
+    # save output
+    cp -r $dataset'_'$model'.csv' $HOME/Desktop/approx_attention/SINGLE_RUN/out_files
+    echo ' -- ' $model 'OUTPUT SEND TO... Desktop/approx_attention/SINGLE_RUN/out_files'
+
+done
+
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
+END=`date +%s`;
+
+let DIFF=END-START
+let HOURS=DIFF/3600
+let MINUTES=(DIFF/60)%60
+
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

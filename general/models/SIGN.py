@@ -44,6 +44,12 @@ class net(torch.nn.Module):
         self.lin = nn.Linear(
             (self.K + 1) * self.hidden_channel, self.out_channel)
 
+    def reset_parameters(self):
+        for lin in self.lins:
+            lin.reset_parameters()
+        for bn in self.bns:
+            bn.reset_parameters()
+
     def forward(self, xs):
         """ xs = [AX^0, AX^1, ..., AX^K] """
         hs = []  # store forward pass of each AX^K

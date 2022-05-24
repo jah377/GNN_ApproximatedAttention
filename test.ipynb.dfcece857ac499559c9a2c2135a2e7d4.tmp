@@ -1,0 +1,11 @@
+from general.models.DotProductAttention_memmap import net 
+
+
+model = net(
+    data.num_nodes,
+    data.num_features,
+    data.num_features,
+    args.mha_batch_size
+)
+
+attn = model(data.x, data.edge_index)

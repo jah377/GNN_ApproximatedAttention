@@ -46,7 +46,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-yaml_file=$model'.yaml'         # yaml name to write to
+yaml_file='SamplerGAT.yaml'         # yaml name to write to
 train_file='hps_SamplerGAT.py'    # model-specific py file used in sweep
 project_name=$FOLDER             # wandb project name
 

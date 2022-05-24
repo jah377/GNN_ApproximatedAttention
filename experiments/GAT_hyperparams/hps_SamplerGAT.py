@@ -47,6 +47,7 @@ def main(config):
         shuffle=True,
         batch_size=config.batch_size,
         drop_last=True,  # remove final batch if incomplete
+        num_workers=config.num_workers,
     )
 
     subgraph_loader = NeighborLoader(
@@ -56,6 +57,7 @@ def main(config):
         shuffle=False,                          # :batch_size in sequential order
         batch_size=config.batch_size,
         drop_last=False,
+        num_workers=config.num_workers,
     )
     subgraph_loader.data.num_nodes = data.num_nodes
     del subgraph_loader.data.x, subgraph_loader.data.y  # only need indices

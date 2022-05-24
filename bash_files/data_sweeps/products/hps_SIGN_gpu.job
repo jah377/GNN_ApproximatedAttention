@@ -2,9 +2,9 @@
 #SBATCH --job-name="products_SIGNgpu"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=12:00:00
+#SBATCH --time=70:00:00
 #SBATCH --gpus=1
-#SBATCH --partition=gpu_shared
+#SBATCH --partition=gpu
 #SBATCH --output=%x.%j.out
 #SBATCH --mail-user=jon.harris@student.uva.nl
 #SBATCH --mail-type=BEGIN,END,FAIL

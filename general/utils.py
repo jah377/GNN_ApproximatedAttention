@@ -6,6 +6,11 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+import torch_geometric.transforms as T
+from torch_geometric.datasets import Planetoid
+
+from ogb.nodeproppred import PygNodePropPredDataset
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -71,24 +76,53 @@ def set_seeds(seed_value: int):
         torch.cuda.manual_seed_all(seed_value)
 
 
-def standardize_dataset(data_obj, data_str):
-    assert data_str.lower() in ['cora', 'pubmed', 'products', 'arxiv']
+def download_data(data_name, K: int = 0):
+    possible_datasets = ['cora', 'pubmed', 'products', 'arxiv']
+    assert data_name.lower() in possible_datasets
+    assert isinstance(K, int)
+
+    if K == 0:
+        transform = T.NormalizeFeatures()
+    else:
+        transform = T.Compose([
+            T.NormalizeFeatures(),
+            T.SIGN(K)
+        ])
+
+    if data_name.lower() in ['products', 'arxiv']:
+        dataset = PygNodePropPredDataset(
+            f'ogbn-{data_name.lower()}',
+            root=f'/tmp/{data_name.title}',
+            transform=transform)
+    else:
+        dataset = Planetoid(
+            root=f'/tmp/{data_name.title()}',
+            name=f'{data_name.title()}',
+            transform=transform,
+            split='full',
+        )
+
+    return dataset
+
+
+def standardize_data(dataset, data_name: str):
+    possible_datasets = ['cora', 'pubmed', 'products', 'arxiv']
+    assert data_name.lower() in possible_datasets
 
     # extract relevant information
-    data = data_obj[0]
-    data.num_classes = data_obj.num_classes
+    data = dataset[0]
+    data.num_classes = dataset.num_classes
     data.num_nodes = data.num_nodes
-    data.num_features = data.num_node_features
+    data.num_edges = data.num_edges
+    data.num_node_features = data.num_node_features
     data.n_id = torch.arange(data.num_nodes)  # global node id
 
     # standardize mask -- node idx, not bool mask
-    if data_str.lower() in ['products', 'arxiv']:
-        masks = data_obj.get_idx_split()
+    if data_name.lower() in ['products', 'arxiv']:
+        masks = dataset.get_idx_split()
         data.train_mask = masks['train']
         data.val_mask = masks['valid']
         data.test_mask = masks['test']
-
-        data.y = data.y.flatten() # original: [n,1]
     else:
         data.train_mask = torch.where(data.train_mask)[0]
         data.val_mask = torch.where(data.val_mask)[0]
@@ -97,25 +131,13 @@ def standardize_dataset(data_obj, data_str):
     return data
 
 
-def build_DataLoader(data, batch_size: int):
-    """ Create train/val/test DataLoader for SIGN
+def create_loader(data, split: str, batch_size: int, num_workers: int = 1):
+    assert split in ['train', 'val', 'test']
 
-    Args:
-        idx:            all idx values
-        batch_size:     int, batch_size
-
-    Returns:
-        train_loader:
-        val_loader:
-        test_loader:
-    """
-
-    def loader(data, split):
-        return DataLoader(
-            eval(f'data.{split}_mask'),
-            batch_size=batch_size,
-            shuffle=(split == 'train'),   # shuffle if training loader
-            drop_last=(split == 'train'),  # remove final incomplete
-        )
-
-    return [loader(data, split) for split in ['train', 'val', 'test']]
+    return DataLoader(
+        data[f'{split}_mask'],
+        batch_size=batch_size,
+        shuffle=(split == 'train'),   # shuffle if training loader
+        drop_last=(split == 'train'),  # remove final incomplete
+        num_workers=num_workers,
+    )

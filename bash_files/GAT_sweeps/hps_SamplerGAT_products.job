@@ -2,9 +2,10 @@
 #SBATCH --job-name="products_SamplerGAT"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=24:00:00
+#SBATCH --time=10:00:00
 #SBATCH --gpus=1
-#SBATCH --partition=gpu_shared
+#SBATCH --mem=256G
+#SBATCH --partition=gpu
 #SBATCH --output=%x.%j.out
 
 date;hostname;id;pwd
@@ -46,7 +47,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-yaml_file=$model'.yaml'         # yaml name to write to
+yaml_file='SamplerGAT.yaml'         # yaml name to write to
 train_file='hps_SamplerGAT.py'    # model-specific py file used in sweep
 project_name=$FOLDER             # wandb project name
 

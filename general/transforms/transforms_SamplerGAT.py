@@ -81,7 +81,7 @@ def extract_attention(data, GATdict):
     train_loader = NeighborLoader(
         data,
         input_nodes=data.train_mask,  # can be bool or n_id indices
-        num_neighbors=[GATdict['nNeighbors']]*GATdict['nlayers'],
+        num_neighbors=[GATdict['nneighbors']]*GATdict['nlayers'],
         shuffle=True,
         batch_size=GATdict['batch_size'],
         drop_last=True,  # remove final batch if incomplete

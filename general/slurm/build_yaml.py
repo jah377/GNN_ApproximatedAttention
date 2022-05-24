@@ -68,10 +68,6 @@ def main(args):
             'distribution': 'constant',
             'value': 42
         },
-        'optimizer_type': {
-            'distribution': 'constant',
-            'value': 'Adam'
-        },
         'optimizer_lr': {
             'distribution': 'uniform',
             'min': 1e-5,
