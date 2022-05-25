@@ -68,6 +68,11 @@ def extract_attention(data, attn_heads):
         SparseTensor containing attention weights
     """
 
-    model = MultiheadAttention(data.num_features, attn_heads)
+    model = MultiheadAttention(
+        data.num_nodes,
+        data.num_features,
+        data.num_edges, 
+        attn_heads
+        )
 
     return model(data.x, data.edge_index)

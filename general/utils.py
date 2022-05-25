@@ -91,6 +91,7 @@ def standardize_data(dataset, data_name: str):
 
     # extract relevant information
     data = dataset[0]
+    data.dataset_name = data_name.lower()
     data.num_classes = dataset.num_classes
     data.num_nodes = data.num_nodes
     data.num_edges = data.num_edges
@@ -103,6 +104,8 @@ def standardize_data(dataset, data_name: str):
         data.train_mask = masks['train']
         data.val_mask = masks['valid']
         data.test_mask = masks['test']
+
+        data.y = data.y.flatten()
     else:
         data.train_mask = torch.where(data.train_mask)[0]
         data.val_mask = torch.where(data.val_mask)[0]

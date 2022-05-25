@@ -13,8 +13,9 @@ from general.epoch_steps.steps_SamplerGAT import train_epoch, test_epoch
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+
 @time_wrapper
-def transform_wAttention(data, dataset: str, K: int, GATtransform_params):
+def transform_wAttention(data, K: int, GATdict):
     """
     Args:
         data:           data object
@@ -45,7 +46,7 @@ def transform_wAttention(data, dataset: str, K: int, GATtransform_params):
     # =========== not part of T.SIGN(K) ===========
 
     # replace adj with DotProductAttention weights
-    adj_t = extract_attention(data, GATtransform_params.get(dataset))
+    adj_t = extract_attention(data, GATdict)
     adj_t = deg_inv_sqrt.view(-1, 1) * adj_t * deg_inv_sqrt.view(1, -1)
 
     # =========== not part of T.SIGN(K) ===========
@@ -80,7 +81,7 @@ def extract_attention(data, GATdict):
     train_loader = NeighborLoader(
         data,
         input_nodes=data.train_mask,  # can be bool or n_id indices
-        num_neighbors=[GATdict['nneighbors']]*GATdict['nlayers'],
+        num_neighbors=[GATdict['n_neighbors']]*GATdict['nlayers'],
         shuffle=True,
         batch_size=GATdict['batch_size'],
         drop_last=True,  # remove final batch if incomplete
@@ -109,7 +110,7 @@ def extract_attention(data, GATdict):
     ).to(device)
 
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    wandb.log({'precomp-trainable_params': n_params})  # size of model
+    # wandb.log({'precomp-trainable_params': n_params})  # size of model
 
     # BUILD OPTIMIZER
     optimizer = torch.optim.Adam(
@@ -147,14 +148,14 @@ def extract_attention(data, GATdict):
         val_loss = test_out['val_loss']
         scheduler.step(val_loss)
 
-        # log results
-        s = 'precomp-epoch'
-        log_dict = {f'{s}': epoch}
-        log_dict.update({f'{s}-'+k: v for k, v in train_out.items()})
-        log_dict.update({f'{s}-train-'+k: v for k,
-                        v in train_resources.items()})
-        log_dict.update({f'{s}-'+k: v for k, v in test_out.items()})
-        wandb.log(log_dict)
+        # # log results
+        # s = 'precomp-epoch'
+        # log_dict = {f'{s}': epoch}
+        # log_dict.update({f'{s}-'+k: v for k, v in train_out.items()})
+        # log_dict.update({f'{s}-train-'+k: v for k,
+        #                 v in train_resources.items()})
+        # log_dict.update({f'{s}-'+k: v for k, v in test_out.items()})
+        # wandb.log(log_dict)
 
         # early stopping
         current_loss = val_loss

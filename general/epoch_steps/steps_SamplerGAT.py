@@ -49,8 +49,8 @@ def train_epoch(model, optimizer, train_loader):
         optimizer.step()
 
     outputs = {
-        'train_loss': float(total_loss/total_nodes),
-        'train_f1': float(total_correct/total_nodes),
+        'loss': float(total_loss/total_nodes),
+        'f1': float(total_correct/total_nodes),
     }
 
     return outputs
@@ -77,10 +77,10 @@ def test_epoch(model, data, subgraph_loader):
     """
     model.eval()
 
-    logits, inf_resources = model.inference(data.x, subgraph_loader)
-    output = {f'inf_{k}': v for k, v in inf_resources.items()}
+    logits, inf_time = model.inference(data.x, subgraph_loader)
 
-    for split in ['train', 'val']:
+    output = {}
+    for split in ['train', 'val', 'test']:
 
         mask = eval(f'data.{split}_mask')
         mask_logits = logits[mask]
@@ -92,4 +92,4 @@ def test_epoch(model, data, subgraph_loader):
             f'{split}_f1': (sum(mask_yhat == mask_y)/len(mask)).item()
         })
 
-    return output
+    return output, inf_time

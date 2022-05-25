@@ -66,6 +66,10 @@ class net(torch.nn.Module):
                 concat=False,
             ))
 
+    def reset_parameters(self):
+        for conv in self.convs:
+            conv.reset_parameters()
+
     def forward(self, x, edge_index):
         for i, conv in enumerate(self.convs):
             x = conv(x, edge_index)

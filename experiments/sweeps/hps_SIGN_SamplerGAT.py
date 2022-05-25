@@ -42,9 +42,8 @@ def main(config):
         data = standardize_data(torch.load(path), config.dataset)
         data, transform_time = transform_wAttention(
             data,
-            config.dataset,
             config.K,
-            GATtransform_params,
+            GATtransform_params.get(config.dataset),
         )
 
         wandb.log({'precomp-transform_time': transform_time})

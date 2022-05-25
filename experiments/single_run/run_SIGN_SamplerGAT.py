@@ -7,7 +7,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from general.models.SIGN import net as SIGN
 from general.utils import set_seeds, download_data, standardize_data, create_loader
 from general.epoch_steps.steps_SIGN import train_epoch, test_epoch
-from general.transforms.transforms_CosineSimilarity import transform_wAttention
+from general.transforms.transforms_SamplerGAT import transform_wAttention
 
 
 # product: https://arxiv.org/pdf/2004.11198v2.pdf
@@ -59,7 +59,7 @@ params_dict = {
 
 
 def main(args):
-    assert args.dataset in [
+    assert args.dataset.lower() in [
         'cora', 'pubmed'], f'GAT transformation OOM for {args.dataset.title()}'
 
     set_seeds(args.seed)
@@ -69,7 +69,6 @@ def main(args):
     data = standardize_data(data, args.dataset)
     data, transform_time = transform_wAttention(
         data,
-        args.dataset,
         args.K,
         params_dict.get(args.dataset),
     )
@@ -93,7 +92,7 @@ def main(args):
 
     store_run = pd.DataFrame()
     for run in range(args.n_runs):
-        model.reset_parameters
+        model.reset_parameters()
 
         optimizer = torch.optim.Adam(
             model.parameters(),
@@ -141,12 +140,34 @@ def main(args):
             )
 
     if args.return_results:
-        return store_run.to_csv(
-            f'{args.dataset}_output.csv',
-            sep=',',
-            header=True,
-            index=False
-        )
+
+        print(f' --- {data.dataset_name.upper()} --- ')
+
+        # parameters
+        n_params = store_run['n_params'].mean()
+        print(f'Number of Model Parameters: {n_params}')
+
+        # precomputation time
+        precomp_time = store_run['transform_time'].mean()
+        print(f'Precomp. Time (s): {precomp_time.round(3)}')
+
+        # total train & inference times
+        train_times = store_run['training_time'].agg(['mean', 'std'])
+        print(
+            f'Training Time (s): {train_times[0].round(3)} +/- {train_times[1].round(3)}')
+
+        cols = ['eval_train_time', 'eval_val_time', 'eval_test_time']
+        inf_time = store_run[cols].sum(axis=1).agg(['mean', 'std'])
+        print(
+            f'Inference Time (s): {inf_time[0].round(3)} +/- {inf_time[1].round(3)}')
+
+        # f1 score
+        last_epoch = (store_run.epoch == max(store_run.epoch))
+        f1_scores = store_run[last_epoch]['eval_test_f1'].agg(['mean', 'std'])
+        print(
+            f'F1 Score (s): {f1_scores[0].round(3)} +/- {f1_scores[1].round(3)}')
+
+        print(f' ---------------- ')
 
     return '-- RUN COMPLETE '
 

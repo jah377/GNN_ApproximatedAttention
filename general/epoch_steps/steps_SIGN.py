@@ -3,6 +3,8 @@ import torch.nn.functional as F
 
 from general.utils import time_wrapper  # wrapper
 
+from ogb.nodeproppred import Evaluator
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -69,12 +71,15 @@ def test_epoch(model, data, loader):
     """
     model.eval()
 
+    if data.dataset_name in ['products', 'arxiv']:
+        evaluator = Evaluator(name=f'ogbn-{data.dataset_name}')
+
     @time_wrapper
     def predict(model, xs):
         return model(xs)
 
-    total_time = total_loss = 0
-    total_examples = total_correct = 0
+    total_time = total_examples = total_loss = 0
+    y_pred, y_true = [], []
 
     for idx in loader:
 
@@ -88,15 +93,26 @@ def test_epoch(model, data, loader):
         out, out_time = predict(model, xs)
         loss = F.nll_loss(out, y)
 
+        y_pred.append((out.argmax(dim=1, keepdim=True).cpu()))
+        y_true.append(y)
+
         # store
         batch_size = int(idx.numel())
         total_time += out_time
-        total_examples += int(batch_size)
+        total_examples += batch_size
         total_loss += float(loss) * batch_size
-        total_correct += int((out.argmax(dim=-1) == y).sum())
+
+        # f1 score
+        if data.dataset_name in ['products', 'arxiv']:
+            f1_score = evaluator.eval({
+                "y_true": torch.cat(y_true, dim=0),
+                "y_pred": torch.cat(y_pred, dim=0),
+            })['acc']
+        else:
+            f1_score = (y_pred == y_true).mean()
 
     return {
-        'f1': total_correct/total_examples,
+        'f1': f1_score,
         'loss': total_loss/total_examples,
         'time': total_time,  # total inference time
     }
