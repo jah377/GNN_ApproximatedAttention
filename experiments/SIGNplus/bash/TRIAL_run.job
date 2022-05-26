@@ -2,7 +2,7 @@
 #SBATCH --job-name="SPLUS_TR"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:30:00
+#SBATCH --time=00:10:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -27,7 +27,7 @@ num_workers=1
 # copy files to scratch
 rm -rf $TMPDIR/$FOLDER
 mkdir -p $TMPDIR/$FOLDER/data
-cp -r data/$dataset/* $TMPDIR/$FOLDER/data
+cp -r data/* $TMPDIR/$FOLDER/data
 cp -r general venvs $TMPDIR/$FOLDER
 cp -r experiments/$EXPERIMENT_FOLDER/* $TMPDIR/$FOLDER
 cd $TMPDIR/$FOLDER
@@ -47,7 +47,7 @@ python -c "import torch; print(f'Torch: {torch.__version__}')"
 python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
 echo ''
 
-for dataset in 'pubmed' 'arxiv'
+for dataset in 'pubmed' # 'arxiv'
 do 
     python run_SIGNplus.py \
         --dataset $dataset \

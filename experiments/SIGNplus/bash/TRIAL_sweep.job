@@ -28,7 +28,7 @@ FOLDER=$EXPERIMENT_FOLDER'_sweep'            # name of folder on scratch
 
 # copy files to scratch
 mkdir -p $TMPDIR/$FOLDER/data
-cp -r data/$dataset/* $TMPDIR/$FOLDER/data
+cp -r data/* $TMPDIR/$FOLDER/data
 cp -r general venvs $TMPDIR/$FOLDER
 cp -r experiments/$EXPERIMENT_FOLDER/* $TMPDIR/$FOLDER
 cd $TMPDIR/$FOLDER
