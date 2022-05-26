@@ -8,7 +8,16 @@ class FeedForwardNet(nn.Module):
     https://github.com/dmlc/dgl/blob/master/examples/pytorch/ogb/sign/sign.py
     """
 
-    def __init__(self, in_channel: int, out_channel: int, hidden_channel: int, dropout: float, n_fflayers: int, batch_norm: bool = True):
+    def __init__(
+        self,
+        in_channel: int,
+        out_channel: int,
+        hidden_channel: int,
+        dropout: float,
+        n_fflayers: int,
+        batch_norm: bool = True
+    ):
+
         super(FeedForwardNet, self).__init__()
         self.in_channel = in_channel
         self.out_channel = out_channel
@@ -26,11 +35,12 @@ class FeedForwardNet(nn.Module):
             self.lins.append(nn.Linear(in_channel, hidden_channel))
             self.bns.append(nn.BatchNorm1d(hidden_channel))
 
-            for _ in range(n_fflayers - 2):
+            print(f'**** {n_fflayers-2} ****')
+            for _ in range(n_fflayers-2):
                 self.lins.append(nn.Linear(hidden_channel, hidden_channel))
                 self.bns.append(nn.BatchNorm1d(hidden_channel))
 
-            self.layers.append(nn.Linear(hidden_channel, out_channel))
+            self.lins.append(nn.Linear(hidden_channel, out_channel))
 
         if self.n_fflayers > 1:
             self.prelu = nn.PReLU()
@@ -78,8 +88,10 @@ class SIGN_plus(torch.nn.Module):
         # inception feedforward layers
         for _ in range(K):
             self.inception_ffs.append(
-                FeedForwardNet(in_channel, hidden_channel,
-                               hidden_channel, n_fflayers, dropout, batch_norm)
+                FeedForwardNet(
+                    in_channel, hidden_channel, hidden_channel,
+                    n_fflayers, dropout, batch_norm
+                )
             )
 
         # feedforward layer for concatenated outputs
@@ -87,8 +99,8 @@ class SIGN_plus(torch.nn.Module):
             K*hidden_channel, hidden_channel, out_channel, n_fflayers, dropout, batch_norm)
 
     def reset_parameters(self):
-        for l in self.inception_ffs:
-            l.reset_parameters()
+        for layer in self.inception_ffs:
+            layer.reset_parameters()
         self.concat_ff.reset_parameters()
 
     def forward(self, xs):

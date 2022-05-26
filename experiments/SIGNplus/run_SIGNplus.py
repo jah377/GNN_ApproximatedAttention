@@ -51,7 +51,7 @@ def main(args):
         data.num_classes,        # out_channel
         args.hidden_channel,
         args.dropout,
-        args.input_drop,
+        args.input_dropout,
         args.K,
         args.n_fflayers,
         args.batch_norm
