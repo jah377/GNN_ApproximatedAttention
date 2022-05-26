@@ -1,18 +1,18 @@
 #!/bin/bash
-#SBATCH --job-name="MHA_TR"
+#SBATCH --job-name="nMHA_TR"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:30:00
+#SBATCH --time=02:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
 
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-echo 'NOTES: get SIGN_MHA to RUN'
+echo 'NOTES: get SIGN_nMHA to RUN'
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 echo 
 
-EXPERIMENT_FOLDER='SIGN_MHA'
+EXPERIMENT_FOLDER='SIGN_nMHA'
 
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
@@ -27,7 +27,7 @@ num_workers=1
 # copy files to scratch
 rm -rf $TMPDIR/$FOLDER
 mkdir -p $TMPDIR/$FOLDER/data
-cp -r data/$dataset/* $TMPDIR/$FOLDER/data
+cp -r data/* $TMPDIR/$FOLDER/data
 cp -r general venvs $TMPDIR/$FOLDER
 cp -r experiments/$EXPERIMENT_FOLDER/* $TMPDIR/$FOLDER
 cd $TMPDIR/$FOLDER
@@ -47,22 +47,23 @@ python -c "import torch; print(f'Torch: {torch.__version__}')"
 python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
 echo ''
 
-
-python run_SIGN_MHA.py \
-    --dataset $dataset \
-    --seed 42 \
-    --optimizer_lr 0.09911 \
-    --optimizer_decay 0.05004 \
-    --epochs 10 \
-    --hidden_channel 579 \
-    --dropout 0.3852 \
-    --K 2 \
-    --batch_norm 1 \
-    --batch_size 1338 \
-    --attn_heads 2 \
-    --n_runs $num_runs \
-    --return_results 1
-
+for dataset in 'pubmed' 'arxiv'
+do 
+    python run_SIGN_nMHA.py \
+        --dataset $dataset \
+        --seed 42 \
+        --optimizer_lr 0.09911 \
+        --optimizer_decay 0.05004 \
+        --epochs 10 \
+        --hidden_channel 579 \
+        --dropout 0.3852 \
+        --K 2 \
+        --batch_norm 1 \
+        --batch_size 1338 \
+        --attn_heads 2 \
+        --n_runs $num_runs \
+        --return_results 1
+done 
 
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
 END=`date +%s`;

@@ -2,13 +2,13 @@
 #SBATCH --job-name="SGAT_TS"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:10:00
+#SBATCH --time=01:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
 
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-echo 'NOTES: get SIGN to sweep'
+echo 'NOTES: get SIGN_GAT to sweep'
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 echo 
 

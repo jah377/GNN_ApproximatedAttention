@@ -1,19 +1,19 @@
 #!/bin/bash
-#SBATCH --job-name="SIGN_TS"
+#SBATCH --job-name="SPLUS_TS"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:10:00
+#SBATCH --time=00:30:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
 
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-echo 'NOTES: get SIGN to sweep'
+echo 'NOTES: get SIGNplus to sweep'
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 echo 
 
-EXPERIMENT_FOLDER='SIGN'
-MODEL='SIGN'
+EXPERIMENT_FOLDER='SIGNplus'
+MODEL='SIGNplus'
 
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
@@ -52,44 +52,44 @@ echo '#!/bin/bash' >> start_agent.sh
 echo 'wandb agent --count '$sweep_iterations' $1 --project $2' >> start_agent.sh
 chmod u+x start_agent.sh        # need permission to use .sh file
 
+for dataset in 'pubmed' 'arxiv'
+do 
+    # perform sweep
+    yaml_file=$MODEL'.yaml'         # yaml name to write to
+    train_file='hps_'$MODEL'.py'    # model-specific py file used in sweep
+    project_name='dump'             # wandb project name
 
-# perform sweep
-yaml_file=$MODEL'.yaml'         # yaml name to write to
-train_file='hps_'$MODEL'.py'    # model-specific py file used in sweep
-project_name='dump'             # wandb project name
+    echo ''
+    echo '=================================================='
+    echo '============== START SWEEP: '$model' =================='
+    echo '=================================================='
 
-echo ''
-echo '=================================================='
-echo '============== START SWEEP: '$model' =================='
-echo '=================================================='
+    echo 'dataset': $dataset
+    echo 'method': $method
+    echo 'model': $MODEL
+    echo 'iterations': $sweep_iterations
+    echo 'run_trial': $run_trial
+    echo 'config:' $yaml_file
+    echo 'train_file:' $train_file
+    echo 'project_name:' $project_name
 
-echo 'dataset': $dataset
-echo 'method': $method
-echo 'model': $MODEL
-echo 'iterations': $sweep_iterations
-echo 'run_trial': $run_trial
-echo 'config:' $yaml_file
-echo 'train_file:' $train_file
-echo 'project_name:' $project_name
+    # build yaml file 
+    python build_yaml_SIGN.py \
+        --DATASET $dataset \
+        --MODEL $MODEL \
+        --METHOD $method \
+        --TRAIN_FILE $train_file \
+        --YAML_FILE $yaml_file \
+        --RUN_TRIAL $run_trial 
 
-# build yaml file 
-python build_yaml_SIGN.py \
-    --DATASET $dataset \
-    --MODEL $MODEL \
-    --METHOD $method \
-    --TRAIN_FILE $train_file \
-    --YAML_FILE $yaml_file \
-    --RUN_TRIAL $run_trial 
+    echo '=================================================='
+    echo ''
 
-echo '=================================================='
-echo ''
-
-# initialize and run sweep
-python general/slurm/run_slurm.py \
-    --YAML_FILE $yaml_file \
-    --PROJ_NAME $project_name
-    
-
+    # initialize and run sweep
+    python general/slurm/run_slurm.py \
+        --YAML_FILE $yaml_file \
+        --PROJ_NAME $project_name
+done
 
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
 END=`date +%s`;
