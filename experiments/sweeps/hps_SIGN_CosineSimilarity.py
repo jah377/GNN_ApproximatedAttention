@@ -2,13 +2,13 @@ import wandb
 import os.path as osp
 
 import torch
+from ogb.nodeproppred import Evaluator
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-from general.models.SIGN import net as SIGN
+from model_SIGN import SIGN
+from steps_SIGN import train_epoch, test_epoch
+from transform_CosineSimilarity import CosineAttention
 from general.utils import set_seeds, standardize_data, create_loader
-from general.epoch_steps.steps_SIGN import train_epoch, test_epoch
-
-from general.transforms.transforms_CosineSimilarity import transform_wAttention
 
 
 hyperparameter_defaults = dict(

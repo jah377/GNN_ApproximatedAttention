@@ -60,10 +60,16 @@ def download_data(data_name, K: int = 0):
     assert isinstance(K, int)
 
     if K == 0:
-        transform = T.NormalizeFeatures()
+        transform = T.Compose([
+            T.NormalizeFeatures(),
+            T.ToUndirected(),
+            T.AddSelfLoops(),
+        ])
     else:
         transform = T.Compose([
             T.NormalizeFeatures(),
+            T.ToUndirected(),
+            T.AddSelfLoops(),
             T.SIGN(K)
         ])
 
@@ -126,3 +132,16 @@ def create_loader(data, split: str, batch_size: int, num_workers: int = 1):
         drop_last=(split == 'train'),  # remove final incomplete
         num_workers=num_workers,
     )
+
+
+def get_n_params(model):
+    """
+    https://github.com/dmlc/dgl/blob/master/examples/pytorch/ogb/sign/sign.py
+    """
+    pp = 0
+    for p in list(model.parameters()):
+        nn = 1
+        for s in list(p.size()):
+            nn = nn*s
+        pp += nn
+    return pp

@@ -37,7 +37,7 @@ def main(args):
     set_seeds(args.seed)
 
     # data
-    data = download_data(args.dataset, K=args.K)
+    data = download_data(args.dataset)
     data = standardize_data(data, args.dataset)
 
     train_loader = NeighborLoader(

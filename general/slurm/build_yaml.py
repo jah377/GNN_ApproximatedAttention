@@ -167,6 +167,12 @@ def main(args):
         })
 
     if include_dpa_params:
+        param_dict.update({
+            'norm': {
+                'values': ['min_max', None]
+            },
+        })
+
         if args.MODEL.lower() == 'sign_mha':
             param_dict.update({
                 'attn_heads': {

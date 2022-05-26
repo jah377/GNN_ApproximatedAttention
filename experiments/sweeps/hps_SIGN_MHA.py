@@ -28,6 +28,7 @@ hyperparameter_defaults = dict(
     batch_norm=1,
     batch_size=256,
     attn_heads=1,
+    norm='min_max',
 )
 
 wandb.init(config=hyperparameter_defaults)
@@ -48,7 +49,8 @@ def main(config):
         data, transform_time = transform_wAttention(
             data,
             config.K,
-            config.attn_heads
+            config.attn_heads,
+            config.norm,
         )
 
         wandb.log({'precomp-transform_time': transform_time})

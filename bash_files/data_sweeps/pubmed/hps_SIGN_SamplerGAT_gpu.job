@@ -1,13 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name="pubmed_SsampGAT"
+#SBATCH --job-name="pubSGAT"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=16:00:00
+#SBATCH --time=20:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
-# SBATCH --mail-user=jon.harris@student.uva.nl
-# SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=jon.harris@student.uva.nl
+#SBATCH --mail-type=BEGIN,END,FAIL
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
 

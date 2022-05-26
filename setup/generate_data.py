@@ -21,6 +21,8 @@ def make_cora(folder_path):
 
         transform = T.Compose([
             T.NormalizeFeatures(),
+            T.ToUndirected(),
+            T.AddSelfLoops(),
             T.SIGN(K)
         ])
 
@@ -46,6 +48,8 @@ def make_pubmed(folder_path):
 
         transform = T.Compose([
             T.NormalizeFeatures(),
+            T.ToUndirected(),
+            T.AddSelfLoops(),
             T.SIGN(K)
         ])
 
@@ -72,6 +76,8 @@ def make_products(folder_path):
 
         transform = T.Compose([
             T.NormalizeFeatures(),
+            T.ToUndirected(),
+            T.AddSelfLoops(),
             T.SIGN(K)
         ])
 
@@ -97,6 +103,8 @@ def make_arxiv(folder_path):
 
         transform = T.Compose([
             T.NormalizeFeatures(),
+            T.ToUndirected(),
+            T.AddSelfLoops(),
             T.SIGN(K)
         ])
 
