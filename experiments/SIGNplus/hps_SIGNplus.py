@@ -1,18 +1,13 @@
+import glob
 import wandb
-import os.path as osp
+from ogb.nodeproppred import Evaluator
 
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-from general.models.SIGN import net as SIGN
+from model_SIGNplus import SIGN_plus
+from steps_SIGNplus import train_epoch, test_epoch
 from general.utils import set_seeds, standardize_data, create_loader
-from general.epoch_steps.steps_SIGN import train_epoch, test_epoch
-
-from transform_nMHA import DotProductAttention
-
-#################################################################
-########## THIS SHOULD BE IDENTICAL TO HPS_SIGN_SHA.PY ##########
-#################################################################
 
 hyperparameter_defaults = dict(
     dataset='cora',
@@ -26,7 +21,6 @@ hyperparameter_defaults = dict(
     K=1,
     batch_norm=1,
     batch_size=256,
-    attn_heads=1,
 )
 
 wandb.init(config=hyperparameter_defaults)
@@ -39,30 +33,10 @@ def main(config):
     set_seeds(config.seed)
 
     # IMPORT & STANDARDIZE DATA
-    path = f'data/{config.dataset}_sign_k0.pth'
-
-    if config.norm:
-        transform_path = f'data/{config.dataset}_sign_k{config.K}_heads{config.attn_heads}_wNorm__transformed.pth'
-    else:
-        transform_path = f'data/{config.dataset}_sign_k{config.K}_heads{config.attn_heads}_woNorm__transformed.pth'
-        
-    if not osp.isfile(transform_path):
-        data = standardize_data(torch.load(path), config.dataset)
-        data, transform_time = DotProductAttention(
-            data,
-            config.K,
-            config.attn_heads,
-            config.norm,
-        )
-
-        wandb.log({'precomp-transform_time': transform_time})
-
-        torch.save(data, transform_path)
-        print('\n~~~ TRANSFORM PERFORMED ~~~\n')
-        print(data)
-    else:
-        data = torch.load(transform_path)   # already standardized
-        assert hasattr(data, 'edge_index')  # must be torch data object
+    file_name = f'{config.dataset}_sign_k{config.K}.pth'
+    path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
+    data = torch.load(path)
+    data = standardize_data(data, config.dataset)
 
     # BUILD DATALOADER
     train_loader = create_loader(data, 'train', batch_size=config.batch_size)
@@ -70,7 +44,7 @@ def main(config):
     test_loader = create_loader(data, 'test', batch_size=config.batch_size)
 
     # BUILD MODEL
-    model = SIGN(
+    model = SIGN_plus(
         data.num_features,  # in_channel
         data.num_classes,   # out_channel
         config.hidden_channel,
@@ -98,6 +72,12 @@ def main(config):
         verbose=False,  # do not monitor lr updates
     )
 
+    # EVALUATOR
+    if data.dataset_name in ['products', 'arxiv']:
+        evaluator = Evaluator(name=f'ogbn-{data.dataset_name}')
+    else:
+        evaluator = None
+
     # RUN THROUGH EPOCHS
     # params for early termination
     previous_loss = 1e10
@@ -109,9 +89,9 @@ def main(config):
         training_out, training_time = train_epoch(
             model, data, optimizer, train_loader)
 
-        train_out = test_epoch(model, data, train_loader)
-        val_out = test_epoch(model, data, val_loader)
-        test_out = test_epoch(model, data, test_loader)
+        train_out = test_epoch(model, data, train_loader, evaluator)
+        val_out = test_epoch(model, data, val_loader, evaluator)
+        test_out = test_epoch(model, data, test_loader, evaluator)
 
         scheduler.step(val_out['loss'])  # modulate learning rate
 

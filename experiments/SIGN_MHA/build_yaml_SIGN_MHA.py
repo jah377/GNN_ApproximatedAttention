@@ -24,6 +24,7 @@ parser.add_argument('--K', type=int, default=None)
 parser.add_argument('--BATCH_NORM', type=strtobool, default=None)
 parser.add_argument('--BATCH_SIZE', type=int, default=None)
 parser.add_argument('--ATTN_HEADS', type=int, default=None)
+parser.add_argument('--NORM', type=str, default=None)
 
 
 args = parser.parse_args()
@@ -48,6 +49,7 @@ def main(args):
     assert args.MODEL != None
     assert args.TRAIN_FILE != None
     assert args.YAML_FILE != None
+    assert args.NORM in ['min-max', None]
 
     # outline config dictionary
     sweep_config = {
@@ -114,7 +116,12 @@ def main(args):
             'distribution': 'int_uniform',
             'min': 1,
             'max': 6,
-        }
+        },
+        'norm': {
+            'distribution': 'int_uniform',
+            'min': 0,
+            'max': 1,
+        },
     }
 
     sweep_config['parameters'] = param_dict
@@ -136,6 +143,7 @@ def main(args):
         sweep_config['parameters']['batch_norm'] = {'value': 1}
         sweep_config['parameters']['batch_size'] = {'value': 256}
         sweep_config['parameters']['attn_heads'] = {'value': 2}
+        sweep_config['parameters']['norm'] = {'value': 0}
 
     # write config to yaml file
     with open(args.YAML_FILE, 'w') as outfile:

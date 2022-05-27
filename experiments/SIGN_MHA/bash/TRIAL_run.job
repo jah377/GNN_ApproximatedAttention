@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="SMHA_TR"
+#SBATCH --job-name="SnMHA_TR"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=02:00:00
@@ -8,11 +8,11 @@
 #SBATCH --output=%x.%j.out
 
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-echo 'NOTES: get SIGN_MHA to RUN'
+echo 'NOTES: get SIGN_nMHA to RUN'
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 echo 
 
-EXPERIMENT_FOLDER='SIGN_MHA'
+EXPERIMENT_FOLDER='SIGN_nMHA'
 
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
@@ -49,7 +49,7 @@ echo ''
 
 for dataset in 'pubmed' 'arxiv'
 do 
-    python run_SIGN_MHA.py \
+    python run_SIGN_nMHA.py \
         --dataset $dataset \
         --seed 42 \
         --optimizer_lr 0.09911 \
@@ -63,7 +63,7 @@ do
         --attn_heads 2 \
         --n_runs $num_runs \
         --return_results 1
-done
+done 
 
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
 END=`date +%s`;

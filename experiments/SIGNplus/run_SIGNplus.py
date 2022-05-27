@@ -7,7 +7,7 @@ from ogb.nodeproppred import Evaluator
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from model_SIGNplus import SIGN_plus
-from steps_SIGNplus import train_epoch, test_epoch
+from steps_SIGN import train_epoch, test_epoch, get_inference_time
 from general.utils import set_seeds, download_data, standardize_data, create_loader, get_n_params
 
 
@@ -44,6 +44,7 @@ def main(args):
     train_loader = create_loader(data, 'train', batch_size=args.batch_size)
     val_loader = create_loader(data, 'val', batch_size=args.batch_size)
     test_loader = create_loader(data, 'test', batch_size=args.batch_size)
+    all_loader = create_loader(data, 'all', batch_size=args.batch_size)
 
     # model
     model = SIGN_plus(
@@ -51,11 +52,8 @@ def main(args):
         data.num_classes,        # out_channel
         args.hidden_channel,
         args.dropout,
-        args.input_dropout,
         args.K,
-        args.n_fflayers,
-        args.batch_norm
-    ).to(device)
+        args.batch_norm).to(device)
 
     n_params = get_n_params(model)
 
@@ -66,6 +64,7 @@ def main(args):
         evaluator = None
 
     store_run = pd.DataFrame()
+    store_inf_time = []
     for run in range(args.n_runs):
         model.reset_parameters()
 
@@ -97,8 +96,10 @@ def main(args):
 
             # store epoch
             epoch_dict = {
-                'run': run, 'epoch': epoch,
-                'n_params': n_params, 'training_time': training_time
+                'run': run,
+                'epoch': epoch,
+                'n_params': n_params,
+                'training_time': training_time
             }
             epoch_dict.update(
                 {f'training_{k}': v for k, v in training_out.items()})
@@ -113,6 +114,11 @@ def main(args):
                 ignore_index=True
             )
 
+        # total inference time
+        store_inf_time.append(
+            get_inference_time(model, data, all_loader)
+        )
+
     if args.return_results:
 
         print(f' --- {data.dataset_name.upper()} --- ')
@@ -121,15 +127,18 @@ def main(args):
         n_params = store_run['n_params'].mean()
         print(f'Number of Model Parameters: {n_params}')
 
-        # total train & inference times
+        # transformation time
+        print(f'Precomputation Time (s): {transform_time}')
+
+        # training time
         train_times = store_run['training_time'].agg(['mean', 'std'])
         print(
             f'Training Time (s): {train_times[0].round(5)} +/- {train_times[1].round(5)}')
 
-        cols = ['eval_train_time', 'eval_val_time', 'eval_test_time']
-        inf_time = store_run[cols].sum(axis=1).agg(['mean', 'std'])
+        import numpy as np
+        inf_mean, inf_std = np.mean(store_inf_time), np.std(store_inf_time)
         print(
-            f'Inference Time (s): {inf_time[0].round(5)} +/- {inf_time[1].round(5)}')
+            f'Inference Time (s): {inf_mean.__round__(5)} +/- {inf_std.__round__(5)}')
 
         # f1 score
         last_epoch = (store_run.epoch == max(store_run.epoch))

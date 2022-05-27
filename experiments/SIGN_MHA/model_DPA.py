@@ -9,14 +9,14 @@ from torch_sparse import SparseTensor
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-# def sparse_min_max_norm(sparse_tensor):
-#     row, col, val = sparse_tensor.coo()
-#     return SparseTensor(
-#         row=row,
-#         col=col,
-#         value=(val-val.min())/(val.max()-val.min()),
-#         sparse_sizes=sparse_tensor.sizes()
-#     )
+def sparse_min_max_norm(sparse_tensor):
+    row, col, val = sparse_tensor.coo()
+    return SparseTensor(
+        row=row,
+        col=col,
+        value=(val-val.min())/(val.max()-val.min()),
+        sparse_sizes=sparse_tensor.sizes()
+    )
 
 
 class DotProductAttention(nn.Module):
@@ -26,14 +26,16 @@ class DotProductAttention(nn.Module):
             num_feats: int,
             num_edges: int,
             num_heads: int = 1,
+            norm: bool = False,
     ):
         """
         https://stackoverflow.com/questions/20983882/efficient-dot-products-of-large-memory-mapped-arrays
 
           num_nodes:    total number of nodes 
           num_feats:    feature embedding dimension
+          num_edges:
           num_heads:    attn heads (default=1)
-
+          norm:         if True, min-max norm attn weights
         """
         super().__init__()
         assert num_heads > 0
@@ -43,6 +45,7 @@ class DotProductAttention(nn.Module):
         self.num_feats = int(num_feats)
         self.num_edges = int(num_edges)
         self.num_heads = int(num_heads)
+        self.norm = norm
 
         # dot product
         self.out_shape = (self.num_heads, self.num_nodes,
@@ -109,6 +112,10 @@ class DotProductAttention(nn.Module):
         # soft max
         attn = torch.sparse.softmax(attn, dim=2)
         attn = torch.sparse.sum(attn, dim=0)/self.num_heads
+
+        # min-max normalization
+        if self.norm == True:
+            return sparse_min_max_norm(attn)
 
         return SparseTensor(
             row=attn.indices()[0],

@@ -1,3 +1,4 @@
+import glob
 import wandb
 import os.path as osp
 
@@ -35,11 +36,14 @@ def main(config):
     set_seeds(config.seed)
 
     # IMPORT & STANDARDIZE DATA
-    path = f'data/{config.dataset}_sign_k{config.K}.pth'
-    transform_path = f'data/{config.dataset}_sign_cs_transformed.pth'
+    file_name = f'{config.dataset}_sign_k0.pth'
+    file_path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
+    folder_path = osp.dirname(file_path)
+    transform_path = osp.join(
+        folder_path, f'{config.dataset}_sign_k{config.K}_transformed.pth')
 
     if not osp.isfile(transform_path):
-        data = standardize_data(torch.load(path), config.dataset)
+        data = standardize_data(torch.load(file_path), config.dataset)
         data, transform_time = GATAttention(
             data, config.K, GATparams.get(config.dataset))
 

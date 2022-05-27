@@ -1,3 +1,4 @@
+import glob
 import wandb
 import os.path as osp
 
@@ -7,7 +8,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from model_SIGN import SIGN
 from steps_SIGN import train_epoch, test_epoch
-from transform_CosineSimilarity import CosineAttention
+from transform_MHA import DPAttention
 from general.utils import set_seeds, standardize_data, create_loader
 
 hyperparameter_defaults = dict(
@@ -22,6 +23,8 @@ hyperparameter_defaults = dict(
     K=1,
     batch_norm=1,
     batch_size=256,
+    attn_heads=1,
+    norm=False,
 )
 
 wandb.init(config=hyperparameter_defaults)
@@ -34,12 +37,15 @@ def main(config):
     set_seeds(config.seed)
 
     # IMPORT & STANDARDIZE DATA
-    path = f'data/{config.dataset}_sign_k{config.K}.pth'
-    transform_path = f'data/{config.dataset}_sign_cs_transformed.pth'
+    file_name = f'{config.dataset}_sign_k0.pth'
+    file_path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
+    folder_path = osp.dirname(file_path)
+    transform_path = osp.join(
+        folder_path, f'{config.dataset}_sign_k{config.K}_heads{config.attn_heads}_norm{config.norm}_transformed.pth')
 
     if not osp.isfile(transform_path):
-        data = standardize_data(torch.load(path), config.dataset)
-        data, transform_time = CosineAttention(
+        data = standardize_data(torch.load(file_path), config.dataset)
+        data, transform_time = DPAttention(
             data,
             config.K,
             config.attn_heads,

@@ -6,7 +6,7 @@ from general.utils import time_wrapper  # wrapper
 
 
 @time_wrapper
-def DPAttention(data, K: int, attn_heads: int = 1):
+def DPAttention(data, K: int, attn_heads: int = 1, norm: bool = False):
     """
     Args:
         data:           data object
@@ -36,7 +36,7 @@ def DPAttention(data, K: int, attn_heads: int = 1):
     # =========== not part of T.SIGN(K) ===========
 
     # replace adj with DotProductAttention weights
-    adj_t = extract_attention(data, attn_heads)
+    adj_t = extract_attention(data, attn_heads, norm)
     adj_t = deg_inv_sqrt.view(-1, 1) * adj_t * deg_inv_sqrt.view(1, -1)
 
     # =========== not part of T.SIGN(K) ===========
@@ -56,7 +56,7 @@ def DPAttention(data, K: int, attn_heads: int = 1):
     return data
 
 
-def extract_attention(data, attn_heads):
+def extract_attention(data, attn_heads, norm: bool = False):
     """ calculate dotproduct attention
     Args:
         data:
@@ -70,7 +70,8 @@ def extract_attention(data, attn_heads):
         data.num_nodes,
         data.num_features,
         data.num_edges,
-        attn_heads
+        attn_heads,
+        norm,
     )
 
     return model(data.x, data.edge_index)

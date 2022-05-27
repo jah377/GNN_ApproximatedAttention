@@ -123,10 +123,10 @@ def standardize_data(dataset, data_name: str):
 def create_loader(data, split: str, batch_size: int, num_workers: int = 1):
     """ build DataLoader object based on inputs """
 
-    assert split in ['train', 'val', 'test']
+    assert split in ['train', 'val', 'test', 'all']
 
     return DataLoader(
-        data[f'{split}_mask'],
+        data.n_id if split == 'all' else data[f'{split}_mask'],
         batch_size=batch_size,
         shuffle=(split == 'train'),   # shuffle if training loader
         drop_last=(split == 'train'),  # remove final incomplete

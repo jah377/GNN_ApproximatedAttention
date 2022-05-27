@@ -25,9 +25,6 @@ class FeedForwardNet(nn.Module):
         self.dropout = dropout
         self.n_fflayers = n_fflayers
         self.batch_norm = batch_norm
-
-        print(f'**** {n_fflayers} ****')
-
         self.lins = nn.ModuleList()
         self.bns = nn.ModuleList()
 
@@ -37,7 +34,6 @@ class FeedForwardNet(nn.Module):
             self.lins.append(nn.Linear(in_channel, hidden_channel))
             self.bns.append(nn.BatchNorm1d(hidden_channel))
 
-            print(f'**** {n_fflayers-2} ****')
             for _ in range(n_fflayers-2):
                 self.lins.append(nn.Linear(hidden_channel, hidden_channel))
                 self.bns.append(nn.BatchNorm1d(hidden_channel))
@@ -61,7 +57,7 @@ class FeedForwardNet(nn.Module):
     def forward(self, x):
         for i, layer in enumerate(self.lins):
             x = layer(x)
-            if i < self.n_layers-1:
+            if i < self.n_fflayers-1:
                 if self.batch_norm == True:
                     x = self.dropout(self.prelu(self.bns[i](x)))
                 else:
@@ -82,13 +78,20 @@ class SIGN_plus(torch.nn.Module):
         batch_norm: bool = True
     ):
         super(SIGN_plus, self).__init__()
+        self.in_channel = in_channel
+        self.out_channel = out_channel
+        self.hidden_channel = hidden_channel
+        self.K = K
+        self.n_fflayers = n_fflayers
+        self.batch_norm = batch_norm
         self.dropout = nn.Dropout(dropout)
-        self.prelu = nn.PReLU()
-        self.inception_ffs = nn.ModuleList()
         self.input_dropout = nn.Dropout(input_drop)
 
+        self.prelu = nn.PReLU()
+        self.inception_ffs = nn.ModuleList()
+
         # inception feedforward layers
-        for _ in range(K):
+        for _ in range(self.K + 1):
             self.inception_ffs.append(
                 FeedForwardNet(
                     in_channel, hidden_channel, hidden_channel,
@@ -98,7 +101,9 @@ class SIGN_plus(torch.nn.Module):
 
         # feedforward layer for concatenated outputs
         self.concat_ff = FeedForwardNet(
-            K*hidden_channel, hidden_channel, out_channel, dropout, n_fflayers, batch_norm)
+            (self.K+1)*hidden_channel, hidden_channel,
+            out_channel, dropout, n_fflayers, batch_norm
+        )
 
     def reset_parameters(self):
         for layer in self.inception_ffs:
@@ -109,12 +114,9 @@ class SIGN_plus(torch.nn.Module):
         """ xs = [AX^0, AX^1, ..., AX^K] """
 
         xs = [self.input_dropout(x) for x in xs]  # input dropout
-
         hs = []  # store forward pass of each AX^K
 
-        for i, layer in self.inception_ffs:
+        for i, layer in enumerate(self.inception_ffs):
             hs.append(layer(xs[i]))
 
-        out = self.concat_ff(self.dropout(self.prelu(torch.cat(hs, dim=-1))))
-
-        return out.log_softmax(dim=-1)    # calc final predictions
+        return self.concat_ff(self.dropout(self.prelu(torch.cat(hs, dim=-1)))).log_softmax(dim=-1)

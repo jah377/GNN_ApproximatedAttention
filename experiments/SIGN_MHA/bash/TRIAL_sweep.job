@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="SMHA_TS"
+#SBATCH --job-name="SnMHA_TR"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=02:00:00
@@ -8,12 +8,12 @@
 #SBATCH --output=%x.%j.out
 
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-echo 'NOTES: get SIGN_MHA to sweep'
+echo 'NOTES: get SIGN+nMHA to sweep'
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 echo 
 
-EXPERIMENT_FOLDER='SIGN_MHA'
-MODEL='SIGN_MHA'
+EXPERIMENT_FOLDER='SIGN_nMHA'
+MODEL='SIGN_nMHA'
 
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
@@ -74,7 +74,7 @@ do
     echo 'project_name:' $project_name
 
     # build yaml file 
-    python build_yaml_SIGN_MHA.py \
+    python build_yaml_SIGN_nMHA.py \
         --DATASET $dataset \
         --MODEL $MODEL \
         --METHOD $method \
@@ -89,8 +89,8 @@ do
     python general/slurm/run_slurm.py \
         --YAML_FILE $yaml_file \
         --PROJ_NAME $project_name
-        
 done
+
 
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
 END=`date +%s`;

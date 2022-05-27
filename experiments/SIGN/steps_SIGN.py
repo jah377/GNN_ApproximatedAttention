@@ -1,3 +1,4 @@
+import time
 import torch
 import torch.nn.functional as F
 
@@ -69,11 +70,7 @@ def test_epoch(model, data, loader, evaluator=None):
     """
     model.eval()
 
-    @time_wrapper
-    def predict(model, xs):
-        return model(xs)
-
-    total_time = total_examples = total_loss = 0
+    total_examples = total_loss = 0
     y_pred, y_true = [], []
     for idx in loader:
 
@@ -84,7 +81,7 @@ def test_epoch(model, data, loader, evaluator=None):
         y = data.y[idx].to(device)              # move target to device
 
         # forward pass
-        out, out_time = predict(model, xs)
+        out = model(xs)
         loss = F.nll_loss(out, y)
 
         y_pred.append(out.argmax(dim=1).cpu())
@@ -92,7 +89,6 @@ def test_epoch(model, data, loader, evaluator=None):
 
         # store
         batch_size = int(idx.numel())
-        total_time += out_time
         total_examples += batch_size
         total_loss += float(loss) * batch_size
 
@@ -109,5 +105,22 @@ def test_epoch(model, data, loader, evaluator=None):
     return {
         'f1': f1_score,
         'loss': total_loss/total_examples,
-        'time': total_time,  # total inference time
     }
+
+
+@torch.no_grad()
+def get_inference_time(model, data, loader):
+    start = time.time()
+
+    model.eval()
+
+    for idx in loader:
+        # organize data
+        xs = [data.x[idx].to(device)]
+        xs += [data[f'x{i}'][idx].to(device)
+               for i in range(1, model.K + 1)]
+
+        # forward pass
+        model(xs)
+
+    return time.time() - start

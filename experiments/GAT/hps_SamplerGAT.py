@@ -1,3 +1,4 @@
+import glob
 import wandb
 import copy
 from ogb.nodeproppred import Evaluator
@@ -35,7 +36,8 @@ def main(config):
     set_seeds(config.seed)
 
     # IMPORT & STANDARDIZE DATA
-    path = f'data/{config.dataset}_sign_k0.pth'
+    file_name = f'{config.dataset}_sign_k0.pth'
+    path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
     data = torch.load(path)
     data = standardize_data(data, config.dataset)
 
@@ -114,7 +116,8 @@ def main(config):
             train_loader
         )
 
-        eval_out, inf_time = test_epoch(model, data, subgraph_loader, evaluator)
+        eval_out, inf_time = test_epoch(
+            model, data, subgraph_loader, evaluator)
 
         val_loss = eval_out['val_loss']
         scheduler.step(val_loss)

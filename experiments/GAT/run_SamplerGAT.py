@@ -113,8 +113,11 @@ def main(args):
 
             # store epoch
             epoch_dict = {
-                'run': run, 'epoch': epoch,
-                'n_params': n_params, 'training_time': training_time, 'inf_time': inf_time,
+                'run': run, 
+                'epoch': epoch,
+                'n_params': n_params, 
+                'training_time': training_time, 
+                'inf_time': inf_time,
             }
             epoch_dict.update(
                 {f'training_{k}': v for k, v in training_out.items()})
