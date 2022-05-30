@@ -26,7 +26,7 @@ SCRATCH_FOLDER=$DATASET'_'$MODEL'_sweep'    # name of folder on TMPDIR
 
 # copy files to scratch
 mkdir -p $TMPDIR/$SCRATCH_FOLDER/data
-cp -r data/* $TMPDIR/$SCRATCH_FOLDER/data
+cp -r data/$DATASET/* $TMPDIR/$SCRATCH_FOLDER/data
 cp -r general venvs $TMPDIR/$SCRATCH_FOLDER
 cp -r experiments/$EXPERIMENT_FOLDER/* $TMPDIR/$SCRATCH_FOLDER
 cd $TMPDIR/$SCRATCH_FOLDER

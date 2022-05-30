@@ -123,7 +123,7 @@ def main(args):
     sweep_config['parameters'] = param_dict
 
     # if single-head attention:
-    if args.MODEL.lower() == 'sign_sha':
+    if 'sha' in args.MODEL.lower():
         sweep_config['parameters']['attn_heads'] = {'value': 1}
 
     # user specified parameters

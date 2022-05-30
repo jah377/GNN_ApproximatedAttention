@@ -14,18 +14,17 @@ parser.add_argument('--METHOD', type=str, default='random')
 parser.add_argument('--TRAIN_FILE', type=str, default=None)
 parser.add_argument('--YAML_FILE', type=str, default=None)
 parser.add_argument('--RUN_TRIAL', type=strtobool, default=True)
-parser.add_argument('--N_WORKERS', type=int, default=1)
 parser.add_argument('--SEED', type=int, default=None)
 parser.add_argument('--OPTIMIZER_LR', type=float, default=None)
 parser.add_argument('--OPTIMIZER_DECAY', type=float, default=None)
 parser.add_argument('--EPOCHS', type=int, default=None)
 parser.add_argument('--HIDDEN_CHANNEL', type=int, default=None)
 parser.add_argument('--DROPOUT', type=float, default=None)
-parser.add_argument('--NLAYERS', type=int, default=None)
-parser.add_argument('--HEADS_IN', type=int, default=None)
-parser.add_argument('--HEADS_OUT', type=int, default=None)
+parser.add_argument('--K', type=int, default=None)
+parser.add_argument('--BATCH_NORM', type=strtobool, default=None)
 parser.add_argument('--BATCH_SIZE', type=int, default=None)
-parser.add_argument('--N_NEIGHBORS', type=int, default=None)
+parser.add_argument('--CS_BATCH_SIZE', type=int, default=None)
+
 
 args = parser.parse_args()
 
@@ -35,16 +34,18 @@ def main(args):
 
     Args:
         DATASET:        name of dataset to be used (pubmed, cora)
+        MODEL:          name of model (GAT_fullbatch, SIGN, SGcomb, SGsep)
         METHOD:         sweep method (random, bayes, grid)
         TRAIN_FILE:     name of py file used for sweep
         YAML_FILE:      desired named of output yaml file
-        IGNORE_KNOWN:   if True, only sweep params not reported in literature
+        RUN_TRIAL:      if True, reduce complexity for efficent test of script
 
     Returns:
         saved yaml file
     """
     assert args.METHOD.lower() in ['grid', 'random', 'bayes']
     assert args.DATASET.lower() in ['pubmed', 'cora', 'arxiv', 'products']
+    assert args.MODEL != None
     assert args.TRAIN_FILE != None
     assert args.YAML_FILE != None
 
@@ -58,16 +59,12 @@ def main(args):
         },
     }
 
-    # add parameters
+    # add parameters (not model specific) to config dictionary
     # q_uniform in SIGN: https://arxiv.org/pdf/2004.11198v2.pdf
     param_dict = {
         'dataset': {
             'distribution': 'constant',
             'value': args.DATASET.lower()
-        },
-        'num_workers': {
-            'distribution': 'constant',
-            'value': args.N_WORKERS
         },
         'seed': {
             'distribution': 'constant',
@@ -96,42 +93,33 @@ def main(args):
             'min': 0.2,
             'max': 0.8,
         },
-        'heads_in': {
+        'K': {
             'distribution': 'int_uniform',
-            'min': 1,
-            'max': 9,
+            'min': 0,
+            'max': 5,
         },
-        'heads_out': {
+        'batch_norm': {
             'distribution': 'int_uniform',
-            'min': 1,
-            'max': 9,
-        },
-        'nlayers': {
-            'distribution': 'int_uniform',
-            'min': 2,
-            'max': 4,
+            'min': 0,
+            'max': 1,
         },
         'batch_size': {
             'values': [2**x for x in range(3, 13)],
         },
-        'n_neighbors': {
-            'values': [-1, 10, 20, 50, 60, 100, 150, 300, 500]
+        'cs_batch_size': {
+            'distribution': 'constant',
+            'value': 10000
         }
     }
 
     sweep_config['parameters'] = param_dict
-
-    # reduce batchsize for large datasets
-    if args.DATASET.lower() != 'pubmed':
-        sweep_config['parameters']['batch_size'] = {
-            'values': [2**x for x in range(3, 9)]}
 
     # user specified parameters
     for k, v in vars(args).items():
         if v is not None:
             sweep_config['parameters'][k.lower()] = {'value': v}
 
-    # if trial, simplify computation
+    # reduce complexity for trialing
     if args.RUN_TRIAL:
         sweep_config['method'] = 'random'
         sweep_config['parameters']['optimizer_lr'] = {'value': 1e-3}
@@ -139,12 +127,10 @@ def main(args):
         sweep_config['parameters']['epochs'] = {'value': 5}
         sweep_config['parameters']['hidden_channel'] = {'value': 32}
         sweep_config['parameters']['dropout'] = {'value': 0.6}
-        sweep_config['parameters']['heads_in'] = {'value': 8}
-        sweep_config['parameters']['heads_out'] = {'value': 1}
-        sweep_config['parameters']['nlayers'] = {'value': 1}
-        sweep_config['parameters']['batch_size'] = {
-            'value': 256}  # for GAT_loader
-        sweep_config['parameters']['n_neighbors'] = {'value': 20}
+        sweep_config['parameters']['K'] = {'value': 1}
+        sweep_config['parameters']['batch_norm'] = {'value': 1}
+        sweep_config['parameters']['batch_size'] = {'value': 256}
+        sweep_config['parameters']['cs_batch_size'] = {'value': 50000}
 
     # write config to yaml file
     with open(args.YAML_FILE, 'w') as outfile:
