@@ -42,7 +42,7 @@ def main(config):
         folder_path, f'{config.dataset}_sign_k{config.K}_transformed.pth')
 
     if not osp.isfile(transform_path):
-        data = standardize_data(torch.load(file_path), config.dataset)
+        data = torch.load(file_path)
         data, transform_time = CosineAttention(
             data,
             config.K,

@@ -6,7 +6,7 @@ import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from model_SIGNplus import SIGN_plus
-from steps_SIGNplus import train_epoch, test_epoch
+from steps_SIGN import train_epoch, test_epoch
 from general.utils import set_seeds, standardize_data, create_loader
 
 hyperparameter_defaults = dict(
@@ -18,9 +18,11 @@ hyperparameter_defaults = dict(
     epochs=5,
     hidden_channel=256,
     dropout=0.6,
+    intput_dropout=0.1,
     K=1,
     batch_norm=1,
     batch_size=256,
+    n_fflayers=2,
 )
 
 wandb.init(config=hyperparameter_defaults)
@@ -36,7 +38,6 @@ def main(config):
     file_name = f'{config.dataset}_sign_k{config.K}.pth'
     path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
     data = torch.load(path)
-    data = standardize_data(data, config.dataset)
 
     # BUILD DATALOADER
     train_loader = create_loader(data, 'train', batch_size=config.batch_size)
@@ -45,11 +46,13 @@ def main(config):
 
     # BUILD MODEL
     model = SIGN_plus(
-        data.num_features,  # in_channel
-        data.num_classes,   # out_channel
+        data.num_features,       # in_channel
+        data.num_classes,        # out_channel
         config.hidden_channel,
         config.dropout,
+        config.input_dropout,
         config.K,
+        config.n_fflayers,
         config.batch_norm).to(device)
 
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)

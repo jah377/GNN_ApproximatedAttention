@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="SnMHA_TR"
+#SBATCH --job-name="SMHA_TS"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=02:00:00
@@ -12,8 +12,8 @@ echo 'NOTES: get SIGN+nMHA to sweep'
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 echo 
 
-EXPERIMENT_FOLDER='SIGN_nMHA'
-MODEL='SIGN_nMHA'
+EXPERIMENT_FOLDER='SIGN_MHA'
+MODEL='SIGN_MHA'
 
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
@@ -74,7 +74,7 @@ do
     echo 'project_name:' $project_name
 
     # build yaml file 
-    python build_yaml_SIGN_nMHA.py \
+    python build_yaml_SIGN_MHA.py \
         --DATASET $dataset \
         --MODEL $MODEL \
         --METHOD $method \

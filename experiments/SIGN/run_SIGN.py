@@ -1,3 +1,4 @@
+import glob
 import argparse
 import pandas as pd
 from distutils.util import strtobool
@@ -8,7 +9,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from model_SIGN import SIGN
 from steps_SIGN import train_epoch, test_epoch, get_inference_time
-from general.utils import set_seeds, download_data, standardize_data, create_loader, get_n_params
+from general.utils import set_seeds, transform_data, create_loader, get_n_params
 
 
 # product: https://arxiv.org/pdf/2004.11198v2.pdf
@@ -33,12 +34,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def main(args):
     print(args)
-
     set_seeds(args.seed)
 
     # data
-    data = download_data(args.dataset, K=args.K)
-    data = standardize_data(data, args.dataset)
+    file_name = f'{args.dataset}_sign_k0.pth'
+    path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
+    data, transform_time = transform_data(torch.load(path), args.K)
 
     train_loader = create_loader(data, 'train', batch_size=args.batch_size)
     val_loader = create_loader(data, 'val', batch_size=args.batch_size)
@@ -118,7 +119,6 @@ def main(args):
             get_inference_time(model, data, all_loader)
         )
 
-    
     if args.return_results:
 
         print(f' --- {data.dataset_name.upper()} --- ')
@@ -126,6 +126,9 @@ def main(args):
         # parameters
         n_params = store_run['n_params'].mean()
         print(f'Number of Model Parameters: {n_params}')
+
+        # transformation time
+        print(f'Precomputation Time (s): {transform_time}')
 
         # training time
         train_times = store_run['training_time'].agg(['mean', 'std'])

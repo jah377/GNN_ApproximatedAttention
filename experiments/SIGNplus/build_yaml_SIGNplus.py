@@ -86,9 +86,8 @@ def main(args):
             'max': 100,
         },
         'hidden_channel': {
-            'distribution': 'q_uniform',
-            'min': 8,
-            'max': 1024,
+            'distribution': 'uniform',
+            'values': [2**x for x in range(3, 13)]
         },
         'dropout': {
             'distribution': 'uniform',
@@ -97,8 +96,8 @@ def main(args):
         },
         'input_dropout': {
             'distribution': 'uniform',
-            'min': 0.2,
-            'max': 0.8,
+            'min': 0,
+            'max': 0.5,
         },
         'K': {
             'distribution': 'int_uniform',
@@ -116,9 +115,8 @@ def main(args):
             'max': 1,
         },
         'batch_size': {
-            'distribution': 'q_uniform',
-            'min': 8,
-            'max': 2048,
+            'distribution': 'uniform',
+            'values': [2**x for x in range(3, 13)]
         },
     }
 

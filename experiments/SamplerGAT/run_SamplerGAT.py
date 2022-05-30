@@ -39,8 +39,7 @@ def main(args):
     set_seeds(args.seed)
 
     # data
-    data = download_data(args.dataset)
-    data = standardize_data(data, args.dataset)
+    data = torch.load(f'data/{args.dataset}/{args.dataset}_sign_k0.pth')
 
     train_loader = NeighborLoader(
         data,
@@ -113,10 +112,10 @@ def main(args):
 
             # store epoch
             epoch_dict = {
-                'run': run, 
+                'run': run,
                 'epoch': epoch,
-                'n_params': n_params, 
-                'training_time': training_time, 
+                'n_params': n_params,
+                'training_time': training_time,
                 'inf_time': inf_time,
             }
             epoch_dict.update(

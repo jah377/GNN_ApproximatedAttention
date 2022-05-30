@@ -1,3 +1,4 @@
+import glob
 import argparse
 import pandas as pd
 from distutils.util import strtobool
@@ -9,7 +10,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from model_SIGN import SIGN
 from transform_CosineSimilarity import CosineAttention
 from steps_SIGN import train_epoch, test_epoch, get_inference_time
-from general.utils import set_seeds, download_data, standardize_data, create_loader, get_n_params
+from general.utils import set_seeds, create_loader, get_n_params
 
 
 # product: https://arxiv.org/pdf/2004.11198v2.pdf
@@ -38,8 +39,10 @@ def main(args):
     set_seeds(args.seed)
 
     # data
-    data = download_data(args.dataset, K=args.K)
-    data = standardize_data(data, args.dataset)
+    file_name = f'{args.dataset}_sign_k0.pth'
+    path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
+    data = torch.load(path)
+
     data, transform_time = CosineAttention(
         data, args.K, args.cs_batch_size)
     print('-- TRANSFORM COMPLETE ')

@@ -35,7 +35,7 @@ def main(args):
 
     Args:
         DATASET:        name of dataset to be used (pubmed, cora)
-        MODEL:          name of model (GAT_fullbatch, SIGN, SGcomb, SGsep)
+        MODEL:          name of model
         METHOD:         sweep method (random, bayes, grid)
         TRAIN_FILE:     name of py file used for sweep
         YAML_FILE:      desired named of output yaml file
@@ -88,9 +88,7 @@ def main(args):
             'max': 100,
         },
         'hidden_channel': {
-            'distribution': 'q_uniform',
-            'min': 8,
-            'max': 1024,
+            'values': [2**x for x in range(3, 13)],
         },
         'dropout': {
             'distribution': 'uniform',
@@ -108,9 +106,7 @@ def main(args):
             'max': 1,
         },
         'batch_size': {
-            'distribution': 'q_uniform',
-            'min': 8,
-            'max': 2048,
+            'values': [2**x for x in range(3, 13)],
         },
         'attn_heads': {
             'distribution': 'int_uniform',
@@ -125,6 +121,10 @@ def main(args):
     }
 
     sweep_config['parameters'] = param_dict
+
+    # if single-head attention:
+    if args.MODEL.lower() == 'sign_sha':
+        sweep_config['parameters']['attn_heads'] = {'value': 1}
 
     # user specified parameters
     for k, v in vars(args).items():

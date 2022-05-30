@@ -10,7 +10,7 @@ from model_SIGN import SIGN
 from steps_SIGN import train_epoch, test_epoch
 from SamplerGAT_configs import GATparams
 from transform_SamplerGAT import GATAttention
-from general.utils import set_seeds, standardize_data, create_loader
+from general.utils import set_seeds, create_loader
 
 hyperparameter_defaults = dict(
     dataset='cora',
@@ -43,7 +43,7 @@ def main(config):
         folder_path, f'{config.dataset}_sign_k{config.K}_transformed.pth')
 
     if not osp.isfile(transform_path):
-        data = standardize_data(torch.load(file_path), config.dataset)
+        data = torch.load(file_path)
         data, transform_time = GATAttention(
             data, config.K, GATparams.get(config.dataset))
 
@@ -53,7 +53,7 @@ def main(config):
         print('\n~~~ TRANSFORM PERFORMED ~~~\n')
         print(data)
     else:
-        data = torch.load(transform_path)   # already standardized
+        data = torch.load(transform_path)
         assert hasattr(data, 'edge_index')  # must be torch data object
 
     # BUILD DATALOADER

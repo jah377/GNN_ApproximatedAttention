@@ -36,7 +36,6 @@ def main(config):
     file_name = f'{config.dataset}_sign_k{config.K}.pth'
     path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
     data = torch.load(path)
-    data = standardize_data(data, config.dataset)
 
     # BUILD DATALOADER
     train_loader = create_loader(data, 'train', batch_size=config.batch_size)

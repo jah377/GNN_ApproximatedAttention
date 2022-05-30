@@ -89,9 +89,8 @@ def main(args):
             'max': 100,
         },
         'hidden_channel': {
-            'distribution': 'q_uniform',
-            'min': 8,
-            'max': 1024,
+            'distribution': 'uniform',
+            'values': [2**x for x in range(3, 13)],
         },
         'dropout': {
             'distribution': 'uniform',
@@ -115,11 +114,11 @@ def main(args):
         },
         'batch_size': {
             'distribution': 'q_uniform',
-            'min': 8,
-            'max': 2048,
+            'distribution': 'uniform',
+            'values': [2**x for x in range(3, 13)],
         },
         'n_neighbors': {
-            'values': [-1, 10, 20, 50, 60, 100, 150, 300]
+            'values': [-1, 10, 20, 50, 60, 100, 150, 300, 500]
         }
     }
 

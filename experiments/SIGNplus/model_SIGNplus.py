@@ -72,7 +72,7 @@ class SIGN_plus(torch.nn.Module):
         out_channel: int,
         hidden_channel: int,
         dropout: float,
-        input_drop: float,
+        input_dropout: float,
         K: int,
         n_fflayers: int,
         batch_norm: bool = True
@@ -85,8 +85,7 @@ class SIGN_plus(torch.nn.Module):
         self.n_fflayers = n_fflayers
         self.batch_norm = batch_norm
         self.dropout = nn.Dropout(dropout)
-        self.input_dropout = nn.Dropout(input_drop)
-
+        self.input_dropout = nn.Dropout(input_dropout)
         self.prelu = nn.PReLU()
         self.inception_ffs = nn.ModuleList()
 

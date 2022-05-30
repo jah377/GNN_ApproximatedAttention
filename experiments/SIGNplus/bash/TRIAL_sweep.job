@@ -74,7 +74,7 @@ do
     echo 'project_name:' $project_name
 
     # build yaml file 
-    python build_yaml_SIGN.py \
+    python build_yaml_SIGNplus.py \
         --DATASET $dataset \
         --MODEL $MODEL \
         --METHOD $method \

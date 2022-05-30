@@ -1,0 +1,95 @@
+#!/bin/bash
+#SBATCH --job-name="hps_GAT_pub"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --time=20:00:00
+#SBATCH --gpus=1
+#SBATCH --partition=gpu_shared
+#SBATCH --output=%x.%j.out
+
+echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+echo 'NOTES: GAT w/Pubmed'
+echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+echo 
+
+
+DATASET='pubmed'                # name of dataset
+EXPERIMENT_FOLDER='GAT'         # folder containing files
+MODEL='SamplerGAT'              # model
+YAML_FILE='SIGN_MHA.yaml'       # name of yaml file to be created
+PY_FILE='hps_SIGN_MHA.py'       # file to sweep
+WAND_PROJ_NAME='SSHA_pubmed'    # name of wand project
+
+METHOD='random'                 # random, bayes, grid
+RUN_TRIAL=false                 # if True, reduced comp. complexity
+SWEEP_ITERATION=100             # numer of iterations
+SCRATCH_FOLDER=$dataset'_'$MODEL'_sweep'    # name of folder on TMPDIR
+
+
+# copy files to scratch
+mkdir -p $TMPDIR/$SCRATCH_FOLDER/data
+cp -r data/* $TMPDIR/$SCRATCH_FOLDER/data
+cp -r general venvs $TMPDIR/$SCRATCH_FOLDER
+cp -r experiments/$EXPERIMENT_FOLDER/* $TMPDIR/$SCRATCH_FOLDER
+cd $TMPDIR/$SCRATCH_FOLDER
+
+
+# activate venv
+module load 2021
+module load CUDA/11.3.1
+source $TMPDIR/$SCRATCH_FOLDER/venvs/GPU_venv/bin/activate
+which python
+
+echo ''
+echo 'Check if packages installed correctly'
+python -c "import torch; print(f'Torch: {torch.__version__}')"
+python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
+echo ''
+
+
+# build start-agent.sh for sweep 
+echo '#!/bin/bash' >> start_agent.sh
+echo 'wandb agent --count '$sweep_iterations' $1 --project $2' >> start_agent.sh
+chmod u+x start_agent.sh        # need permission to use .sh file
+
+echo ''
+echo '=================================================='
+echo '============== START SWEEP: '$model' =================='
+echo '=================================================='
+
+echo 'dataset': $DATASET
+echo 'method': $METHOD
+echo 'model': $MODEL
+echo 'iterations': $SWEEP_ITERATIONS
+echo 'run_trial': $run_trial
+echo 'config:' $YAML_FILE
+echo 'train_file:' $PY_FILE
+echo 'project_name:' $WAND_PROJ_NAME
+
+# build yaml file 
+python build_yaml_SIGN_CS.py \
+    --DATASET $DATASET \
+    --MODEL $MODEL \
+    --METHOD $METHOD \
+    --TRAIN_FILE $PY_FILE \
+    --YAML_FILE $YAML_FILE \
+    --RUN_TRIAL $RUN_TRIAL 
+
+echo '=================================================='
+echo ''
+
+# initialize and run sweep
+python general/slurm/run_slurm.py \
+    --YAML_FILE $YAML_FILE \
+    --PROJ_NAME $WAND_PROJ_NAME
+
+
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
+END=`date +%s`;
+
+let DIFF=END-START
+let HOURS=DIFF/3600
+let MINUTES=(DIFF/60)%60
+
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
