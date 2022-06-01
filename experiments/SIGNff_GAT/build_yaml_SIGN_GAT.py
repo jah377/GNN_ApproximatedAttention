@@ -20,9 +20,7 @@ parser.add_argument('--OPTIMIZER_DECAY', type=float, default=None)
 parser.add_argument('--EPOCHS', type=int, default=None)
 parser.add_argument('--HIDDEN_CHANNEL', type=int, default=None)
 parser.add_argument('--DROPOUT', type=float, default=None)
-parser.add_argument('--INPUT_DROPOUT', type=float, default=None)
 parser.add_argument('--K', type=int, default=None)
-parser.add_argument('--N_FFLAYERS', type=int, default=None)
 parser.add_argument('--BATCH_NORM', type=strtobool, default=None)
 parser.add_argument('--BATCH_SIZE', type=int, default=None)
 
@@ -60,7 +58,6 @@ def main(args):
     }
 
     # add parameters (not model specific) to config dictionary
-    # q_uniform in SIGN: https://arxiv.org/pdf/2004.11198v2.pdf
     param_dict = {
         'dataset': {
             'distribution': 'constant',
@@ -81,22 +78,20 @@ def main(args):
             'max': 1e-1,
         },
         'epochs': {
-            'distribution': 'int_uniform',
-            'min': 5,
-            'max': 100,
+            'distribution': 'contant',
+            'value': 200,
         },
         'hidden_channel': {
-            'distribution': 'uniform',
             'values': [2**x for x in range(3, 13)]
         },
         'dropout': {
             'distribution': 'uniform',
-            'min': 0.2,
+            'min': 0.1,
             'max': 0.8,
         },
         'input_dropout': {
             'distribution': 'uniform',
-            'min': 0,
+            'min': 0.0,
             'max': 0.5,
         },
         'K': {
@@ -106,16 +101,14 @@ def main(args):
         },
         'n_fflayers': {
             'distribution': 'int_uniform',
-            'min': 0,
-            'max': 3,
+            'min': 1,
+            'max': 5,
         },
         'batch_norm': {
-            'distribution': 'int_uniform',
-            'min': 0,
-            'max': 1,
+            'distribution': 'constant',
+            'value': 1,
         },
         'batch_size': {
-            'distribution': 'uniform',
             'values': [2**x for x in range(3, 13)]
         },
     }
@@ -135,8 +128,6 @@ def main(args):
         sweep_config['parameters']['epochs'] = {'value': 5}
         sweep_config['parameters']['hidden_channel'] = {'value': 32}
         sweep_config['parameters']['dropout'] = {'value': 0.6}
-        sweep_config['parameters']['input_dropout'] = {'value': 0.2}
-        sweep_config['parameters']['n_fflayers'] = {'value': 2}
         sweep_config['parameters']['K'] = {'value': 1}
         sweep_config['parameters']['batch_norm'] = {'value': 1}
         sweep_config['parameters']['batch_size'] = {'value': 256}

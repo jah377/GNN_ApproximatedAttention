@@ -1,28 +1,27 @@
 #!/bin/bash
-#SBATCH --job-name="hps_SIGN_prod"
+#SBATCH --job-name="hps_SCS_prod"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=90:00:00
+#SBATCH --time=70:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
 
 date;hostname;id;pwd
-START=`date +%s`                  # will record .job runtime
+START=`date +%s`                   # will record .job runtime
 
-DATASET='products'                   # name of dataset
-EXPERIMENT_FOLDER='SIGN'          # folder containing files
-MODEL='SIGN'                      # model
-YAML_NAME='SIGN.yaml'             # name of yaml file to be created
-YAML_FILE='build_yaml_SIGN.py'    # file creating yaml
-PY_FILE='hps_SIGN.py'             # file to sweep
-WAND_PROJ_NAME='SIGN_'$DATASET    # name of wand project
+DATASET='products'                    # name of dataset
+EXPERIMENT_FOLDER='SIGN_CS'        # folder containing files
+MODEL='SIGN_CS'                    # model
+YAML_NAME='SIGN_CS.yaml'           # name of yaml file to be created
+YAML_FILE='build_yaml_SIGN_CS.py'  # file creating yaml
+PY_FILE='hps_SIGN_CS.py'           # file to sweep
+WAND_PROJ_NAME=$MODEL'_'$DATASET   # name of wand project
 
-METHOD='random'                   # random, bayes, grid
-RUN_TRIAL=false                   # if True, reduced comp. complexity
-SWEEP_ITERATIONS=100              # numer of iterations
-SCRATCH_FOLDER=$DATASET'_'$MODEL'_sweep'    # name of folder on TMPDIR
-
+METHOD='random'                    # random, bayes, grid
+RUN_TRIAL=false                    # if True, reduced comp. complexity
+SWEEP_ITERATIONS=100               # numer of iterations
+SCRATCH_FOLDER=$dataset'_'$MODEL'_sweep'    # name of folder on TMPDIR
 
 # copy files to scratch
 mkdir -p $TMPDIR/$SCRATCH_FOLDER/data

@@ -1,12 +1,12 @@
 import glob
 import wandb
 import os.path as osp
+from ogb.nodeproppred import Evaluator
 
 import torch
-from ogb.nodeproppred import Evaluator
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-from model_SIGN import SIGN
+from model_SIGNplus import SIGN_plus
 from steps_SIGN import train_epoch, test_epoch
 from transform_CosineSimilarity import CosineAttention
 from general.utils import set_seeds, create_loader
@@ -20,9 +20,11 @@ hyperparameter_defaults = dict(
     epochs=5,
     hidden_channel=256,
     dropout=0.6,
+    intput_dropout=0.1,
     K=1,
     batch_norm=1,
     batch_size=256,
+    n_fflayers=2,
     cs_batch_size=10000,
 )
 
@@ -68,12 +70,14 @@ def main(config):
     test_loader = create_loader(data, 'test', batch_size=config.batch_size)
 
     # BUILD MODEL
-    model = SIGN(
-        data.num_features,  # in_channel
-        data.num_classes,   # out_channel
+    model = SIGN_plus(
+        data.num_features,       # in_channel
+        data.num_classes,        # out_channel
         config.hidden_channel,
         config.dropout,
+        config.input_dropout,
         config.K,
+        config.n_fflayers,
         config.batch_norm).to(device)
 
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -105,7 +109,7 @@ def main(config):
     # RUN THROUGH EPOCHS
     # params for early termination
     previous_loss = 1e10
-    patience = 5
+    patience = 15
     trigger_times = 0
 
     for epoch in range(config.epochs):

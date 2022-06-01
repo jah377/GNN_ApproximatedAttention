@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="hps_SCS_prod"
+#SBATCH --job-name="hps_SCS_arx"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=25:00:00
+#SBATCH --time=30:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -10,7 +10,7 @@
 date;hostname;id;pwd
 START=`date +%s`                   # will record .job runtime
 
-DATASET='products'                    # name of dataset
+DATASET='arxiv'                    # name of dataset
 EXPERIMENT_FOLDER='SIGN_CS'        # folder containing files
 MODEL='SIGN_CS'                    # model
 YAML_NAME='SIGN_CS.yaml'           # name of yaml file to be created

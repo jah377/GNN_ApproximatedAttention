@@ -1,28 +1,27 @@
 #!/bin/bash
-#SBATCH --job-name="hps_GAT_pub"
+#SBATCH --job-name="hps_SffCS_arx"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=20:00:00
+#SBATCH --time=72:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
 
 date;hostname;id;pwd
-START=`date +%s`                      # will record .job runtime
+START=`date +%s`                            # will record .job runtime
 
-DATASET='pubmed'                      # name of dataset
-EXPERIMENT_FOLDER='SamplerGAT'        # folder containing files
-MODEL='SamplerGAT'                    # model
-YAML_NAME='SamplerGAT.yaml'           # name of yaml file to be created
-YAML_FILE='build_yaml_SamplerGAT.py'  # file creating yaml
-PY_FILE='hps_SamplerGAT.py'           # file to sweep
-WAND_PROJ_NAME=$MODEL'_'$DATASET      # name of wand project
+DATASET='arxiv'                             # name of dataset
+EXPERIMENT_FOLDER='SIGNff_CSX'               # folder containing files
+MODEL='SIGNplus_CS'                         # model
+YAML_NAME='SIGNplus_CS.yaml'                # name of yaml file to be created
+YAML_FILE='build_yaml_SIGNplus_CS.py'       # file creating yaml
+PY_FILE='hps_SIGNplus_CS.py'                # file to sweep
+WAND_PROJ_NAME=$MODEL'_'$DATASET            # name of wand project
 
-METHOD='random'                    # random, bayes, grid
-RUN_TRIAL=false                    # if True, reduced comp. complexity
-SWEEP_ITERATIONS=100               # numer of iterations
-SCRATCH_FOLDER=$dataset'_'$MODEL'_sweep'    # name of folder on TMPDIR
-
+METHOD='random'                             # random, bayes, grid
+RUN_TRIAL=false                             # if True, reduced comp. complexity
+SWEEP_ITERATIONS=100                        # numer of iterations
+SCRATCH_FOLDER=$DATASET'_'$MODEL'_sweep'    # name of folder on TMPDIR
 
 # copy files to scratch
 mkdir -p $TMPDIR/$SCRATCH_FOLDER/data

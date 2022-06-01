@@ -1,5 +1,6 @@
 import glob
 import wandb
+import os.path as osp
 from ogb.nodeproppred import Evaluator
 
 import torch
@@ -7,7 +8,8 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from model_SIGNplus import SIGN_plus
 from steps_SIGN import train_epoch, test_epoch
-from general.utils import set_seeds, standardize_data, create_loader
+from transform_CSX import CosineAttentionX
+from general.utils import set_seeds, create_loader
 
 hyperparameter_defaults = dict(
     dataset='cora',
@@ -23,6 +25,7 @@ hyperparameter_defaults = dict(
     batch_norm=1,
     batch_size=256,
     n_fflayers=2,
+    cs_batch_size=10000,
 )
 
 wandb.init(config=hyperparameter_defaults)
@@ -35,9 +38,31 @@ def main(config):
     set_seeds(config.seed)
 
     # IMPORT & STANDARDIZE DATA
-    file_name = f'{config.dataset}_sign_k{config.K}.pth'
-    path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
-    data = torch.load(path)
+    file_name = f'{config.dataset}_sign_k0.pth'
+    file_path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
+    folder_path = osp.dirname(file_path)
+    transform_path = osp.join(
+        folder_path, f'{config.dataset}_sign_k{config.K}_transformed.pth')
+
+    if not osp.isfile(transform_path):
+        data = torch.load(file_path)
+        data, transform_time = CosineAttentionX(
+            data,
+            config.K,
+            config.cs_batch_size,
+        )
+
+        wandb.log({'precomp-transform_time': transform_time})
+
+        torch.save(data, transform_path)
+        print()
+        print(f'TRANSFORM PERFORMED:{transform_path}')
+        print()
+        print(data)
+        print()
+    else:
+        data = torch.load(transform_path)   # already standardized
+        assert hasattr(data, 'edge_index')  # must be torch data object
 
     # BUILD DATALOADER
     train_loader = create_loader(data, 'train', batch_size=config.batch_size)
@@ -84,7 +109,7 @@ def main(config):
     # RUN THROUGH EPOCHS
     # params for early termination
     previous_loss = 1e10
-    patience = 5
+    patience = 15
     trigger_times = 0
 
     for epoch in range(config.epochs):

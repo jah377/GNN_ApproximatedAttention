@@ -1,15 +1,13 @@
 import glob
 import wandb
-import os.path as osp
+from ogb.nodeproppred import Evaluator
 
 import torch
-from ogb.nodeproppred import Evaluator
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-from model_SIGN import SIGN
+from model_SIGNplus import SIGN_plus
 from steps_SIGN import train_epoch, test_epoch
-from transform_CosineSimilarity import CosineAttention
-from general.utils import set_seeds, create_loader
+from general.utils import set_seeds, standardize_data, create_loader
 
 hyperparameter_defaults = dict(
     dataset='cora',
@@ -20,10 +18,11 @@ hyperparameter_defaults = dict(
     epochs=5,
     hidden_channel=256,
     dropout=0.6,
+    intput_dropout=0.1,
     K=1,
     batch_norm=1,
     batch_size=256,
-    cs_batch_size=10000,
+    n_fflayers=2,
 )
 
 wandb.init(config=hyperparameter_defaults)
@@ -36,31 +35,9 @@ def main(config):
     set_seeds(config.seed)
 
     # IMPORT & STANDARDIZE DATA
-    file_name = f'{config.dataset}_sign_k0.pth'
-    file_path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
-    folder_path = osp.dirname(file_path)
-    transform_path = osp.join(
-        folder_path, f'{config.dataset}_sign_k{config.K}_transformed.pth')
-
-    if not osp.isfile(transform_path):
-        data = torch.load(file_path)
-        data, transform_time = CosineAttention(
-            data,
-            config.K,
-            config.cs_batch_size,
-        )
-
-        wandb.log({'precomp-transform_time': transform_time})
-
-        torch.save(data, transform_path)
-        print()
-        print(f'TRANSFORM PERFORMED:{transform_path}')
-        print()
-        print(data)
-        print()
-    else:
-        data = torch.load(transform_path)   # already standardized
-        assert hasattr(data, 'edge_index')  # must be torch data object
+    file_name = f'{config.dataset}_sign_k{config.K}.pth'
+    path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
+    data = torch.load(path)
 
     # BUILD DATALOADER
     train_loader = create_loader(data, 'train', batch_size=config.batch_size)
@@ -68,12 +45,14 @@ def main(config):
     test_loader = create_loader(data, 'test', batch_size=config.batch_size)
 
     # BUILD MODEL
-    model = SIGN(
-        data.num_features,  # in_channel
-        data.num_classes,   # out_channel
+    model = SIGN_plus(
+        data.num_features,       # in_channel
+        data.num_classes,        # out_channel
         config.hidden_channel,
         config.dropout,
+        config.input_dropout,
         config.K,
+        config.n_fflayers,
         config.batch_norm).to(device)
 
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -105,7 +84,7 @@ def main(config):
     # RUN THROUGH EPOCHS
     # params for early termination
     previous_loss = 1e10
-    patience = 5
+    patience = 15
     trigger_times = 0
 
     for epoch in range(config.epochs):
