@@ -58,7 +58,7 @@ def main(args):
             'name': 'epoch-val_loss'
         },
     }
-    
+
     # add parameters (not model specific) to config dictionary
     param_dict = {
         'dataset': {
@@ -84,7 +84,7 @@ def main(args):
             'value': 200,
         },
         'hidden_channel': {
-            'values': [2**x for x in range(3, 13)]
+            'values': [2**x for x in range(3, 12)]
         },
         'dropout': {
             'distribution': 'uniform',
@@ -104,7 +104,7 @@ def main(args):
         'n_fflayers': {
             'distribution': 'int_uniform',
             'min': 1,
-            'max': 5,
+            'max': 3,
         },
         'batch_norm': {
             'distribution': 'constant',

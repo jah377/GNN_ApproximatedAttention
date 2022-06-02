@@ -66,7 +66,6 @@ def main(args):
             'value': args.DATASET.lower()
         },
         'seed': {
-            'distribution': 'constant',
             'value': 42
         },
         'optimizer_lr': {
@@ -80,11 +79,10 @@ def main(args):
             'max': 1e-1,
         },
         'epochs': {
-            'distribution': 'contant',
-            'value': 200,
+            'value': 100,
         },
         'hidden_channel': {
-            'values': [2**x for x in range(3, 13)]
+            'values': [2**x for x in range(3, 12)]
         },
         'dropout': {
             'distribution': 'uniform',
@@ -107,7 +105,6 @@ def main(args):
             'max': 5,
         },
         'batch_norm': {
-            'distribution': 'constant',
             'value': 1,
         },
         'batch_size': {

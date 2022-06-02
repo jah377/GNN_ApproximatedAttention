@@ -2,7 +2,7 @@
 #SBATCH --job-name="hps_SIGNplus_arx"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=24:00:00
+#SBATCH --time=72:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -12,13 +12,13 @@ START=`date +%s`                            # will record .job runtime
 
 DATASET='arxiv'                             # name of dataset
 EXPERIMENT_FOLDER='SIGNff'                  # folder containing files
-MODEL='SIGNplus'                            # model
-YAML_NAME='SIGNplus.yaml'                   # name of yaml file to be created
+MODEL='SIGNff'                            # model
+YAML_NAME='SIGNff.yaml'                   # name of yaml file to be created
 YAML_FILE='build_yaml_SIGNplus.py'          # file creating yaml
 PY_FILE='hps_SIGNplus.py'                   # file to sweep
-WAND_PROJ_NAME='SIGNplus_pubmed'            # name of wand project
+WAND_PROJ_NAME='SIGNff_pubmed'            # name of wand project
 
-METHOD='random'                             # random, bayes, grid
+METHOD='bayes'                             # random, bayes, grid
 RUN_TRIAL=false                             # if True, reduced comp. complexity
 SWEEP_ITERATIONS=100                        # numer of iterations
 SCRATCH_FOLDER=$dataset'_'$MODEL'_sweep'    # name of folder on TMPDIR

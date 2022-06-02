@@ -23,7 +23,7 @@ class FeedForwardNet(nn.Module):
         self.out_channel = out_channel
         self.hidden_channel = hidden_channel
         self.dropout = dropout
-        self.n_fflayers = n_fflayers
+        self.n_fflayers = max(1, n_fflayers)
         self.batch_norm = batch_norm
         self.lins = nn.ModuleList()
         self.bns = nn.ModuleList()
@@ -100,8 +100,8 @@ class SIGN_plus(torch.nn.Module):
 
         # feedforward layer for concatenated outputs
         self.concat_ff = FeedForwardNet(
-            (self.K+1)*hidden_channel, hidden_channel,
-            out_channel, dropout, n_fflayers, batch_norm
+            (self.K+1)*hidden_channel, out_channel,
+            hidden_channel, dropout, n_fflayers, batch_norm
         )
 
     def reset_parameters(self):
