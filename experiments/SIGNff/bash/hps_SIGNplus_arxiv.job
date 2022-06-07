@@ -16,7 +16,7 @@ MODEL='SIGNff'                            # model
 YAML_NAME='SIGNff.yaml'                   # name of yaml file to be created
 YAML_FILE='build_yaml_SIGNplus.py'          # file creating yaml
 PY_FILE='hps_SIGNplus.py'                   # file to sweep
-WAND_PROJ_NAME='SIGNff_pubmed'            # name of wand project
+WAND_PROJ_NAME='SIGNff_'$DATASET            # name of wand project
 
 METHOD='bayes'                             # random, bayes, grid
 RUN_TRIAL=false                             # if True, reduced comp. complexity

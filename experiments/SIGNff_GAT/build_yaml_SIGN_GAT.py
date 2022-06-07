@@ -53,18 +53,16 @@ def main(args):
         'method': args.METHOD,
         'metric': {
             'goal': 'minimize',
-            'name': 'epoch-val_loss'
+            'name': 'epoch-eval-val_loss'
         },
     }
 
     # add parameters (not model specific) to config dictionary
     param_dict = {
         'dataset': {
-            'distribution': 'constant',
             'value': args.DATASET.lower()
         },
         'seed': {
-            'distribution': 'constant',
             'value': 42
         },
         'optimizer_lr': {
@@ -78,8 +76,7 @@ def main(args):
             'max': 1e-1,
         },
         'epochs': {
-            'distribution': 'contant',
-            'value': 200,
+            'value': 100,
         },
         'hidden_channel': {
             'values': [2**x for x in range(3, 12)]
@@ -105,7 +102,6 @@ def main(args):
             'max': 3,
         },
         'batch_norm': {
-            'distribution': 'constant',
             'value': 1,
         },
         'batch_size': {

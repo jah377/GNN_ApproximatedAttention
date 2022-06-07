@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="hps_SIGNffCSX_prod"
+#SBATCH --job-name="hps_SIGNffMHA_prod"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=120:00:00
@@ -11,12 +11,12 @@ date;hostname;id;pwd
 START=`date +%s`                            # will record .job runtime
 
 DATASET='products'                             # name of dataset
-EXPERIMENT_FOLDER='SIGNff_CSX'                  # folder containing files
-MODEL='SIGNff_CSX'                            # model
-YAML_NAME='SIGNffCSX.yaml'                   # name of yaml file to be created
-YAML_FILE='build_yaml_SIGNplus_CS.py'          # file creating yaml
-PY_FILE='hps_SIGNplus_CS.py'                   # file to sweep
-WAND_PROJ_NAME='SIGNffCSX_'$DATASET           # name of wand project
+EXPERIMENT_FOLDER='SIGNff_MHA'                  # folder containing files
+MODEL='SIGNff_MHA'                            # model
+YAML_NAME='SIGNffMHA.yaml'                   # name of yaml file to be created
+YAML_FILE='build_yaml_SIGNplus_MHA.py'          # file creating yaml
+PY_FILE='hps_SIGNplus_MHA.py'                   # file to sweep
+WAND_PROJ_NAME='SIGNffMHA_'$DATASET           # name of wand project
 
 METHOD='bayes'                             # random, bayes, grid
 RUN_TRIAL=false                             # if True, reduced comp. complexity

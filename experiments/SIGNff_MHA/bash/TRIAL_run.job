@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="SPLUS_TR"
+#SBATCH --job-name="SffMHA_TR"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=00:30:00
@@ -8,11 +8,11 @@
 #SBATCH --output=%x.%j.out
 
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-echo 'NOTES: get SIGNff to RUN'
+echo 'NOTES: get SIGNff+MHA to RUN'
 echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 echo 
 
-EXPERIMENT_FOLDER='SIGNff'
+EXPERIMENT_FOLDER='SIGNff_MHA'
 
 date;hostname;id;pwd
 START=`date +%s`                # will record .job runtime
@@ -47,7 +47,7 @@ python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
 echo ''
 
 # PUBMED
-python run_SIGNplus.py \
+python run_SIGNplus_MHA.py \
     --dataset 'pubmed' \
     --seed 42 \
     --optimizer_lr 0.09911 \
@@ -61,10 +61,12 @@ python run_SIGNplus.py \
     --batch_size 1338 \
     --n_fflayers 2 \
     --n_runs $num_runs \
+    --attn_heads 2 \
+    --norm 0 \
     --return_results 1
 
 # ARXIV
-python run_SIGNplus.py \
+python run_SIGNplus_MHA.py \
     --dataset 'arxiv' \
     --seed 42 \
     --optimizer_lr 0.09911 \
@@ -78,10 +80,12 @@ python run_SIGNplus.py \
     --batch_size 1338 \
     --n_fflayers 2 \
     --n_runs $num_runs \
+    --attn_heads 1 \
+    --norm 1 \
     --return_results 1
 
 # # PRODUCTS
-# python run_SIGNplus.py \
+# python run_SIGNplus_MHA.py \
 #     --dataset 'products' \
 #     --seed 42 \
 #     --optimizer_lr 0.09911 \
@@ -95,6 +99,8 @@ python run_SIGNplus.py \
 #     --batch_size 1338 \
 #     --n_fflayers 2 \
 #     --n_runs $num_runs \
+#     --attn_heads 2 \
+#     --norm 1 \
 #     --return_results 1
 
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

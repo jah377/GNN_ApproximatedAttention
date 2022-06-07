@@ -36,7 +36,6 @@ def train_epoch(model, data, optimizer, loader):
         # forward pass
         out = model(xs)
         loss = F.nll_loss(out, y)
-
         batch_size = int(idx.numel())
         total_examples += int(batch_size)
         total_loss += float(loss) * batch_size

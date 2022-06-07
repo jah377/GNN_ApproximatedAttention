@@ -9,30 +9,36 @@ from torch_sparse import SparseTensor
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def sparse_min_max_norm(sparse_tensor):
+def sparse_min_max_norm(s_coo):
     """ perform min-max normalization """
-    row, col, val = sparse_tensor.coo()
+    assert type(s_coo) == torch.Tensor, f'{type(s_coo)} not torch.Tensor'
+    assert s_coo.layout == torch.sparse_coo, f'{s_coo.type} not in torch.sparse_coo format'
+
+    row, col = s_coo.indices()
+    val = s_coo.values().detach()
+
     return SparseTensor(
         row=row,
         col=col,
         value=(val-val.min())/(val.max()-val.min()),
-        sparse_sizes=sparse_tensor.sizes()
+        sparse_sizes=list(s_coo.shape)
     )
 
 
 class DotProductAttention(nn.Module):
+
     def __init__(
-            self,
-            num_nodes: int,
-            num_feats: int,
-            num_edges: int,
-            num_heads: int = 1,
-            norm: bool = False,
+        self,
+        num_nodes: int,
+        num_feats: int,
+        num_edges: int,
+        num_heads: int = 1,
+        norm: bool = False,
     ):
         """
         https://stackoverflow.com/questions/20983882/efficient-dot-products-of-large-memory-mapped-arrays
         """
-        super(DotProductAttention).__init__()
+        super(DotProductAttention, self).__init__()
         assert num_heads > 0
 
         # definitions
@@ -106,15 +112,17 @@ class DotProductAttention(nn.Module):
 
         # soft max
         attn = torch.sparse.softmax(attn, dim=2)
-        attn = torch.sparse.sum(attn, dim=0)/self.num_heads
+        attn = (torch.sparse.sum(attn, dim=0)/self.num_heads).coalesce()
 
         # min-max normalization
-        if self.norm == True:
-            return sparse_min_max_norm(attn)
+        if self.norm == False:
+            row, col = attn.indices()
 
-        return SparseTensor(
-            row=attn.indices()[0],
-            col=attn.indices()[1],
-            value=attn.values().detach(),
-            sparse_sizes=attn.size()
-        )
+            return SparseTensor(
+                row=row,
+                col=col,
+                value=attn.values().detach(),
+                sparse_sizes=list(attn.shape)
+            )
+
+        return sparse_min_max_norm(attn)

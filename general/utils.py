@@ -115,6 +115,7 @@ def standardize_data(dataset, data_name: str):
 def transform_data(data, K: int = 0):
     """ perform SIGN transformation """
     assert data.edge_index is not None
+
     row, col = data.edge_index
     adj_t = SparseTensor(row=col, col=row,
                          sparse_sizes=(data.num_nodes, data.num_nodes))

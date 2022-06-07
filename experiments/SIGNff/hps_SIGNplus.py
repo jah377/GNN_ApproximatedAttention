@@ -7,7 +7,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from model_SIGNplus import SIGN_plus
 from steps_SIGN import train_epoch, test_epoch
-from general.utils import set_seeds, standardize_data, create_loader
+from general.utils import set_seeds, create_loader
 
 hyperparameter_defaults = dict(
     dataset='cora',

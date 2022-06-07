@@ -6,7 +6,7 @@ from general.utils import time_wrapper  # wrapper
 
 
 @time_wrapper
-def DPAttention(data, K: int, attn_heads: int = 1, norm: bool = False):
+def DPAttention(data, K: int, attn_heads: int = 1, norm: bool = True):
     """
     Args:
         data:           data object
@@ -56,7 +56,7 @@ def DPAttention(data, K: int, attn_heads: int = 1, norm: bool = False):
     return data
 
 
-def extract_attention(data, attn_heads, norm: bool = False):
+def extract_attention(data, attn_heads, norm: bool = True):
     """ calculate dotproduct attention
     Args:
         data:

@@ -60,7 +60,7 @@ class FeedForwardNet(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
-        gain = nn.init.calculate_gain("relu")
+        gain = nn.init.calculate_gain('relu')
         for lin in self.lins:
             nn.init.xavier_uniform_(lin.weight, gain=gain)
             nn.init.zeros_(lin.bias)
@@ -140,9 +140,9 @@ def create_evaluator(dataset):
     """
     evaluator = Evaluator(name=dataset)
     return lambda preds, labels: evaluator.eval({
-        "y_true": labels.view(-1, 1),
-        "y_pred": preds.view(-1, 1),
-    })["acc"]
+        'y_true': labels.view(-1, 1),
+        'y_pred': preds.view(-1, 1),
+    })['acc']
 
 
 def load_data(dataset):
@@ -248,7 +248,7 @@ def main(args):
         args.BATCH_NORM
     ).to(device)
 
-    print("# Params:", sum(p.numel() for p in model.parameters()))
+    print('# Params:', sum(p.numel() for p in model.parameters()))
 
     # prep
     optimizer = torch.optim.Adam(
@@ -269,32 +269,33 @@ def main(args):
             with torch.no_grad():
                 accs = eval(data, model, eval_loader, evaluator)
             end = time.time()
-            log = "Epoch {}, Time(s): {:.4f}, ".format(epoch, end - start)
-            log += "Acc: Train {:.4f}, Val {:.4f}, Test {:.4f}".format(*accs)
+            log = 'Epoch {}, Time(s): {:.4f}, '.format(epoch, end - start)
+            log += 'Acc: Train {:.4f}, Val {:.4f}, Test {:.4f}'.format(*accs)
             print(log)
 
             if accs[1] > best_val:
                 best_epoch = epoch
                 best_train, best_val, best_test = accs
 
-    print("Best Epoch {}, Val {:.4f}, Test {:.4f}".format(
-        best_epoch, best_val, best_test))
+    print('Best Epoch {}, Train {:.4f}, Val {:.4f}, Test {:.4f}'.format(
+        best_epoch, best_train, best_val, best_test))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description="SIGN")
-    parser.add_argument("--EPOCHS", type=int, default=1000)
-    parser.add_argument("--HIDDEN_CHANNEL", type=int, default=512)
-    parser.add_argument("--K", type=int, default=5)
-    parser.add_argument("--LR", type=float, default=0.001)
-    parser.add_argument("--DATASET", type=str, default="arxiv")
-    parser.add_argument("--DROPOUT", type=float, default=0.5)
-    parser.add_argument("--WEIGHT_DECAY", type=float, default=0)
-    parser.add_argument("--TRAIN_BATCH_SIZE", type=int, default=50000)
-    parser.add_argument("--EVAL_BATCH_SIZE", type=int, default=100000)
-    parser.add_argument("--N_FFLAYERS", type=int, default=2)
-    parser.add_argument("--INPUT_DROPOUT", type=float, default=0)
+    parser = argparse.ArgumentParser(description='SIGN')
+    parser.add_argument('--SEED', type=int, default=42)
+    parser.add_argument('--EPOCHS', type=int, default=1000)
+    parser.add_argument('--HIDDEN_CHANNEL', type=int, default=512)
+    parser.add_argument('--K', type=int, default=5)
+    parser.add_argument('--LR', type=float, default=0.001)
+    parser.add_argument('--DATASET', type=str, default='arxiv')
+    parser.add_argument('--DROPOUT', type=float, default=0.5)
+    parser.add_argument('--WEIGHT_DECAY', type=float, default=0)
+    parser.add_argument('--TRAIN_BATCH_SIZE', type=int, default=50000)
+    parser.add_argument('--EVAL_BATCH_SIZE', type=int, default=100000)
+    parser.add_argument('--N_FFLAYERS', type=int, default=2)
+    parser.add_argument('--INPUT_DROPOUT', type=float, default=0)
     args = parser.parse_args()
 
     print(args)

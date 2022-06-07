@@ -50,7 +50,8 @@ def main(config):
         data, transform_time = DPAttention(
             data,
             config.K,
-            config.cs_batch_size,
+            config.attn_heads,
+            config.norm,
         )
 
         wandb.log({'precomp-transform_time': transform_time})

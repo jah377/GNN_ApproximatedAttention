@@ -124,10 +124,11 @@ def homophily_degree(data):
 def get_statistics(args):
     data_name = args.data_name
 
-    data = download_data(data_name)
-    # data = torch.load(f'data/{data_name}/{data_name}_sign_k0.pth')
+    # data = download_data(data_name)
+    # data = standardize_data(data, data_name)
 
-    data = standardize_data(data, data_name)
+    data = torch.load(f'data/{data_name}_sign_k0.pth')
+
     splits = percent_split(data)
     n_edges = total_edges(data)
     avg_deg, std_deg, max_deg, min_deg = average_degree(data)

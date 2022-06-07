@@ -55,7 +55,7 @@ def main(args):
         'method': args.METHOD,
         'metric': {
             'goal': 'minimize',
-            'name': 'epoch-val_loss'
+            'name': 'epoch-eval-val_loss'
         },
     }
 

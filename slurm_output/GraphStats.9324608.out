@@ -1,0 +1,28 @@
+Sat 04 Jun 2022 04:31:31 PM CEST
+r26n32.lisa.surfsara.nl
+uid=55639(jharris) gid=55199(jharris) groups=55199(jharris),46457(lisa_uva_gpu),50488(ssh_forwarding)
+/home/jharris/Desktop/approx_attention
+/home/jharris/Desktop/approx_attention/venvs/GPU_venv/bin/python
+
+Check if packages installed correctly
+Torch: 1.11.0+cu113
+PyG: 2.0.4
+
+
+
+==== PRODUCTS Statistics =====
+Nodes: 2,449,029
+Edges: 63,083,591.0
+Features: 100
+Classes: 47
+Directed?: False
+%Train: 0.08
+%Val: 0.016
+%Test: 0.904
+Avg. Deg.: 51.517+/-95.905 [1.0-17482.0]
+AVG DEG SANITY CHECK: 51.51722621496111
+Homophily Deg.: 0.811
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+TOTAL RUNTIME = 0 hours 19 minutes
+++++++++++++++++++++++++++++++++++++++++++++++++++++

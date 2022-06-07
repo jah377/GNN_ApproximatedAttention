@@ -1,0 +1,49 @@
+#!/bin/bash
+#SBATCH --job-name="GraphStats"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --time=2:00:00
+#SBATCH --partition=normal
+#SBATCH --output=%x.%j.out
+
+date;hostname;id;pwd
+START=`date +%s`                            
+
+DATASET='products'                            
+SCRATCH_FOLDER='GraphStats'
+
+# copy files to scratch
+mkdir -p $TMPDIR/$SCRATCH_FOLDER/data
+cp -r data/$DATASET/* $TMPDIR/$SCRATCH_FOLDER/data
+cp -r venvs $TMPDIR/$SCRATCH_FOLDER
+cp -r setup/graph_statistics.py $TMPDIR/$SCRATCH_FOLDER
+cd $TMPDIR/$SCRATCH_FOLDER
+
+
+# activate venv
+module load 2021
+module load CUDA/11.3.1
+source $TMPDIR/$SCRATCH_FOLDER/venvs/GPU_venv/bin/activate
+which python
+
+echo ''
+echo 'Check if packages installed correctly'
+python -c "import torch; print(f'Torch: {torch.__version__}')"
+python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
+echo ''
+
+
+# initialize and run sweep
+python graph_statistics.py \
+    --data_name $DATASET \
+
+
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
+END=`date +%s`;
+
+let DIFF=END-START
+let HOURS=DIFF/3600
+let MINUTES=(DIFF/60)%60
+
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

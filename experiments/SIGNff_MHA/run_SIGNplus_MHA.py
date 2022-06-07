@@ -9,7 +9,8 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from model_SIGNplus import SIGN_plus
 from steps_SIGN import train_epoch, test_epoch, get_inference_time
-from general.utils import set_seeds, transform_data, create_loader, get_n_params
+from transform_MHA import DPAttention
+from general.utils import set_seeds, create_loader, get_n_params
 
 
 # product: https://arxiv.org/pdf/2004.11198v2.pdf
@@ -27,6 +28,8 @@ parser.add_argument('--batch_norm', type=strtobool, default=True)
 parser.add_argument('--batch_size', type=int, default=4096)
 parser.add_argument('--n_fflayers', type=int, default=2)
 parser.add_argument('--n_runs', type=int, default=10)
+parser.add_argument('--attn_heads', type=int, default=2)
+parser.add_argument('--norm', type=strtobool, default=True)
 parser.add_argument('--return_results', type=strtobool, default=True)
 args = parser.parse_args()
 
@@ -41,7 +44,12 @@ def main(args):
     # data
     file_name = f'{args.dataset}_sign_k0.pth'
     path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
-    data, transform_time = transform_data(torch.load(path), args.K)
+    data, transform_time = DPAttention(
+        torch.load(path),
+        args.K,
+        args.attn_heads,
+        args.norm,
+    )
 
     train_loader = create_loader(data, 'train', batch_size=args.batch_size)
     val_loader = create_loader(data, 'val', batch_size=args.batch_size)
@@ -119,10 +127,6 @@ def main(args):
                 [store_run, pd.DataFrame.from_dict([epoch_dict])],
                 ignore_index=True
             )
-
-            if (epoch == 0) or (epoch % 100 == 0):
-                print(
-                    f"{epoch}: {epoch_dict['eval_train_f1']}, {epoch_dict['eval_val_f1']}, {epoch_dict['eval_test_f1']}")
 
         # total inference time
         store_inf_time.append(
