@@ -2,7 +2,7 @@
 #SBATCH --job-name="dgl_SIGNff"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=01:00:00
+#SBATCH --time=00:30:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -47,20 +47,6 @@ python -c "import torch; print(f'Torch: {torch.__version__}')"
 python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
 echo ''
 
-    parser = argparse.ArgumentParser(description='SIGN')
-    parser.add_argument('--SEED', type=int, default=42)
-    parser.add_argument('--EPOCHS', type=int, default=1000)
-    parser.add_argument('--HIDDEN_CHANNEL', type=int, default=512)
-    parser.add_argument('--K', type=int, default=5)
-    parser.add_argument('--LR', type=float, default=0.001)
-    parser.add_argument('--DATASET', type=str, default='arxiv')
-    parser.add_argument('--DROPOUT', type=float, default=0.5)
-    parser.add_argument('--WEIGHT_DECAY', type=float, default=0)
-    parser.add_argument('--TRAIN_BATCH_SIZE', type=int, default=50000)
-    parser.add_argument('--EVAL_BATCH_SIZE', type=int, default=100000)
-    parser.add_argument('--N_FFLAYERS', type=int, default=2)
-    parser.add_argument('--INPUT_DROPOUT', type=float, default=0)
-
 # ARXIV
 python dgl_SIGN.py \
     --SEED 42 \
@@ -69,12 +55,13 @@ python dgl_SIGN.py \
     --K 5 \
     --LR 0.001 \
     --DATASET 'arxiv' \
-    --DROPOUT 0.5 \
+    --DROPOUT 0.4 \
     --WEIGHT_DECAY 0.0 \
     --TRAIN_BATCH_SIZE 50000 \
     --EVAL_BATCH_SIZE 100000 \
     --N_FFLAYERS 2 \
-    --INPUT_DROPOUT 0
+    --INPUT_DROPOUT 0.1 \
+    --BATCH_NORM 0
 
 
 # PRODUCTS
@@ -84,13 +71,14 @@ python dgl_SIGN.py \
     --HIDDEN_CHANNEL 512 \
     --K 5 \
     --LR 0.001 \
-    --DATASET 'arxiv' \
-    --DROPOUT 0.5 \
+    --DATASET 'products' \
+    --DROPOUT 0.4 \
     --WEIGHT_DECAY 0.0 \
     --TRAIN_BATCH_SIZE 50000 \
     --EVAL_BATCH_SIZE 100000 \
     --N_FFLAYERS 2 \
-    --INPUT_DROPOUT 0
+    --INPUT_DROPOUT 0.3 \
+    --BATCH_NORM 0
 
 
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

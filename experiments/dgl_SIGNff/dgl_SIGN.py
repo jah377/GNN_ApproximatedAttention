@@ -1,7 +1,11 @@
 
+import os.path as osp
+from pathlib import Path
 import glob
 import time
 import argparse
+import numpy as np
+from distutils.util import strtobool
 
 import torch
 import torch.nn as nn
@@ -32,9 +36,6 @@ class FeedForwardNet(nn.Module):
     ):
 
         super(FeedForwardNet, self).__init__()
-        self.in_channel = in_channel
-        self.out_channel = out_channel
-        self.hidden_channel = hidden_channel
         self.dropout = dropout
         self.n_fflayers = max(1, n_fflayers)
         self.batch_norm = batch_norm
@@ -91,9 +92,6 @@ class SIGN(torch.nn.Module):
         batch_norm: bool = True
     ):
         super(SIGN, self).__init__()
-        self.in_channel = in_channel
-        self.out_channel = out_channel
-        self.hidden_channel = hidden_channel
         self.K = K
         self.n_fflayers = n_fflayers
         self.batch_norm = batch_norm
@@ -134,11 +132,35 @@ class SIGN(torch.nn.Module):
         return self.concat_ff(self.dropout(self.prelu(torch.cat(hs, dim=-1)))).log_softmax(dim=-1)
 
 
-def create_evaluator(dataset):
+def time_wrapper(func):
+    """ wrapper for recording time
+    Args:
+        func:   function to evaluate
+
+    Return:
+        output:         output of func
+        delta_time:     seconds, time to exec func
+    """
+    def wrapper(*args, **kwargs):
+
+        time_initial = time.time()
+        output = func(*args, **kwargs)
+        time_end = time.time()-time_initial
+
+        # unpack tuple if func returns multiple outputs
+        if isinstance(output, tuple):
+            return *output, time_end
+
+        return output, time_end
+
+    return wrapper
+
+
+def create_evaluator_fn(dataset):
     """
     Get evaluator from Open Graph Benchmark based on dataset
     """
-    evaluator = Evaluator(name=dataset)
+    evaluator = Evaluator(name=f'ogbn-{dataset}')
     return lambda preds, labels: evaluator.eval({
         'y_true': labels.view(-1, 1),
         'y_pred': preds.view(-1, 1),
@@ -152,6 +174,7 @@ def load_data(dataset):
     return torch.load(path)
 
 
+@time_wrapper
 def transform_data(data, K):
 
     # calculate adj matrix
@@ -183,6 +206,7 @@ def transform_data(data, K):
     return data
 
 
+@time_wrapper
 def train(data, model, optimizer, train_loader):
     model.train()
 
@@ -190,37 +214,49 @@ def train(data, model, optimizer, train_loader):
         xs = [data.x[batch].to(device)]
         xs += [data[f'x{i}'][batch].to(device)
                for i in range(1, model.K + 1)]
-        labels = data.y[batch].to(xs.device)
+        labels = data.y[batch].to(device)
         loss = F.nll_loss(model(xs), labels)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
 
+@torch.no_grad()
 def eval(data, model, eval_loader, evaluator):
-    model.eval()
-    preds = []
 
+    @time_wrapper
+    def inference(model, xs):
+        return model(xs)
+    model.eval()
+
+    inf_time = 0
+    preds, labels = [], []
     for batch in eval_loader:
         xs = [data.x[batch].to(device)]
         xs += [data[f'x{i}'][batch].to(device)
                for i in range(1, model.K + 1)]
-        labels = data.y[batch].to(xs.device)
-        preds.append(torch.argmax(model(xs), dim=-1).cpu())
 
+        out, batch_time = inference(model, xs)
+        preds.append(out.argmax(dim=1).cpu())
+        # labels.append(data.y[batch])
+        inf_time += batch_time
+
+    # labels = torch.cat(labels, dim=0)
     preds = torch.cat(preds, dim=0)
 
-    train_f1 = evaluator(preds[data.train_mask], labels[data.train_mask])
-    val_f1 = evaluator(preds[data.val_mask], labels[data.val_mask])
-    test_f1 = evaluator(preds[data.test_mask], labels[data.test_mask])
+    train_f1 = evaluator(preds[data.train_mask], data.y[data.train_mask])
+    val_f1 = evaluator(preds[data.val_mask], data.y[data.val_mask])
+    test_f1 = evaluator(preds[data.test_mask], data.y[data.test_mask])
 
-    return train_f1, val_f1, test_f1
+    return [train_f1, val_f1, test_f1], inf_time
 
 
 def main(args):
     # data
     data = load_data(args.DATASET)
-    data = transform_data(data, args.K)
+    data, transform_time = transform_data(data, args.K)
+
+    print('Transformation Time (s): {:.4f}'.format(transform_time))
 
     train_loader = DataLoader(
         data.train_mask,
@@ -248,7 +284,7 @@ def main(args):
         args.BATCH_NORM
     ).to(device)
 
-    print('# Params:', sum(p.numel() for p in model.parameters()))
+    print('# Model Params:', sum(p.numel() for p in model.parameters()))
 
     # prep
     optimizer = torch.optim.Adam(
@@ -256,18 +292,23 @@ def main(args):
         lr=args.LR,
         weight_decay=args.WEIGHT_DECAY
     )
-    evaluator = create_evaluator(args.DATASET)
+    evaluator = create_evaluator_fn(args.DATASET)
 
-    # run
+    # per run
+    model.reset_parameters()
+
+    epoch_train_time = []
+    epoch_inf_time = []
     best_epoch, best_val, best_test = 0, 0, 0
 
     for epoch in range(1, args.EPOCHS+1):
         start = time.time()
-        train(data, model, optimizer, train_loader)
+        _, train_time = train(data, model, optimizer, train_loader)
+        epoch_train_time.append([train_time])
 
         if epoch % 100 == 0:
-            with torch.no_grad():
-                accs = eval(data, model, eval_loader, evaluator)
+            accs, inf_time = eval(data, model, eval_loader, evaluator)
+            epoch_inf_time.append([inf_time])
             end = time.time()
             log = 'Epoch {}, Time(s): {:.4f}, '.format(epoch, end - start)
             log += 'Acc: Train {:.4f}, Val {:.4f}, Test {:.4f}'.format(*accs)
@@ -279,6 +320,10 @@ def main(args):
 
     print('Best Epoch {}, Train {:.4f}, Val {:.4f}, Test {:.4f}'.format(
         best_epoch, best_train, best_val, best_test))
+    print('Avg. Training Time (s): {:.4f} +/- {:.4f}'.format(
+        np.mean(epoch_train_time), np.std(epoch_train_time)))
+    print('Avg. Inference Time (s): {:.4f} +/- {:.4f}'.format(
+        np.mean(epoch_inf_time), np.std(epoch_inf_time)))
 
 
 if __name__ == '__main__':
@@ -296,6 +341,7 @@ if __name__ == '__main__':
     parser.add_argument('--EVAL_BATCH_SIZE', type=int, default=100000)
     parser.add_argument('--N_FFLAYERS', type=int, default=2)
     parser.add_argument('--INPUT_DROPOUT', type=float, default=0)
+    parser.add_argument('--BATCH_NORM', type=strtobool, default=True)
     args = parser.parse_args()
 
     print(args)

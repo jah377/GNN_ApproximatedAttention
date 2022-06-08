@@ -95,53 +95,45 @@ def main(config):
         verbose=False,  # do not monitor lr updates
     )
 
-    # EVALUATOR
-    if data.dataset_name in ['products', 'arxiv']:
-        evaluator = Evaluator(name=f'ogbn-{data.dataset_name}')
-    else:
-        evaluator = None
-
     # RUN THROUGH EPOCHS
     # params for early termination
     previous_loss = 1e10
-    patience = 5
+    patience = 15
     trigger_times = 0
 
     for epoch in range(config.epochs):
 
-        training_out, training_time = train_epoch(
+        _, training_time = train_epoch(
             model,
             optimizer,
             train_loader
         )
 
-        eval_out, inf_time = test_epoch(
-            model, data, subgraph_loader, evaluator)
-
-        val_loss = eval_out['val_loss']
-        scheduler.step(val_loss)
-
-        # log results
-        log_dict = {
-            'epoch': epoch,
-            'epoch-training-train_time': training_time,
-            'epoch-eval-inf_time': inf_time,
-        }
-
-        log_dict.update(
-            {'epoch-train-train_'+k: v for k, v in training_out.items()}
+        train_f1, val_f1, test_f1, val_loss, inf_time = test_epoch(
+            model,
+            data,
+            subgraph_loader,
+            evaluator
         )
 
-        log_dict.update({f'epoch-eval-'+k: v for k,
-                        v in eval_out.items()})
-        wandb.log(log_dict)
+        wandb.log({
+            'epoch': epoch,
+            'epoch-train_time': training_time,
+            'epoch-eval-train_f1': train_f1,
+            'epoch-eval-val_f1': val_f1,
+            'epoch-eval-test_f1': test_f1,
+            'epoch-eval-val_loss': val_loss,
+            'epoch-eval-inf_time': inf_time,
+        })
+
+        scheduler.step(val_loss)
 
         # early stopping
         current_loss = val_loss
         if current_loss > previous_loss:
             trigger_times += 1
             if trigger_times >= patience:
-                print('~~~ early stop triggered ~~~')
+                print('$$$ EARLY STOPPING TRIGGERED $$$')
                 break
         else:
             trigger_times = 0

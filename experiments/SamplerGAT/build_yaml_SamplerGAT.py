@@ -62,15 +62,12 @@ def main(args):
     # q_uniform in SIGN: https://arxiv.org/pdf/2004.11198v2.pdf
     param_dict = {
         'dataset': {
-            'distribution': 'constant',
             'value': args.DATASET.lower()
         },
         'num_workers': {
-            'distribution': 'constant',
             'value': args.N_WORKERS
         },
         'seed': {
-            'distribution': 'constant',
             'value': 42
         },
         'optimizer_lr': {
@@ -84,9 +81,7 @@ def main(args):
             'max': 1e-1,
         },
         'epochs': {
-            'distribution': 'int_uniform',
-            'min': 5,
-            'max': 100,
+            'value': 300,
         },
         'hidden_channel': {
             'values': [2**x for x in range(3, 13)],

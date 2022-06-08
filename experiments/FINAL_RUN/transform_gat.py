@@ -1,9 +1,15 @@
+
+import copy
+
 import torch
 import torch.nn.functional as F
-from torch_geometric.nn import GATConv
 from torch_sparse import SparseTensor
 
-from general.utils import time_wrapper
+from torch_geometric.nn import GATConv
+from torch_geometric.loader import NeighborLoader
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
+from utils import time_wrapper
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -18,6 +24,9 @@ class GAT(torch.nn.Module):
                  heads_in,
                  heads_out):
         """
+        https://github.com/pyg-team/pytorch_geometric/blob/master/examples/reddit.py
+
+
         Args:
             in_channel:         dim of features
             out_channel:        number of classes
@@ -164,3 +173,101 @@ class GAT(torch.nn.Module):
         )
 
         return attn_sparse
+
+
+def gat_filter(data, args, GATdict=None):
+    """ train GAT model and extract attention
+    Args:
+        data:
+        GATtransform_params:     number of attention heads
+
+    Returns:
+        SparseTensor containing attention weights
+    """
+
+    # create neighbor samplers
+    train_loader = NeighborLoader(
+        data,
+        input_nodes=data.train_mask,  # can be bool or n_id indices
+        num_neighbors=[GATdict['n_neighbors']]*GATdict['nlayers'],
+        shuffle=True,
+        batch_size=GATdict['batch_size'],
+        drop_last=True,  # remove final batch if incomplete
+    )
+
+    subgraph_loader = NeighborLoader(
+        copy.copy(data),
+        input_nodes=None,
+        num_neighbors=[-1]*GATdict['nlayers'],  # sample all neighbors
+        shuffle=False,                          # :batch_size in sequential order
+        batch_size=GATdict['batch_size'],
+        drop_last=False,
+    )
+    subgraph_loader.data.num_nodes = data.num_nodes
+    del subgraph_loader.data.x, subgraph_loader.data.y  # only need indices
+
+    # build model
+    model = GAT(
+        data.num_features,  # in_channel
+        data.num_classes,  # out_channel
+        GATdict['hidden_channel'],
+        GATdict['dropout'],
+        GATdict['nlayers'],
+        GATdict['heads_in'],
+        GATdict['heads_out'],
+    ).to(device)
+
+    # build optimizer
+    optimizer = torch.optim.Adam(
+        model.parameters(),
+        lr=GATdict['optimizer_lr'],
+        weight_decay=GATdict['optimizer_decay'],
+    )
+
+    # build scheduler (modulates learning rate)
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        mode='min',     # nll_loss expected to decrease over epochs
+        factor=0.1,     # lr reduction factor
+        patience=5,     # reduce lr after _ epochs of no improvement
+        min_lr=1e-6,    # min learning rate
+        verbose=False,  # do not monitor lr updates
+    )
+
+    for _ in range(GATdict['epochs']):
+
+        # train model
+        model.train()
+        for batch in train_loader:
+            batch_size = batch.batch_size
+
+            logits = model(
+                batch.x.to(device),
+                batch.edge_index.to(device)
+            )[:batch_size]
+
+            y = batch.y[:batch_size].to(logits.device)
+            loss = F.nll_loss(logits, y)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        # eval model
+        model.eval()
+        with torch.no_grad():
+            logits, _ = model.inference(data.x, subgraph_loader)
+            mask = data.val_mask
+            val_loss = F.nll_loss(
+                logits[mask].cpu(),
+                data.y[mask].cpu()
+            ).item()
+
+        scheduler.step(val_loss)
+
+    # extract attention matrix
+    model.eval()
+    with torch.no_grad():
+        sparse_attn = model.extract_features(data.x, subgraph_loader)
+
+    return sparse_attn

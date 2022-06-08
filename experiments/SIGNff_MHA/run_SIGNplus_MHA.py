@@ -29,7 +29,7 @@ parser.add_argument('--batch_size', type=int, default=4096)
 parser.add_argument('--n_fflayers', type=int, default=2)
 parser.add_argument('--n_runs', type=int, default=10)
 parser.add_argument('--attn_heads', type=int, default=2)
-parser.add_argument('--norm', type=strtobool, default=True)
+parser.add_argument('--norm', type=strtobool, default=False)
 parser.add_argument('--return_results', type=strtobool, default=True)
 args = parser.parse_args()
 

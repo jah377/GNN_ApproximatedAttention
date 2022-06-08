@@ -78,17 +78,15 @@ def extract_attention(x, edge_index, cs_batch_size):
     for batch in create_slices(num_edges, cs_batch_size):
         A = x[edge_index[0, batch]].to(device)
         B = x[edge_index[1, batch]].to(device)
-        values[batch] = F.relu(
-            F.cosine_similarity(A, B, dim=1).cpu()
-        )  # normalize 0-1
-
+        values[batch] = F.cosine_similarity(A, B, dim=1).cpu()
         del A, B
+
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
     return SparseTensor(
         row=edge_index[0],
         col=edge_index[1],
-        value=values,
+        value=F.relu(values),  # normalize [0-1]
         sparse_sizes=(num_nodes, num_nodes)
     )
