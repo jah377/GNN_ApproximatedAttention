@@ -2,7 +2,7 @@
 #SBATCH --job-name="Sff_TS"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:10:00
+#SBATCH --time=00:15:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -10,23 +10,23 @@
 date;hostname;id;pwd
 START=`date +%s`                            # will record .job runtime
 
-DATASET='pubmed'                            # name of dataset
 EXPERIMENT_FOLDER='SIGNff'                  # folder containing files
-MODEL='SIGNplus'                            # model
-YAML_NAME='SIGNplus.yaml'                   # name of yaml file to be created
-YAML_FILE='build_yaml_SIGNplus.py'          # file creating yaml
-PY_FILE='hps_SIGNplus.py'                   # file to sweep
-WAND_PROJ_NAME='SIGNff_pubmed'              # name of wand project
+MODEL='SIGNff'                              # model
+YAML_NAME='SIGNff.yaml'                     # name of yaml file to be created
+YAML_FILE='build_yaml_SIGNff.py'            # file creating yaml
+PY_FILE='hps_SIGNff.py'                     # file to sweep
+WAND_PROJ_NAME='dump'                       # name of wand project
 
 METHOD='random'                             # random, bayes, grid
-RUN_TRIAL=false                             # if True, reduced comp. complexity
+RUN_TRIAL=true                              # if True, reduced comp. complexity
 SWEEP_ITERATIONS=2                          # numer of iterations
-SCRATCH_FOLDER=$dataset'_'$MODEL'_sweep'    # name of folder on TMPDIR
+SCRATCH_FOLDER='dump'                       # name of folder on TMPDIR
 
 
 # copy files to scratch
 mkdir -p $TMPDIR/$SCRATCH_FOLDER/data
-cp -r data/* $TMPDIR/$SCRATCH_FOLDER/data
+cp -r data/pubmed/* $TMPDIR/$SCRATCH_FOLDER/data
+cp -r data/arxiv/* $TMPDIR/$SCRATCH_FOLDER/data
 cp -r general venvs $TMPDIR/$SCRATCH_FOLDER
 cp -r experiments/$EXPERIMENT_FOLDER/* $TMPDIR/$SCRATCH_FOLDER
 cd $TMPDIR/$SCRATCH_FOLDER
@@ -66,8 +66,6 @@ do
     project_name='dump'             # wandb project name
 
     echo ''
-    echo '=================================================='
-    echo '============== START SWEEP: '$model' =================='
     echo '=================================================='
 
     echo 'dataset': $DATASET

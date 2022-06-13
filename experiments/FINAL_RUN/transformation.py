@@ -31,20 +31,19 @@ def transform_data(data, args):
 
     # replace adj_t with attention filter
     if args.TRANSFORMATION.lower() == 'gat':
-        assert args.DATASET.lower(
-        ) in ['cora', 'pubmed'], f'GAT transformation unavailable for {args.DATASET}'
-
+        assert args.DATASET.lower() in [
+            'cora', 'pubmed'], f'GAT transformation unavailable for {args.DATASET}'
         adj_t = gat_filter(data, args, GATparams.get(args.DATASET.lower()))
 
     elif args.TRANSFORMATION.lower() == 'cosine':
-        adj_t = cosine_filter(data.x, data.edge_index, args)
+        adj_t = cosine_filter(data.x0, data.edge_index, args)
 
     elif args.TRANSFORMATION.lower() == 'dot_product':
         adj_t = dotproduct_filter(data, args)
 
     elif args.TRANSFORMATION.lower() == 'cosine_per_k':
-        assert data.x is not None
-        xs = [data.x]
+        assert data.x0 is not None
+        xs = [data.x0]
 
         for i in range(1, args.K + 1):
             adj_t = cosine_filter(xs[-1], data.edge_index, args)
@@ -57,8 +56,8 @@ def transform_data(data, args):
 
     adj_t = deg_inv_sqrt.view(-1, 1) * adj_t * deg_inv_sqrt.view(1, -1)
 
-    assert data.x is not None
-    xs = [data.x]
+    assert data.x0 is not None
+    xs = [data.x0]
 
     for i in range(1, args.K + 1):
         xs += [adj_t @ xs[-1]]
