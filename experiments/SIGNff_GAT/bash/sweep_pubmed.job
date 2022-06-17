@@ -16,9 +16,9 @@ DATASET='pubmed'                            # dataset used
 EXPERIMENT_FOLDER='SIGNff_GAT'              # folder containing files
 MODEL='SIGNff_GAT'                          # model
 YAML_NAME='SIGNff_GAT.yaml'                 # name of yaml file to be created
-YAML_FILE='build_yaml_SIGNff.py'            # file creating yaml
+YAML_FILE='build_yaml_SIGNff_quant.py'            # file creating yaml
 PY_FILE='hps_SIGNff_GAT.py'                 # file to sweep
-WAND_PROJ_NAME='sffMHA_'$DATASET            # name of wand project
+WAND_PROJ_NAME='sffGAT_'$DATASET            # name of wand project
 
 METHOD='bayes'                              # random, bayes, grid
 RUN_TRIAL=false                             # if True, reduced comp. complexity

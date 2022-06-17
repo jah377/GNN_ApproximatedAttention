@@ -168,11 +168,11 @@ def main(args):
     # if smaller datasets -> reduce range of values
     if args.DATASET.lower() in ['cora', 'pubmed']:
         sweep_config['parameters']['BATCH_SIZE'] = {
-            'values': [8, 16, 32, 64, 128, 256, 512, 1024]}
+            'values': [64, 128, 256, 512, 1024]}
         sweep_config['parameters']['INCEPTION_UNITS'] = {
-            'values': [8, 16, 32, 64, 128, 256, 512]}
+            'values': [64, 128, 256, 512]}
         sweep_config['parameters']['CLASSIFICATION_UNITS'] = {
-            'values': [8, 16, 32, 64, 128, 256, 512]}
+            'values': [64, 128, 256, 512]}
 
     # if user-determined value -> update parameter
     non_params = ['DATASET', 'MODEL', 'METHOD',

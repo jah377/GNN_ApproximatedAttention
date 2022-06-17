@@ -20,8 +20,8 @@ GATparams = {
         'nlayers': 2,
         'heads_in': 8,
         'heads_out': 1,
-        'batch_size': 512,  ## not tested
-        'n_neighbors': 100, ## not tested 
+        'batch_size': 512,  # not tested
+        'n_neighbors': 100,  # not tested
     },
     'pubmed': {
         'optimizer_type': 'Adam',
@@ -33,7 +33,7 @@ GATparams = {
         'nlayers': 2,
         'heads_in': 8,
         'heads_out': 8,
-        'batch_size': 1789,
+        'batch_size': 1024,
         'n_neighbors': 150,
     },
 }

@@ -89,22 +89,16 @@ def main(args):
             'value': 300,
         },
         'HOPS': {
-            'distribution': 'int_uniform',
-            'min': 0,
-            'max': 5,
+            'values': [x for x in range(6)]
         },
         'BATCH_SIZE': {
-            'values': [256, 512, 1024, 2048, 4096, 8192, 16384]
+            'values': [2048, 4096, 8192, 16384]
         },
         'LEARNING_RATE': {
-            'distribution': 'uniform',
-            'min': 1e-5,
-            'max': 1e-1,
+            'values': [eval(f'1e-{x}') for x in range(8)]
         },
         'WEIGHT_DECAY': {
-            'distribution': 'uniform',
-            'min': 1e-5,
-            'max': 1e-1,
+            'values': [eval(f'1e-{x}') for x in range(8)]
         },
         'INCEPTION_LAYERS': {
             'distribution': 'int_uniform',
@@ -123,14 +117,10 @@ def main(args):
             'values': [128, 256, 512, 1024]
         },
         'FEATURE_DROPOUT': {
-            'distribution': 'uniform',
-            'min': 0.0,
-            'max': 0.8,
+            'values': [x/10 for x in range(0, 8)],
         },
         'NODE_DROPOUT': {
-            'distribution': 'uniform',
-            'min': 0.0,
-            'max': 0.8,
+            'values': [x/10 for x in range(0, 8)],
         },
         'BATCH_NORMALIZATION': {
             'value': 1,
@@ -176,8 +166,7 @@ def main(args):
         if (k not in non_params) & (v is not None):
             if not isinstance(v, list):
                 v = list(v)
-            key = 'value' if len(v) == 1 else 'values'
-            sweep_config['parameters'][k] = {f'{key}': v}
+            sweep_config['parameters'][k] = {f'values': v}
 
     # if running trial -> reduce complexity
     if args.RUN_TRIAL:

@@ -16,7 +16,7 @@ DATASET='arxiv'                             # dataset used
 EXPERIMENT_FOLDER='SIGNff_DPA'              # folder containing files
 MODEL='SIGNff_SHA'                          # model
 YAML_NAME='SIGNff_SHA.yaml'                 # name of yaml file to be created
-YAML_FILE='build_yaml_SIGNff_DPA.py'        # file creating yaml
+YAML_FILE='build_yaml_SIGNff_DPA_quant.py'        # file creating yaml
 PY_FILE='hps_SIGNff_DPA.py'                 # file to sweep
 WAND_PROJ_NAME='sffSHA_'$DATASET            # name of wand project
 

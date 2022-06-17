@@ -1,4 +1,5 @@
 import time
+import glob
 import torch
 import random
 
@@ -8,6 +9,7 @@ from scipy import sparse
 from torch_sparse import SparseTensor
 from torch.utils.data import DataLoader
 from ogb.nodeproppred import Evaluator
+
 
 def time_wrapper(func):
     """ wrapper for recording time
@@ -72,6 +74,14 @@ def create_loader(data, split: str, batch_size: int, num_workers: int = 1):
     )
 
 
+def load_data(dataset):
+    """ load original data (K=0) from dataset name """
+
+    file_name = f'{dataset}_sign_k0.pth'
+    path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
+    return torch.load(path)
+
+
 def sparse_min_max_norm(s_coo):
     """ row-level min-max normalization """
     # https://stackoverflow.com/questions/51570512/minmax-scale-sparse-matrix-excluding-zero-elements
@@ -105,3 +115,18 @@ def sparse_min_max_norm(s_coo):
         value=torch.tensor((v-min_m)/(max_m-min_m)),
         sparse_sizes=shape
     )
+
+
+def print_filter_stats(filter):
+    """ return statistics about attention filter weights """
+
+    v = filter.to_torch_sparse_coo_tensor().coalesce().values().float()
+    v = v[v != 0.0]  # remove empty weights
+
+    print('Attention Filter (n={}): {:0.3f} +\- {:0.3f} [{:0.3f}-{:0.3f}]'.format(
+        v.size()[0],
+        v.mean(),
+        v.std(),
+        v.min(),
+        v.max()
+    ))

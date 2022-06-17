@@ -5,7 +5,7 @@ import torch
 import torch.nn.functional as F
 from torch_sparse import SparseTensor
 
-from SIGNff_utils import sparse_min_max_norm
+from utils import sparse_min_max_norm
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

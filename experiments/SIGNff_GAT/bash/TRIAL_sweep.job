@@ -13,7 +13,7 @@ START=`date +%s`                            # will record .job runtime
 EXPERIMENT_FOLDER='SIGNff_GAT'              # folder containing files
 MODEL='SIGNff_GAT'                          # model
 YAML_NAME='SIGNff_GAT.yaml'                 # name of yaml file to be created
-YAML_FILE='build_yaml_SIGNff.py'            # file creating yaml
+YAML_FILE='build_yaml_SIGNff_quant.py'            # file creating yaml
 PY_FILE='hps_SIGNff_GAT.py'                 # file to sweep
 WAND_PROJ_NAME='dump'                       # name of wand project
 
