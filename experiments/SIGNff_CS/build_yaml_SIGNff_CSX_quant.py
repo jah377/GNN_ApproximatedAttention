@@ -140,7 +140,7 @@ def main(args):
         #     'max': 5,
         # },
         'ATTN_NORMALIZATION': {
-            'value': [0, 1],
+            'values': [0, 1],
         },
     }
 

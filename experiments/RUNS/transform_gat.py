@@ -195,7 +195,7 @@ def gat_filter(data, args):
         args.GAT_NODE_DROPOUT,
         args.GAT_LAYERS,
         args.GAT_HEADS_IN,
-        args.GATS_HEADS_OUT,
+        args.GAT_HEADS_OUT,
     ).to(device)
 
     # build optimizer
@@ -210,7 +210,7 @@ def gat_filter(data, args):
         optimizer,
         mode='min',
         factor=0.1,
-        patience=args.LR_PATIENCE,
+        patience=args.GAT_LR_PATIENCE,
         min_lr=1e-7,
         verbose=False,
     )

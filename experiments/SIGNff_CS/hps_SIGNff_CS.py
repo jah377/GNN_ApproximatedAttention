@@ -233,8 +233,7 @@ def main(config):
     file_path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
     folder_path = osp.dirname(file_path)
     transform_path = osp.join(
-        folder_path, f'{config.DATASET}_k{config.HOPS}_{config.TRANSFORMATION}.pth')
-
+        folder_path, f'{config.DATASET}_k{config.HOPS}_{config.TRANSFORMATION}_norm{config.ATTN_NORMALIZATION}.pth')
     if not osp.isfile(transform_path):
         data = torch.load(file_path)
         data, _ = transform_data(data, config)

@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="Sff_prod"
+#SBATCH --job-name="SffGAT_pub"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=120:00:00
+#SBATCH --time=48:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -12,13 +12,15 @@
 date;hostname;id;pwd
 START=`date +%s`                            # will record .job runtime
 
-DATASET='products'                            # dataset used
-EXPERIMENT_FOLDER='SIGNff'                  # folder containing files
-MODEL='SIGNff'                              # model
-YAML_NAME='SIGNff.yaml'                     # name of yaml file to be created
-YAML_FILE='build_yaml_SIGNff_quant.py'      # file creating yaml
-PY_FILE='hps_SIGNff.py'                     # file to sweep
-WAND_PROJ_NAME='sff_'$DATASET               # name of wand project
+DATASET='pubmed'                            # dataset used
+EXPERIMENT_FOLDER='SIGNff_GAT'              # folder containing files
+MODEL='SIGNff_GAT'                          # model
+YAML_NAME='SIGNff_GAT.yaml'                 # name of yaml file to be created
+YAML_FILE='build_yaml_SIGNff_quant.py'            # file creating yaml
+PY_FILE='hps_SIGNff_GAT.py'                 # file to sweep
+WAND_PROJ_NAME='sffGAT_'$DATASET            # name of wand project
+
+
 
 METHOD='bayes'                              # random, bayes, grid
 RUN_TRIAL=false                             # if True, reduced comp. complexity

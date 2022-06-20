@@ -1,0 +1,104 @@
+#!/bin/bash
+#SBATCH --job-name="DGL_arxSIGN"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --time=06:00:00
+#SBATCH --gpus=1
+#SBATCH --partition=gpu_shared
+#SBATCH --output=%x.%j.out
+#SBATCH --mail-user=jon.harris@student.uva.nl
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+date;hostname;id;pwd
+START=`date +%s`                            # will record .job runtime
+
+DATASET='arxiv'                             # dataset used
+PY_FILE='sign_runs.py'                      # file to sweep
+SCRATCH_FOLDER='DGL_arxSIGN'                # name of folder on TMPDIR
+EXPERIMENT_FOLDER='RUNS'                    # folder containing files
+
+EVAL_EVERY=20
+RUN_SEEDS='0,4,8,42,64,128,256,512,1024,2048'
+EPOCHS=1000
+
+ATTN_FILTER='sign'
+BATCH_NORMALIZATION=0
+BATCH_SIZE=50000
+CLASSIFICATION_LAYERS=2
+CLASSIFICATION_UNITS=512
+FEATURE_DROPOUT=0.1
+HOPS=5
+INCEPTION_LAYERS=2
+INCEPTION_UNITS=512
+LEARNING_RATE=1e-3
+NODE_DROPOUT=0.5
+WEIGHT_DECAY=0
+
+
+# copy files to scratch
+mkdir -p $TMPDIR/$SCRATCH_FOLDER/data
+cp -r data/pubmed/pubmed_sign_k0.pth $TMPDIR/$SCRATCH_FOLDER/data
+cp -r data/arxiv/arxiv_sign_k0.pth $TMPDIR/$SCRATCH_FOLDER/data
+cp -r data/products/products_sign_k0.pth $TMPDIR/$SCRATCH_FOLDER/data
+cp -r venvs $TMPDIR/$SCRATCH_FOLDER
+cp -r experiments/$EXPERIMENT_FOLDER/* $TMPDIR/$SCRATCH_FOLDER
+cd $TMPDIR/$SCRATCH_FOLDER
+
+
+# activate venv
+module load 2021
+module load CUDA/11.3.1
+source $TMPDIR/$SCRATCH_FOLDER/venvs/GPU_venv/bin/activate
+which python
+
+echo ''
+echo 'Check if packages installed correctly'
+python -c "import torch; print(f'Torch: {torch.__version__}')"
+python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
+echo ''
+
+
+echo '=================================================='
+
+python $PY_FILE\
+    --DATASET $DATASET \
+    --ATTN_FILTER $ATTN_FILTER \
+    --EPOCHS $EPOCHS \
+    --EVAL_EVERY $EVAL_EVERY \
+    --RUN_SEEDS $RUN_SEEDS  \
+    --HOPS $HOPS \
+    --BATCH_SIZE $BATCH_SIZE \
+    --LEARNING_RATE $LEARNING_RATE \
+    --WEIGHT_DECAY $WEIGHT_DECAY \
+    --INCEPTION_LAYERS $INCEPTION_LAYERS \
+    --INCEPTION_UNITS $INCEPTION_UNITS \
+    --CLASSIFICATION_LAYERS $CLASSIFICATION_LAYERS \
+    --CLASSIFICATION_UNITS $CLASSIFICATION_UNITS \
+    --FEATURE_DROPOUT $FEATURE_DROPOUT \
+    --NODE_DROPOUT $NODE_DROPOUT \
+    --BATCH_NORMALIZATION $BATCH_NORMALIZATION 
+    # --ATTN_HEADS $ATTN_HEADS \
+    # --ATTN_NORMALIZATION $ATTN_NORMALIZATION \ 
+    # --GAT_EPOCHS $GAT_EPOCHS \
+    # --GAT_BATCH_SIZE $GAT_BATCH_SIZE \
+    # --GAT_LEARNING_RATE $GAT_LEARNING_RATE \
+    # --GAT_WEIGHT_DECAY $GAT_WEIGHT_DECAY \
+    # --GAT_HIDDEN_UNITS $GAT_HIDDEN_UNITS \
+    # --GAT_NODE_DROPOUT $GAT_NODE_DROPOUT \
+    # --GAT_LAYERS $GAT_LAYERS \
+    # --GAT_HEADS_IN $GAT_HEADS_IN \
+    # --GAT_HEADS_OUT $GAT_HEADS_OUT \
+    # --GAT_NEIGHBORS $GAT_NEIGHBORS \
+
+echo '=================================================='
+echo ''
+
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
+END=`date +%s`;
+
+let DIFF=END-START
+let HOURS=DIFF/3600
+let MINUTES=(DIFF/60)%60
+
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
