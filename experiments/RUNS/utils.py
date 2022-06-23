@@ -10,6 +10,8 @@ from torch_sparse import SparseTensor
 from torch.utils.data import DataLoader
 from ogb.nodeproppred import Evaluator
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 def time_wrapper(func):
     """ wrapper for recording time
@@ -76,10 +78,22 @@ def create_loader(data, split: str, batch_size: int, num_workers: int = 1):
 
 def load_data(dataset):
     """ load original data (K=0) from dataset name """
-
     file_name = f'{dataset}_sign_k0.pth'
     path = glob.glob(f'./**/{file_name}', recursive=True)[0][2:]
     return torch.load(path)
+
+
+def parse_data(data, args):
+    """ parse Data object for relevant variables """
+    xs = [data.x]+[data[f'x{k}'].float() for k in range(1, args.HOPS+1)]
+    labels = data.y
+    n_features = data.num_features
+    n_classes = data.num_classes
+    train_idx = data['train_mask']
+    val_idx = data['val_mask']
+    test_idx = data['test_mask']
+    evaluator = create_evaluator_fn(args.DATASET)
+    return [xs, labels, n_features, n_classes, train_idx, val_idx, test_idx, evaluator]
 
 
 def sparse_min_max_norm(s_coo):
@@ -98,12 +112,12 @@ def sparse_min_max_norm(s_coo):
 
     # calculate min-max per row
     v = s_csr.data
-    nnz = s_csr.getnnz(axis=1)          # total edges per row
-    idx = np.r_[0, nnz[:-1].cumsum()]   # v.idx corresponding to each row
+    nnz = s_csr.getnnz(axis=1)           # total edges per row
+    idx = np.r_[0, nnz[:-1].cumsum()]    # v.idx corresponding to each row
 
     max_r = np.maximum.reduceat(v, idx)  # max per row
     min_r = np.minimum.reduceat(v, idx)  # min per row
-    min_r *= (nnz == shape[1])          # if not fully-connected, min=0
+    min_r *= (nnz == shape[1])           # if not fully-connected, min=0
 
     # create matrices for vectorization
     max_m = np.repeat(max_r, nnz)
@@ -130,3 +144,14 @@ def print_filter_stats(filter):
         v.min(),
         v.max()
     ))
+
+
+def count_parameters(model):
+    """ determine total size of model """
+    pp = 0
+    for p in list(model.parameters()):
+        nn = 1
+        for s in list(p.size()):
+            nn = nn*s
+        pp += nn
+    return pp

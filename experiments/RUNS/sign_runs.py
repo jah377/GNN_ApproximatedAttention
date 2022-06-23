@@ -256,6 +256,7 @@ def main(args):
 
         data = load_data(args.DATASET)
         data, transform_time = transform_data(data, args)
+        print('Total Transformation Time: {:0.4f}'.format(transform_time))
         train_loader = create_loader(data, 'train', args.BATCH_SIZE)
         eval_loader = create_loader(data, 'all', args.BATCH_SIZE)
 

@@ -159,6 +159,9 @@ def main(args):
         sweep_config['parameters']['CLASSIFICATION_UNITS'] = {
             'values': [64, 128, 256, 512]}
 
+    if args.DATASET.lower() in ['products']:
+        sweep_config['parameters']['ATTN_NORMALIZATION'] = {'value': 1}
+
     # if user-determined value -> update parameter
     non_params = ['DATASET', 'MODEL', 'METHOD',
                   'TRAIN_FILE', 'YAML_FILE', 'RUN_TRIAL']

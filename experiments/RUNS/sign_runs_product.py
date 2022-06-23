@@ -238,118 +238,116 @@ def transform_data(data, args):
     return data
 
 
-def run(data, model, args, optimizer, train_loader, eval_loader, evaluator):
-    """ execute single run to train/eval model"""
-
-    model.reset_parameters()
-
-    epoch_train_times = []
-    epoch_inf_times = []
-    best_epoch, best_val, best_test = 0, 0, 0
-
-    for epoch in range(1, args.EPOCHS+1):
-        _, train_time = train(data, model, optimizer, train_loader)
-        epoch_train_times.append([train_time])
-
-        if (epoch % args.EVAL_EVERY == 0) or (epoch == args.EPOCHS):
-            train_f1, val_f1, test_f1, inf_time = eval(
-                data, model, eval_loader, evaluator)
-            epoch_inf_times.append([inf_time])
-
-            if val_f1 > best_val:
-                best_epoch = epoch
-                best_train, best_val, best_test = train_f1, val_f1, test_f1
-
-            print('Epoch {}:, Train {:.4f}, Val {:.4f}, Test {:.4f}'.format(
-                epoch, train_f1, val_f1, test_f1))
-
-    return {
-        'best_epoch': [best_epoch],
-        'best_train': [best_train],
-        'best_val': [best_val],
-        'best_test': [best_test],
-        'train_times': [epoch_train_times],
-        'inf_times': [epoch_inf_times],
-    }
-
-
 def main(args):
-    set_seeds(args.SEED)
-
-    data = load_data(args.DATASET)
-    data, transform_time = transform_data(data, args)
-    train_loader = create_loader(data, 'train', args.BATCH_SIZE)
-    eval_loader = create_loader(data, 'all', args.BATCH_SIZE)
-    print('Transformation Time (s): {:.4f}'.format(transform_time))
-
-    model = SIGN(
-        data.num_features,
-        data.num_classes,
-        args.INCEPTION_UNITS,
-        args.INCEPTION_LAYERS,
-        args.CLASSIFICATION_UNITS,
-        args.CLASSIFICATION_LAYERS,
-        args.FEATURE_DROPOUT,
-        args.NODE_DROPOUT,
-        args.HOPS,
-        args.BATCH_NORMALIZATION,
-    ).to(device)
-
-    print('# Model Params:', sum(p.numel()
-          for p in model.parameters() if p.requires_grad))
-    print()
-
-    optimizer = torch.optim.Adam(
-        model.parameters(),
-        lr=args.LEARNING_RATE,
-        weight_decay=args.WEIGHT_DECAY
-    )
-
-    evaluator = create_evaluator_fn(args.DATASET)
-
-    # per run
     results = {
         'best_epoch': [], 'best_train': [],
         'best_val': [], 'best_test': [],
-        'train_times': [], 'inf_times': [],
+        'preproc_time': [], 'train_times': [], 'inf_times': [],
     }
 
-    for i in range(1, args.N_RUNS+1):
-        print(f'RUN #{i}:')
+    data = load_data(args.DATASET)
+    data, transform_time = transform_data(data, args)
+    print('Total Transformation Time: {:0.4f}'.format(transform_time))
+    train_loader = create_loader(data, 'train', args.BATCH_SIZE)
+    eval_loader = create_loader(data, 'all', args.BATCH_SIZE)
 
-        run_out = run(
-            data,
-            model,
-            args,
-            optimizer,
-            train_loader,
-            eval_loader,
-            evaluator
+    for i, seed in enumerate(args.RUN_SEEDS):
+        try:
+            model.reset_parameters()
+        except:
+            pass
+
+        print(f'RUN #{i}: seed={seed}')
+        set_seeds(seed)
+
+        # data = load_data(args.DATASET)
+        # data, transform_time = transform_data(data, args)
+        # print('Total Transformation Time: {:0.4f}'.format(transform_time))
+        # train_loader = create_loader(data, 'train', args.BATCH_SIZE)
+        # eval_loader = create_loader(data, 'all', args.BATCH_SIZE)
+
+        model = SIGN(
+            data.num_features,
+            data.num_classes,
+            args.INCEPTION_UNITS,
+            args.INCEPTION_LAYERS,
+            args.CLASSIFICATION_UNITS,
+            args.CLASSIFICATION_LAYERS,
+            args.FEATURE_DROPOUT,
+            args.NODE_DROPOUT,
+            args.HOPS,
+            args.BATCH_NORMALIZATION,
+        ).to(device)
+
+        model_params = sum(p.numel()
+                           for p in model.parameters() if p.requires_grad)
+
+        optimizer = torch.optim.Adam(
+            model.parameters(),
+            lr=args.LEARNING_RATE,
+            weight_decay=args.WEIGHT_DECAY
         )
 
-        print('BEST: Epoch {}, Train {:.4f}, Val {:.4f}, Test {:.4f}'.format(
-            run_out['best_epoch'][0], run_out['best_train'][0],
-            run_out['best_val'][0], run_out['best_test'][0]
-        ))
-        print()
+        evaluator = create_evaluator_fn(args.DATASET)
 
-        for k, v in run_out.items():
-            results[k].append(v)  # store run results
+        # train and evaluate
+        epoch_train_times = []
+        epoch_inf_times = []
+        best_epoch, best_val, best_test = 0, 0, 0
+
+        for epoch in range(1, args.EPOCHS+1):
+            _, train_time = train(data, model, optimizer, train_loader)
+            epoch_train_times.append([train_time])
+
+            if (epoch % args.EVAL_EVERY == 0) or (epoch == args.EPOCHS):
+                train_f1, val_f1, test_f1, inf_time = eval(
+                    data, model, eval_loader, evaluator)
+                epoch_inf_times.append([inf_time])
+
+                if val_f1 > best_val:
+                    best_epoch = epoch
+                    best_train, best_val, best_test = train_f1, val_f1, test_f1
+
+                print('Epoch {}:, Train {:.4f}, Val {:.4f}, Test {:.4f}'.format(
+                    epoch, train_f1, val_f1, test_f1))
+
+        # print store best values of run
+        run_results = {
+            'preproc_time': [transform_time],
+            'best_epoch': [best_epoch],
+            'best_train': [best_train],
+            'best_val': [best_val],
+            'best_test': [best_test],
+            'train_times': [epoch_train_times],
+            'inf_times': [epoch_inf_times],
+        }
+
+        for k, v in run_results.items():
+            results[k].append(v)
+
+        print('BEST: Epoch {}, Train {:.4f}, Val {:.4f}, Test {:.4f}'.format(
+            best_epoch, best_train, best_val, best_test))
+        print()
 
     # print final numbers reported in thesis
     print('\n\n')
     print('==================================================')
+    print('Model Parameters: {}'.format(model_params))
+    print()
+    print('Avg. Preaggregation Time (s): {:.4f} +/- {:.4f}'.format(
+        np.mean(results['preproc_time']), np.std(results['preproc_time'])))
     print('Avg. Training Time (epoch) (s): {:.4f} +/- {:.4f}'.format(
         np.mean(results['train_times']), np.std(results['train_times'])))
     print('Avg. Inference Time (s): {:.4f} +/- {:.4f}'.format(
         np.mean(results['inf_times']), np.std(results['inf_times'])))
-
+    print()
     print('Avg. Training Acc: {:.4f} +/- {:.4f}'.format(
         np.mean(results['best_train']), np.std(results['best_train'])))
     print('Avg. Validation Acc: {:.4f} +/- {:.4f}'.format(
         np.mean(results['best_val']), np.std(results['best_val'])))
     print('Avg. Test Acc: {:.4f} +/- {:.4f}'.format(
         np.mean(results['best_test']), np.std(results['best_test'])))
+    print()
 
 
 if __name__ == '__main__':
@@ -362,9 +360,8 @@ if __name__ == '__main__':
                         help='number of epochs')
     parser.add_argument('--EVAL_EVERY', type=int, default=5,
                         help='evaluate model every _ epochs')
-    parser.add_argument('--N_RUNS', type=int, default=2,
-                        help='number of runs')
-    parser.add_argument('--SEED', type=int, default=42, help='seed value')
+    parser.add_argument('--RUN_SEEDS', '--list', help='delimited list input of run seeds',
+                        type=lambda s: [int(item) for item in s.split(',')])
     parser.add_argument('--HOPS', type=int, default=2,
                         help='k-hop neighborhood aggregations')
     parser.add_argument('--BATCH_SIZE', type=int, default=2048,

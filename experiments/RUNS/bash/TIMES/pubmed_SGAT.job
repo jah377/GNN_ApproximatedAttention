@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="Frasca"
+#SBATCH --job-name="TIME_pubSGAT"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=06:00:00
+#SBATCH --time=16:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -13,28 +13,39 @@ date;hostname;id;pwd
 START=`date +%s`                            # will record .job runtime
 
 DATASET='pubmed'                            # dataset used
-PY_FILE='sign.py'                           # file to sweep
-SCRATCH_FOLDER='RUN_pubSIGN'                # name of folder on TMPDIR
+PY_FILE='sign_runs.py'                           # file to sweep
+SCRATCH_FOLDER='TIME_pubSGAT'                # name of folder on TMPDIR
 EXPERIMENT_FOLDER='RUNS'                    # folder containing files
 
-N_RUNS=10
 EVAL_EVERY=20
-SEED=42
-
-DATASET='products'                            
+RUN_SEEDS='0,4,8,42,64,128,256,512,1024,2048'
 EPOCHS=300
-ATTN_FILTER='sign'
+
+ATTN_FILTER='gat'
 BATCH_NORMALIZATION=1
-BATCH_SIZE=16384
-CLASSIFICATION_LAYERS=1
+BATCH_SIZE=256
+CLASSIFICATION_LAYERS=3
 CLASSIFICATION_UNITS=512
-FEATURE_DROPOUT=0.0
-HOPS=5
-INCEPTION_LAYERS=1
+FEATURE_DROPOUT=0.3
+HOPS=2
+INCEPTION_LAYERS=2
 INCEPTION_UNITS=512
-LEARNING_RATE=1e-4
-NODE_DROPOUT=0.5
-WEIGHT_DECAY=1e-4
+LEARNING_RATE=1e-3
+NODE_DROPOUT=0.3
+WEIGHT_DECAY=1e-7
+GAT_EPOCHS=300
+GAT_BATCH_SIZE=1024
+GAT_LEARNING_RATE=1e-2 
+GAT_WEIGHT_DECAY=1e-3
+GAT_HIDDEN_UNITS=8 
+GAT_NODE_DROPOUT=0.6 
+GAT_LAYERS=2
+GAT_HEADS_IN=8 
+GAT_HEADS_OUT=8
+GAT_NEIGHBORS=150
+GAT_LR_PATIENCE=5
+
+
 
 
 # copy files to scratch
@@ -67,8 +78,7 @@ python $PY_FILE\
     --ATTN_FILTER $ATTN_FILTER \
     --EPOCHS $EPOCHS \
     --EVAL_EVERY $EVAL_EVERY \
-    --N_RUNS $N_RUNS  \
-    --SEED $SEED \
+    --RUN_SEEDS $RUN_SEEDS  \
     --HOPS $HOPS \
     --BATCH_SIZE $BATCH_SIZE \
     --LEARNING_RATE $LEARNING_RATE \
@@ -82,16 +92,17 @@ python $PY_FILE\
     --BATCH_NORMALIZATION $BATCH_NORMALIZATION \
     # --ATTN_HEADS $ATTN_HEADS \
     # --ATTN_NORMALIZATION $ATTN_NORMALIZATION 
-    # --GAT_EPOCHS $GAT_EPOCHS \
-    # --GAT_BATCH_SIZE $GAT_BATCH_SIZE \
-    # --GAT_LEARNING_RATE $GAT_LEARNING_RATE \
-    # --GAT_WEIGHT_DECAY $GAT_WEIGHT_DECAY \
-    # --GAT_HIDDEN_UNITS $GAT_HIDDEN_UNITS \
-    # --GAT_NODE_DROPOUT $GAT_NODE_DROPOUT \
-    # --GAT_LAYERS $GAT_LAYERS \
-    # --GAT_HEADS_IN $GAT_HEADS_IN \
-    # --GAT_HEADS_OUT $GAT_HEADS_OUT \
-    # --GAT_NEIGHBORS $GAT_NEIGHBORS \
+    --GAT_EPOCHS $GAT_EPOCHS \
+    --GAT_BATCH_SIZE $GAT_BATCH_SIZE \
+    --GAT_LEARNING_RATE $GAT_LEARNING_RATE \
+    --GAT_WEIGHT_DECAY $GAT_WEIGHT_DECAY \
+    --GAT_HIDDEN_UNITS $GAT_HIDDEN_UNITS \
+    --GAT_NODE_DROPOUT $GAT_NODE_DROPOUT \
+    --GAT_LAYERS $GAT_LAYERS \
+    --GAT_HEADS_IN $GAT_HEADS_IN \
+    --GAT_HEADS_OUT $GAT_HEADS_OUT \
+    --GAT_NEIGHBORS $GAT_NEIGHBORS \
+    --GAT_LR_PATIENCE $GAT_LR_PATIENCE
 
 echo '=================================================='
 echo ''

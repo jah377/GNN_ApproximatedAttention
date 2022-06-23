@@ -288,32 +288,33 @@ def main(config):
     for epoch in range(1, config.EPOCHS+1):
         _, training_time = train(data, model, optimizer, train_loader)
 
-        train_loss, train_f1, _ = eval(
-            data, model, train_loader, evaluator)
-        val_loss, val_f1, _ = eval(
-            data, model, val_loader, evaluator)
+        if (epoch%20==0) or (epoch==config.EPOCHS):
+            train_loss, train_f1, _ = eval(
+                data, model, train_loader, evaluator)
+            val_loss, val_f1, _ = eval(
+                data, model, val_loader, evaluator)
 
-        scheduler.step(val_loss)
+            scheduler.step(val_loss)
 
-        wandb.log({
-            'epoch': epoch,
-            'training_time': training_time,
-            'train_loss': train_loss,
-            'train_f1': train_f1,
-            'val_loss': val_loss,
-            'val_f1': val_f1,
-        })
+            wandb.log({
+                'epoch': epoch,
+                'training_time': training_time,
+                'train_loss': train_loss,
+                'train_f1': train_f1,
+                'val_loss': val_loss,
+                'val_f1': val_f1,
+            })
 
-        # early stopping
-        current_loss = val_loss
-        if current_loss > previous_loss:
-            trigger_times += 1
-            if trigger_times >= config.TERMINATION_PATIENCE:
-                print('$$$ EARLY STOPPING TRIGGERED $$$')
-                break
-        else:
-            trigger_times = 0
-        previous_loss = current_loss
+            # early stopping
+            current_loss = val_loss
+            if current_loss > previous_loss:
+                trigger_times += 1
+                if trigger_times >= config.TERMINATION_PATIENCE:
+                    print('$$$ EARLY STOPPING TRIGGERED $$$')
+                    break
+            else:
+                trigger_times = 0
+            previous_loss = current_loss
 
 
 if __name__ == '__main__':

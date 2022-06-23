@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="RUN_pubSIGN"
+#SBATCH --job-name="TIME_pubSMHA"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=10:00:00
@@ -14,15 +14,16 @@ START=`date +%s`                            # will record .job runtime
 
 DATASET='pubmed'                            # dataset used
 PY_FILE='sign_runs.py'                           # file to sweep
-SCRATCH_FOLDER='RUN_pubSIGN'                # name of folder on TMPDIR
+SCRATCH_FOLDER='TIME_pubSMHA'                # name of folder on TMPDIR
 EXPERIMENT_FOLDER='RUNS'                    # folder containing files
 
 EVAL_EVERY=20
 RUN_SEEDS='0,4,8,42,64,128,256,512,1024,2048'
 EPOCHS=300
 
-DATASET='pubmed'                            
-ATTN_FILTER='sign'
+ATTN_FILTER='dot_product'
+ATTN_HEADS=3
+ATTN_NORMALIZATION=1
 BATCH_NORMALIZATION=1
 BATCH_SIZE=256
 CLASSIFICATION_LAYERS=3
@@ -77,9 +78,9 @@ python $PY_FILE\
     --CLASSIFICATION_UNITS $CLASSIFICATION_UNITS \
     --FEATURE_DROPOUT $FEATURE_DROPOUT \
     --NODE_DROPOUT $NODE_DROPOUT \
-    --BATCH_NORMALIZATION $BATCH_NORMALIZATION 
-    # --ATTN_HEADS $ATTN_HEADS \
-    # --ATTN_NORMALIZATION $ATTN_NORMALIZATION \ 
+    --BATCH_NORMALIZATION $BATCH_NORMALIZATION \
+    --ATTN_HEADS $ATTN_HEADS \
+    --ATTN_NORMALIZATION $ATTN_NORMALIZATION 
     # --GAT_EPOCHS $GAT_EPOCHS \
     # --GAT_BATCH_SIZE $GAT_BATCH_SIZE \
     # --GAT_LEARNING_RATE $GAT_LEARNING_RATE \

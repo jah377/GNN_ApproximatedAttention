@@ -1,0 +1,236 @@
+Mon 20 Jun 2022 11:24:24 AM CEST
+r32n3.lisa.surfsara.nl
+uid=55639(jharris) gid=55199(jharris) groups=55199(jharris),46457(lisa_uva_gpu),50488(ssh_forwarding)
+/home/jharris/Desktop/approx_attention
+/home/jharris/Desktop/approx_attention/venvs/GPU_venv/bin/python
+
+Check if packages installed correctly
+Torch: 1.11.0+cu113
+PyG: 2.0.4
+
+==================================================
+Using backend: pytorch
+
+===== ARXIV =====
+
+Namespace(DATASET='arxiv', ATTN_FILTER='cosine', EPOCHS=300, EVAL_EVERY=20, RUN_SEEDS=[0, 4, 8, 42, 64, 128, 256, 512, 1024, 2048], HOPS=2, BATCH_SIZE=2048, LEARNING_RATE=0.001, WEIGHT_DECAY=1e-07, INCEPTION_LAYERS=3, INCEPTION_UNITS=1024, CLASSIFICATION_LAYERS=3, CLASSIFICATION_UNITS=1024, FEATURE_DROPOUT=0.0, NODE_DROPOUT=0.6, BATCH_NORMALIZATION=1, ATTN_HEADS=2, ATTN_NORMALIZATION=1, GAT_EPOCHS=10, GAT_BATCH_SIZE=1024, GAT_LEARNING_RATE=0.01, GAT_WEIGHT_DECAY=0.001, GAT_HIDDEN_UNITS=8, GAT_NODE_DROPOUT=0.6, GAT_LAYERS=2, GAT_HEADS_IN=8, GAT_HEADS_OUT=8, GAT_NEIGHBORS=150, GAT_LR_PATIENCE=5)
+
+RUN #0: seed=0
+COSINE
+Attention Filter (n=1166243): 0.919 +\- 0.073 [0.303-1.000]
+Epoch 20:, Train 0.6699, Val 0.6300, Test 0.5822
+Epoch 40:, Train 0.7191, Val 0.6376, Test 0.5839
+Epoch 60:, Train 0.7527, Val 0.6430, Test 0.5907
+Epoch 80:, Train 0.7848, Val 0.6453, Test 0.5931
+Epoch 100:, Train 0.8090, Val 0.6432, Test 0.5902
+Epoch 120:, Train 0.8324, Val 0.6433, Test 0.5867
+Epoch 140:, Train 0.8504, Val 0.6436, Test 0.5927
+Epoch 160:, Train 0.8687, Val 0.6434, Test 0.5928
+Epoch 180:, Train 0.8818, Val 0.6414, Test 0.5896
+Epoch 200:, Train 0.8926, Val 0.6443, Test 0.5870
+Epoch 220:, Train 0.9000, Val 0.6423, Test 0.5864
+Epoch 240:, Train 0.9104, Val 0.6431, Test 0.5870
+Epoch 260:, Train 0.9182, Val 0.6429, Test 0.5908
+Epoch 280:, Train 0.9241, Val 0.6420, Test 0.5857
+Epoch 300:, Train 0.9306, Val 0.6373, Test 0.5816
+BEST: Epoch 80, Train 0.7848, Val 0.6453, Test 0.5931
+
+RUN #1: seed=4
+COSINE
+Attention Filter (n=1166243): 0.919 +\- 0.073 [0.303-1.000]
+Epoch 20:, Train 0.6686, Val 0.6346, Test 0.5854
+Epoch 40:, Train 0.7182, Val 0.6391, Test 0.5911
+Epoch 60:, Train 0.7532, Val 0.6387, Test 0.5892
+Epoch 80:, Train 0.7857, Val 0.6444, Test 0.5935
+Epoch 100:, Train 0.8100, Val 0.6435, Test 0.5900
+Epoch 120:, Train 0.8337, Val 0.6434, Test 0.5915
+Epoch 140:, Train 0.8531, Val 0.6459, Test 0.5937
+Epoch 160:, Train 0.8671, Val 0.6446, Test 0.5916
+Epoch 180:, Train 0.8773, Val 0.6467, Test 0.5919
+Epoch 200:, Train 0.8931, Val 0.6439, Test 0.5892
+Epoch 220:, Train 0.9023, Val 0.6418, Test 0.5859
+Epoch 240:, Train 0.9096, Val 0.6451, Test 0.5914
+Epoch 260:, Train 0.9161, Val 0.6419, Test 0.5878
+Epoch 280:, Train 0.9250, Val 0.6425, Test 0.5890
+Epoch 300:, Train 0.9297, Val 0.6409, Test 0.5843
+BEST: Epoch 180, Train 0.8773, Val 0.6467, Test 0.5919
+
+RUN #2: seed=8
+COSINE
+Attention Filter (n=1166243): 0.919 +\- 0.073 [0.303-1.000]
+Epoch 20:, Train 0.6694, Val 0.6321, Test 0.5896
+Epoch 40:, Train 0.7172, Val 0.6413, Test 0.5946
+Epoch 60:, Train 0.7545, Val 0.6442, Test 0.5984
+Epoch 80:, Train 0.7852, Val 0.6416, Test 0.5911
+Epoch 100:, Train 0.8107, Val 0.6432, Test 0.5921
+Epoch 120:, Train 0.8317, Val 0.6411, Test 0.5925
+Epoch 140:, Train 0.8505, Val 0.6417, Test 0.5866
+Epoch 160:, Train 0.8660, Val 0.6415, Test 0.5878
+Epoch 180:, Train 0.8787, Val 0.6401, Test 0.5831
+Epoch 200:, Train 0.8931, Val 0.6455, Test 0.5915
+Epoch 220:, Train 0.9023, Val 0.6418, Test 0.5893
+Epoch 240:, Train 0.9114, Val 0.6418, Test 0.5844
+Epoch 260:, Train 0.9165, Val 0.6432, Test 0.5881
+Epoch 280:, Train 0.9253, Val 0.6422, Test 0.5870
+Epoch 300:, Train 0.9310, Val 0.6395, Test 0.5835
+BEST: Epoch 200, Train 0.8931, Val 0.6455, Test 0.5915
+
+RUN #3: seed=42
+COSINE
+Attention Filter (n=1166243): 0.919 +\- 0.073 [0.303-1.000]
+Epoch 20:, Train 0.6714, Val 0.6355, Test 0.5894
+Epoch 40:, Train 0.7193, Val 0.6436, Test 0.5961
+Epoch 60:, Train 0.7552, Val 0.6416, Test 0.5896
+Epoch 80:, Train 0.7861, Val 0.6462, Test 0.6007
+Epoch 100:, Train 0.8136, Val 0.6413, Test 0.5898
+Epoch 120:, Train 0.8327, Val 0.6409, Test 0.5903
+Epoch 140:, Train 0.8520, Val 0.6421, Test 0.5889
+Epoch 160:, Train 0.8666, Val 0.6427, Test 0.5922
+Epoch 180:, Train 0.8811, Val 0.6415, Test 0.5893
+Epoch 200:, Train 0.8927, Val 0.6408, Test 0.5863
+Epoch 220:, Train 0.9032, Val 0.6419, Test 0.5893
+Epoch 240:, Train 0.9103, Val 0.6437, Test 0.5949
+Epoch 260:, Train 0.9200, Val 0.6417, Test 0.5860
+Epoch 280:, Train 0.9253, Val 0.6451, Test 0.5867
+Epoch 300:, Train 0.9315, Val 0.6421, Test 0.5880
+BEST: Epoch 80, Train 0.7861, Val 0.6462, Test 0.6007
+
+RUN #4: seed=64
+COSINE
+Attention Filter (n=1166243): 0.919 +\- 0.073 [0.303-1.000]
+Epoch 20:, Train 0.6685, Val 0.6328, Test 0.5816
+Epoch 40:, Train 0.7184, Val 0.6399, Test 0.5871
+Epoch 60:, Train 0.7537, Val 0.6460, Test 0.5948
+Epoch 80:, Train 0.7869, Val 0.6421, Test 0.5904
+Epoch 100:, Train 0.8119, Val 0.6445, Test 0.5940
+Epoch 120:, Train 0.8321, Val 0.6435, Test 0.5926
+Epoch 140:, Train 0.8526, Val 0.6439, Test 0.5932
+Epoch 160:, Train 0.8685, Val 0.6450, Test 0.5909
+Epoch 180:, Train 0.8824, Val 0.6416, Test 0.5869
+Epoch 200:, Train 0.8929, Val 0.6429, Test 0.5905
+Epoch 220:, Train 0.9031, Val 0.6406, Test 0.5857
+Epoch 240:, Train 0.9126, Val 0.6428, Test 0.5839
+Epoch 260:, Train 0.9201, Val 0.6424, Test 0.5859
+Epoch 280:, Train 0.9277, Val 0.6420, Test 0.5847
+Epoch 300:, Train 0.9313, Val 0.6430, Test 0.5877
+BEST: Epoch 60, Train 0.7537, Val 0.6460, Test 0.5948
+
+RUN #5: seed=128
+COSINE
+Attention Filter (n=1166243): 0.919 +\- 0.073 [0.303-1.000]
+Epoch 20:, Train 0.6699, Val 0.6372, Test 0.5892
+Epoch 40:, Train 0.7186, Val 0.6409, Test 0.5907
+Epoch 60:, Train 0.7531, Val 0.6416, Test 0.5874
+Epoch 80:, Train 0.7847, Val 0.6476, Test 0.5944
+Epoch 100:, Train 0.8086, Val 0.6436, Test 0.5912
+Epoch 120:, Train 0.8322, Val 0.6448, Test 0.5932
+Epoch 140:, Train 0.8508, Val 0.6450, Test 0.5887
+Epoch 160:, Train 0.8664, Val 0.6441, Test 0.5921
+Epoch 180:, Train 0.8797, Val 0.6389, Test 0.5808
+Epoch 200:, Train 0.8913, Val 0.6415, Test 0.5846
+Epoch 220:, Train 0.9027, Val 0.6426, Test 0.5869
+Epoch 240:, Train 0.9119, Val 0.6416, Test 0.5857
+Epoch 260:, Train 0.9161, Val 0.6404, Test 0.5833
+Epoch 280:, Train 0.9249, Val 0.6426, Test 0.5827
+Epoch 300:, Train 0.9308, Val 0.6394, Test 0.5848
+BEST: Epoch 80, Train 0.7847, Val 0.6476, Test 0.5944
+
+RUN #6: seed=256
+COSINE
+Attention Filter (n=1166243): 0.919 +\- 0.073 [0.303-1.000]
+Epoch 20:, Train 0.6688, Val 0.6329, Test 0.5896
+Epoch 40:, Train 0.7182, Val 0.6372, Test 0.5843
+Epoch 60:, Train 0.7536, Val 0.6460, Test 0.6008
+Epoch 80:, Train 0.7841, Val 0.6422, Test 0.5907
+Epoch 100:, Train 0.8111, Val 0.6428, Test 0.5868
+Epoch 120:, Train 0.8331, Val 0.6417, Test 0.5856
+Epoch 140:, Train 0.8511, Val 0.6424, Test 0.5861
+Epoch 160:, Train 0.8674, Val 0.6434, Test 0.5878
+Epoch 180:, Train 0.8841, Val 0.6409, Test 0.5848
+Epoch 200:, Train 0.8925, Val 0.6408, Test 0.5878
+Epoch 220:, Train 0.9026, Val 0.6423, Test 0.5882
+Epoch 240:, Train 0.9111, Val 0.6419, Test 0.5878
+Epoch 260:, Train 0.9209, Val 0.6406, Test 0.5838
+Epoch 280:, Train 0.9245, Val 0.6378, Test 0.5797
+Epoch 300:, Train 0.9321, Val 0.6404, Test 0.5824
+BEST: Epoch 60, Train 0.7536, Val 0.6460, Test 0.6008
+
+RUN #7: seed=512
+COSINE
+Attention Filter (n=1166243): 0.919 +\- 0.073 [0.303-1.000]
+Epoch 20:, Train 0.6691, Val 0.6360, Test 0.5889
+Epoch 40:, Train 0.7196, Val 0.6409, Test 0.5960
+Epoch 60:, Train 0.7546, Val 0.6476, Test 0.6001
+Epoch 80:, Train 0.7828, Val 0.6446, Test 0.5946
+Epoch 100:, Train 0.8111, Val 0.6451, Test 0.5961
+Epoch 120:, Train 0.8343, Val 0.6467, Test 0.5939
+Epoch 140:, Train 0.8517, Val 0.6430, Test 0.5885
+Epoch 160:, Train 0.8680, Val 0.6441, Test 0.5899
+Epoch 180:, Train 0.8809, Val 0.6459, Test 0.5934
+Epoch 200:, Train 0.8909, Val 0.6411, Test 0.5862
+Epoch 220:, Train 0.9031, Val 0.6399, Test 0.5861
+Epoch 240:, Train 0.9118, Val 0.6369, Test 0.5780
+Epoch 260:, Train 0.9175, Val 0.6398, Test 0.5827
+Epoch 280:, Train 0.9252, Val 0.6416, Test 0.5833
+Epoch 300:, Train 0.9276, Val 0.6441, Test 0.5900
+BEST: Epoch 60, Train 0.7546, Val 0.6476, Test 0.6001
+
+RUN #8: seed=1024
+COSINE
+Attention Filter (n=1166243): 0.919 +\- 0.073 [0.303-1.000]
+Epoch 20:, Train 0.6707, Val 0.6343, Test 0.5865
+Epoch 40:, Train 0.7187, Val 0.6398, Test 0.5885
+Epoch 60:, Train 0.7551, Val 0.6448, Test 0.5926
+Epoch 80:, Train 0.7839, Val 0.6461, Test 0.5944
+Epoch 100:, Train 0.8088, Val 0.6479, Test 0.5948
+Epoch 120:, Train 0.8331, Val 0.6465, Test 0.5923
+Epoch 140:, Train 0.8499, Val 0.6441, Test 0.5870
+Epoch 160:, Train 0.8652, Val 0.6468, Test 0.5930
+Epoch 180:, Train 0.8802, Val 0.6467, Test 0.5915
+Epoch 200:, Train 0.8903, Val 0.6418, Test 0.5841
+Epoch 220:, Train 0.8997, Val 0.6444, Test 0.5866
+Epoch 240:, Train 0.9094, Val 0.6448, Test 0.5884
+Epoch 260:, Train 0.9174, Val 0.6412, Test 0.5815
+Epoch 280:, Train 0.9249, Val 0.6414, Test 0.5875
+Epoch 300:, Train 0.9299, Val 0.6377, Test 0.5832
+BEST: Epoch 100, Train 0.8088, Val 0.6479, Test 0.5948
+
+RUN #9: seed=2048
+COSINE
+Attention Filter (n=1166243): 0.919 +\- 0.073 [0.303-1.000]
+Epoch 20:, Train 0.6696, Val 0.6353, Test 0.5894
+Epoch 40:, Train 0.7182, Val 0.6441, Test 0.5975
+Epoch 60:, Train 0.7552, Val 0.6455, Test 0.5952
+Epoch 80:, Train 0.7809, Val 0.6478, Test 0.6012
+Epoch 100:, Train 0.8110, Val 0.6435, Test 0.5906
+Epoch 120:, Train 0.8343, Val 0.6445, Test 0.5932
+Epoch 140:, Train 0.8518, Val 0.6418, Test 0.5890
+Epoch 160:, Train 0.8679, Val 0.6448, Test 0.5936
+Epoch 180:, Train 0.8809, Val 0.6416, Test 0.5885
+Epoch 200:, Train 0.8911, Val 0.6425, Test 0.5902
+Epoch 220:, Train 0.9016, Val 0.6444, Test 0.5902
+Epoch 240:, Train 0.9117, Val 0.6414, Test 0.5851
+Epoch 260:, Train 0.9199, Val 0.6409, Test 0.5829
+Epoch 280:, Train 0.9276, Val 0.6431, Test 0.5868
+Epoch 300:, Train 0.9293, Val 0.6423, Test 0.5878
+BEST: Epoch 80, Train 0.7809, Val 0.6478, Test 0.6012
+
+
+
+
+==================================================
+Model Parameters: 10947629
+
+Avg. Preaggregation Time (s): 406.0301 +/- 494.9566
+Avg. Training Time (epoch) (s): 1.9980 +/- 0.0740
+Avg. Inference Time (s): 0.1477 +/- 0.0036
+
+Avg. Training Acc: 0.7978 +/- 0.0470
+Avg. Validation Acc: 0.6467 +/- 0.0010
+Avg. Test Acc: 0.5963 +/- 0.0037
+
+==================================================
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+TOTAL RUNTIME = 2 hours 52 minutes
+++++++++++++++++++++++++++++++++++++++++++++++++++++

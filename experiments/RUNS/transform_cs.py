@@ -1,4 +1,5 @@
 
+import time
 import numpy as np
 
 import torch
@@ -18,13 +19,22 @@ def cosine_filter(x, edge_index, args):
     attn_size = (num_nodes, num_nodes)
     cs_scores = np.empty(num_edges)
 
-    for i in range(num_edges):
-        A, B = x[edge_index[:, i]].to(device)
-        cs_scores[i] = F.cosine_similarity(A, B, dim=-1)
+    cs_times = np.empty(num_edges)
 
-        del A, B
+    for i in range(num_edges):
+        start = time.time()
+        A, B = x[edge_index[:, i]].to(device)
+        score = F.cosine_similarity(A, B, dim=-1)
+        cs_scores[i] = score.cpu()
+
+        cs_times[i] = time.time()-start
+
+        del A, B, score
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
+
+    print('For-Loop Times: {:0.4f}+\-{:0.4f} [{:0.4f}-{:0.4f}]'.format(
+        cs_times.mean(), cs_times.std(), cs_times.min(), cs_times.max()))
 
     # remove idx of cs_score
     nonzero_idx = np.nonzero(cs_scores != 0)[0]
@@ -35,6 +45,9 @@ def cosine_filter(x, edge_index, args):
 
     # min-max normalization
     if args.ATTN_NORMALIZATION == True:
-        return sparse_min_max_norm(attn)
+        start = time.time()
+        attn = sparse_min_max_norm(attn)
+        print('Normalization Time: {:0.4f}'.format(time.time()-start))
+        return attn
 
     return SparseTensor.from_torch_sparse_coo_tensor(attn)
