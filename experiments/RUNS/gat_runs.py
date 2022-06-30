@@ -246,12 +246,11 @@ def main(args):
         except:
             pass
 
-        print(f'RUN #{i}: seed{seed}')
+        print(f'RUN #{i}: seed={seed}')
         set_seeds(seed)
 
         # load data
         data = load_data(args.DATASET)
-
         train_loader = NeighborLoader(
             data,
             input_nodes=data.train_mask,
@@ -331,6 +330,8 @@ def main(args):
         print('BEST: Epoch {}, Train {:.4f}, Val {:.4f}, Test {:.4f}'.format(
             best_epoch, best_train, best_val, best_test))
         print()
+
+        del data, train_loader, subgraph_loader, model, optimizer, evaluator, epoch_train_times, epoch_inf_times, run_results
 
     # print final numbers reported in thesis
     print('\n\n')

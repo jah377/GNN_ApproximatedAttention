@@ -26,14 +26,12 @@ def prep_data(path: str, dataset_name: str, K: int):
     # download data
     if dataset_name == 'arixv':
         transform = T.Compose([
-            # T.NormalizeFeatures(),
             T.ToUndirected(),
             T.AddSelfLoops(),
             T.SIGN(K)
         ])
     else:
         transform = T.Compose([
-            # T.NormalizeFeatures(),
             T.SIGN(K)
         ])
 

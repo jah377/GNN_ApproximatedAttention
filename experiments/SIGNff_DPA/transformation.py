@@ -11,6 +11,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 @time_wrapper
+@torch.no_grad()
 def transform_data(data, args):
     """ SIGN transformation with attention filter """
     """ SIGN transformation with attention filter """
@@ -23,7 +24,7 @@ def transform_data(data, args):
     assert has_corr_trans, "Transformation: Must specify correct transformation"
     assert not gat_ogb, f'Dataset: GAT transformation unavailable for {args.DATASET}'
     assert data.x is not None,  f'Dataset: data.x empty'
-    
+
     xs = [data.x]  # store transformations
 
     # calculate adj matrix

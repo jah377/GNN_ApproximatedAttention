@@ -64,7 +64,7 @@ args = parser.parse_args()
 def main(args):
     """ save sweep yaml to file """
     assert args.METHOD.lower() in ['grid', 'random', 'bayes']
-    assert args.DATASET.lower() in ['pubmed', 'cora', 'arxiv', 'products']
+    assert args.DATASET.lower() in ['pubmed', 'cora', 'arxiv', 'products', 'arxiv_new']
     assert args.MODEL != None
     assert args.TRAIN_FILE != None
     assert args.YAML_FILE != None
@@ -97,10 +97,10 @@ def main(args):
             'values': [2048, 4096, 8192, 16384]
         },
         'LEARNING_RATE': {
-            'values': [eval(f'1e-{x}') for x in range(8)]
+            'values': [eval(f'1e-{x}') for x in range(1,8)]
         },
         'WEIGHT_DECAY': {
-            'values': [eval(f'1e-{x}') for x in range(8)]
+            'values': [eval(f'1e-{x}') for x in range(1,8)]
         },
         'INCEPTION_LAYERS': {
             'distribution': 'int_uniform',
@@ -127,6 +127,9 @@ def main(args):
         'BATCH_NORMALIZATION': {
             'value': 1,
         },
+        'FILTER_BATCH_SIZE': {
+            'value': 100000,
+        },
         'LR_PATIENCE': {
             'value': 5,
         },
@@ -141,8 +144,8 @@ def main(args):
             'min': 2,
             'max': 5,
         },
-        'DPA_NORMALIZATION': {
-            'values': [0, 1],
+        'ATTN_NORMALIZATION': {
+            'values': [1],
         },
         # 'CS_BATCH_SIZE': {
         #     'value': 10000,

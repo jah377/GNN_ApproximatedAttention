@@ -1,3 +1,4 @@
+import time
 import argparse
 import numpy as np
 from distutils.util import strtobool
@@ -5,9 +6,7 @@ from distutils.util import strtobool
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 from torch_sparse import SparseTensor
-import pytorch_model_summary as pms
 
 from transform_cs import cosine_filter
 from transform_dp import dotproduct_filter
@@ -211,38 +210,46 @@ def transform_data(data, args):
     deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
 
     # replace adj_t with attention filter
+    filter_time = 0  # for baseline SIGN
+
     if filter == 'cosine':
-        adj_t = cosine_filter(data.x, data.edge_index, args)
+        adj_t, filter_time = cosine_filter(data.x, data.edge_index, args)
     elif filter == 'gat':
-        adj_t = gat_filter(data, args)
+        adj_t, filter_time = gat_filter(data, args)
     elif filter == 'dot_product':
-        adj_t = dotproduct_filter(data, args)
+        adj_t, filter_time = dotproduct_filter(data, args)
     elif filter == 'cosine_per_k':
+        filter_time = 0
         for i in range(1, args.HOPS + 1):
-            adj_t = cosine_filter(xs[-1], data.edge_index, args)
+            adj_t, sfilter_time = cosine_filter(xs[-1], data.edge_index, args)
+            filter_time += sfilter_time
             print_filter_stats(adj_t)
             adj_t = deg_inv_sqrt.view(-1, 1) * \
                 adj_t * deg_inv_sqrt.view(1, -1)
             xs += [adj_t @ xs[-1]]
             data[f'x{i}'] = xs[-1]
             del adj_t
-        return data
+        return data, filter_time
 
     print(filter.upper())
     print_filter_stats(adj_t)
+
+    start = time.time()
     adj_t = deg_inv_sqrt.view(-1, 1) * adj_t * deg_inv_sqrt.view(1, -1)
     for i in range(1, args.HOPS + 1):
         xs += [adj_t @ xs[-1]]
         data[f'x{i}'] = xs[-1]
-
-    return data
+    diffusion_time = time.time()-start
+    return data, filter_time, diffusion_time
 
 
 def main(args):
     results = {
         'best_epoch': [], 'best_train': [],
         'best_val': [], 'best_test': [],
-        'preproc_time': [], 'train_times': [], 'inf_times': [],
+        'filter_time': [], 'diffusion_time': [],
+        'preproc_time': [], 'train_times': [],
+        'inf_times': [],
     }
 
     for i, seed in enumerate(args.RUN_SEEDS):
@@ -255,8 +262,13 @@ def main(args):
         set_seeds(seed)
 
         data = load_data(args.DATASET)
-        data, transform_time = transform_data(data, args)
+        data, filter_time, diffusion_time, transform_time = transform_data(
+            data, args)
+
+        print('Filter Time: {:0.4f}'.format(filter_time))
+        print('Diffusion Time: {:0.4f}'.format(diffusion_time))
         print('Total Transformation Time: {:0.4f}'.format(transform_time))
+
         train_loader = create_loader(data, 'train', args.BATCH_SIZE)
         eval_loader = create_loader(data, 'all', args.BATCH_SIZE)
 
@@ -307,6 +319,8 @@ def main(args):
 
         # print store best values of run
         run_results = {
+            'filter_time': [filter_time],
+            'diffusion_time': [diffusion_time],
             'preproc_time': [transform_time],
             'best_epoch': [best_epoch],
             'best_train': [best_train],
@@ -323,11 +337,21 @@ def main(args):
             best_epoch, best_train, best_val, best_test))
         print()
 
+        del data, model, train_loader, eval_loader, optimizer, evaluator, epoch_train_times, epoch_inf_times
+
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
     # print final numbers reported in thesis
     print('\n\n')
     print('==================================================')
     print('Model Parameters: {}'.format(model_params))
     print()
+
+    print('Avg. Filter Time (s): {:.4f} +/- {:.4f}'.format(
+        np.mean(results['filter_time']), np.std(results['filter_time'])))
+    print('Avg. Diffusion Time (s): {:.4f} +/- {:.4f}'.format(
+        np.mean(results['diffusion_time']), np.std(results['diffusion_time'])))
     print('Avg. Preaggregation Time (s): {:.4f} +/- {:.4f}'.format(
         np.mean(results['preproc_time']), np.std(results['preproc_time'])))
     print('Avg. Training Time (epoch) (s): {:.4f} +/- {:.4f}'.format(
@@ -378,6 +402,8 @@ if __name__ == '__main__':
                         help='fraction of NN nodes to be dropped')
     parser.add_argument('--BATCH_NORMALIZATION', type=strtobool,
                         default=True, help='NN regularization')
+    parser.add_argument('--FILTER_BATCH_SIZE', type=int, default=100000,
+                        help='for batch processing attention weights')
     parser.add_argument('--ATTN_HEADS', type=int, default=2,
                         help='number of attention heads (DPA only)')
     parser.add_argument('--ATTN_NORMALIZATION', type=strtobool, default=True,

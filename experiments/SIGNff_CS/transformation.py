@@ -11,6 +11,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 @time_wrapper
+@torch.no_grad()
 def transform_data(data, args):
     """ SIGN transformation with attention filter """
     has_trans = hasattr(args, 'TRANSFORMATION')

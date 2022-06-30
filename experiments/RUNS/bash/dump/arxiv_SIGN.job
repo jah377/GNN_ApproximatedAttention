@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="TIME_prodSCS"
+#SBATCH --job-name="TIME_arxSIGN"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=72:00:00
+#SBATCH --time=24:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -12,28 +12,27 @@
 date;hostname;id;pwd
 START=`date +%s`                            # will record .job runtime
 
-DATASET='products'                            # dataset used
+DATASET='arxiv'                             # dataset used
 PY_FILE='sign_runs.py'                           # file to sweep
-SCRATCH_FOLDER='TIME_prodSCS'                # name of folder on TMPDIR
+SCRATCH_FOLDER='TIME_arxSIGN'                # name of folder on TMPDIR
 EXPERIMENT_FOLDER='RUNS'                    # folder containing files
 
 EVAL_EVERY=20
 RUN_SEEDS='0,4,8,42,64,128,256,512,1024,2048'
 EPOCHS=300
 
-ATTN_FILTER='cosine'
-ATTN_NORMALIZATION=1
+ATTN_FILTER='sign'
 BATCH_NORMALIZATION=1
-BATCH_SIZE=4096
+BATCH_SIZE=2048
 CLASSIFICATION_LAYERS=3
-CLASSIFICATION_UNITS=1024
+CLASSIFICATION_UNITS=512
 FEATURE_DROPOUT=0.1
-HOPS=3
-INCEPTION_LAYERS=3
-INCEPTION_UNITS=1024
-LEARNING_RATE=0.01
-NODE_DROPOUT=0.4
-WEIGHT_DECAY=0.00001
+HOPS=2
+INCEPTION_LAYERS=1
+INCEPTION_UNITS=128
+LEARNING_RATE=1e-3
+NODE_DROPOUT=0.3
+WEIGHT_DECAY=1e-3
 
 
 # copy files to scratch
@@ -77,9 +76,9 @@ python $PY_FILE\
     --CLASSIFICATION_UNITS $CLASSIFICATION_UNITS \
     --FEATURE_DROPOUT $FEATURE_DROPOUT \
     --NODE_DROPOUT $NODE_DROPOUT \
-    --BATCH_NORMALIZATION $BATCH_NORMALIZATION \
-    --ATTN_NORMALIZATION $ATTN_NORMALIZATION 
+    --BATCH_NORMALIZATION $BATCH_NORMALIZATION 
     # --ATTN_HEADS $ATTN_HEADS \
+    # --ATTN_NORMALIZATION $ATTN_NORMALIZATION 
     # --GAT_EPOCHS $GAT_EPOCHS \
     # --GAT_BATCH_SIZE $GAT_BATCH_SIZE \
     # --GAT_LEARNING_RATE $GAT_LEARNING_RATE \

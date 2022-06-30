@@ -105,3 +105,12 @@ def sparse_min_max_norm(s_coo):
         value=torch.tensor((v-min_m)/(max_m-min_m)),
         sparse_sizes=shape
     )
+
+def create_slices(dim_size, batch_size):
+    """ create generator of index slices """
+    count = 0
+    while True:
+        yield slice(count, count + int(batch_size), 1)
+        count += int(batch_size)
+        if count >= int(dim_size):
+            break

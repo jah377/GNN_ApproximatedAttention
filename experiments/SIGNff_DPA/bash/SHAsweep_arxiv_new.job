@@ -1,11 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name="SffMHA_prod"
+#SBATCH --job-name="SffSHA_arxiv"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=100:00:00
+#SBATCH --time=36:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
-#SBATCH --mem=90G
 #SBATCH --output=%x.%j.out
 #SBATCH --mail-user=jon.harris@student.uva.nl
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -13,17 +12,17 @@
 date;hostname;id;pwd
 START=`date +%s`                            # will record .job runtime
 
-DATASET='products'                          # dataset used
+DATASET='arxiv_new'                             # dataset used
 EXPERIMENT_FOLDER='SIGNff_DPA'              # folder containing files
-MODEL='SIGNff_MHA'                          # model
-YAML_NAME='SIGNff_MHA.yaml'                 # name of yaml file to be created
-YAML_FILE='build_yaml_SIGNff_DPA_quant.py'  # file creating yaml
+MODEL='SIGNff_SHA'                          # model
+YAML_NAME='SIGNff_SHA.yaml'                 # name of yaml file to be created
+YAML_FILE='build_yaml_SIGNff_DPA_quant.py'        # file creating yaml
 PY_FILE='hps_SIGNff_DPA.py'                 # file to sweep
-WAND_PROJ_NAME='sffMHA_'$DATASET            # name of wand project
+WAND_PROJ_NAME='sffSHA_'$DATASET            # name of wand project
 
-METHOD='random'                             # random, bayes, grid
+METHOD='random'                              # random, bayes, grid
 RUN_TRIAL=false                             # if True, reduced comp. complexity
-SWEEP_ITERATIONS=200                        # numer of iterations
+SWEEP_ITERATIONS=100                        # numer of iterations
 SCRATCH_FOLDER=$WAND_PROJ_NAME              # name of folder on TMPDIR
 
 

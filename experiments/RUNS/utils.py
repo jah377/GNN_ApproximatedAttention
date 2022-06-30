@@ -102,15 +102,30 @@ def sparse_min_max_norm(s_coo):
     assert type(s_coo) == torch.Tensor, f'{type(s_coo)} not torch.Tensor'
     assert s_coo.layout == torch.sparse_coo, f'{s_coo.type} not in torch.sparse_coo format'
 
+    print('Attn Summary:')
+
     # convert to scipy.sparse.csr_matrix
+    start = time.time()
     if not s_coo.is_coalesced():
         s_coo = s_coo.coalesce()
+    delta_coal = time.time()-start
+
+    start = time.time()
     r, c = s_coo.indices()
     v = s_coo.values()
     shape = list(s_coo.shape)
     s_csr = sparse.csr_matrix((v, (r, c)), shape=shape)
+    delta_convert = time.time()-start
+
+    print('len(r): {}'.format(len(r)))
+    print('len(c): {}'.format(len(c)))
+    print('len(v): {}'.format(len(v)))
+    print('dtype(v): {}, {}'.format(v.type(), v[0]))
+    print('coalesce scoo: {:0.4}'.format(delta_coal))
+    print('convert to csr_matrix: {:0.4}'.format(delta_convert))
 
     # calculate min-max per row
+    start = time.time()
     v = s_csr.data
     nnz = s_csr.getnnz(axis=1)           # total edges per row
     idx = np.r_[0, nnz[:-1].cumsum()]    # v.idx corresponding to each row
@@ -118,10 +133,13 @@ def sparse_min_max_norm(s_coo):
     max_r = np.maximum.reduceat(v, idx)  # max per row
     min_r = np.minimum.reduceat(v, idx)  # min per row
     min_r *= (nnz == shape[1])           # if not fully-connected, min=0
+    print('calc min-max per row: {:0.4}'.format(time.time()-start))
 
     # create matrices for vectorization
+    start = time.time()
     max_m = np.repeat(max_r, nnz)
     min_m = np.repeat(min_r, nnz)
+    print('vectorization: {:0.4}'.format(time.time()-start))
 
     return SparseTensor(
         row=r,
@@ -155,3 +173,13 @@ def count_parameters(model):
             nn = nn*s
         pp += nn
     return pp
+
+
+def create_slices(dim_size, batch_size):
+    """ create generator of index slices """
+    count = 0
+    while True:
+        yield slice(count, count + int(batch_size), 1)
+        count += int(batch_size)
+        if count >= int(dim_size):
+            break

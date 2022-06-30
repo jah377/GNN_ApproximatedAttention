@@ -163,6 +163,7 @@ class GAT(torch.nn.Module):
         return attn_sparse
 
 
+@time_wrapper
 def gat_filter(data, args):
     """ train GAT model and extract attention """
 

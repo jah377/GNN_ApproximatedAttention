@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from einops import rearrange
 
@@ -5,7 +6,7 @@ import torch
 import torch.nn as nn
 from torch_sparse import SparseTensor
 
-from utils import sparse_min_max_norm
+from utils import time_wrapper, create_slices, sparse_min_max_norm
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -17,6 +18,7 @@ class DotProductAttention(nn.Module):
         num_feats: int,
         num_edges: int,
         num_heads: int = 1,
+        batch_size: int = 10000,
         row_norm: bool = False,
     ):
         """
@@ -29,6 +31,7 @@ class DotProductAttention(nn.Module):
         self.num_feats = int(num_feats)
         self.num_edges = int(num_edges)
         self.num_heads = int(num_heads)
+        self.batch_size = int(batch_size)
         self.row_norm = row_norm
 
         # dot product
@@ -45,24 +48,20 @@ class DotProductAttention(nn.Module):
 
         # compute dotproduct in batches, across heads
         h_idx = torch.tensor(range(self.num_heads))
-        values = torch.zeros(self.num_edges*self.num_heads)
 
-        start, end = 0, self.num_heads
-        for i in range(self.num_edges):
-            r_idx, c_idx = edge_index[:, i]
-            A_node = A[:, r_idx, :].unsqueeze(dim=1).to(device)  # to gpu
-            B_node = B[:, :, c_idx].unsqueeze(dim=2).to(device)  # to gpu
+        def matmul(n1, n2): return torch.sum(n1*n2, dim=-1)
 
-            values[start:end] = A_node.matmul(
-                B_node).detach().flatten().cpu()
-            start += self.num_heads
-            end += self.num_heads
+        values = torch.concat(
+            [matmul(
+                A[:, edge_index[0, batch], :],
+                B[:, edge_index[1, batch], :])
+             for batch in create_slices(self.num_edges, self.batch_size)], dim=-1)
 
         return torch.sparse_coo_tensor(
             indices=torch.stack([
-                h_idx.repeat(self.num_edges),  # h_idx
-                edge_index[0].repeat_interleave(self.num_heads),  # r_idx
-                edge_index[1].repeat_interleave(self.num_heads),  # c_idx
+                h_idx.repeat_interleave(self.num_edges),  # h_idx
+                edge_index[0].repeat(self.num_heads),  # r_idx
+                edge_index[1].repeat(self.num_heads),  # c_idx
             ]),
             values=values.flatten(),
             size=self.out_shape,
@@ -90,7 +89,7 @@ class DotProductAttention(nn.Module):
         del qk
 
         # calculate block dot product attention (Q x K^T)/sqrt(dk)
-        k = k.permute([0, 2, 1])  # h L hdim -> h hdim L
+        # k = k.permute([0, 2, 1])  # h L hdim -> h hdim L
         attn = self._batch_matmul(q, k, edge_index)
         del q, k
 
@@ -99,19 +98,23 @@ class DotProductAttention(nn.Module):
         attn = (torch.sparse.sum(attn, dim=0)/self.num_heads).coalesce()
 
         # min-max normalization
-        if self.row_norm == False:
-            row, col = attn.indices()
+        if self.row_norm == True:
+            start = time.time()
+            attn = sparse_min_max_norm(attn)
+            print('Normalization Time: {:0.4f}'.format(time.time()-start))
+            return attn
 
-            return SparseTensor(
-                row=row,
-                col=col,
-                value=attn.values().detach(),
-                sparse_sizes=list(attn.shape)
-            )
+        row, col = attn.indices()
 
-        return sparse_min_max_norm(attn)
+        return SparseTensor(
+            row=row,
+            col=col,
+            value=attn.values().detach(),
+            sparse_sizes=list(attn.shape)
+        )
 
-
+@time_wrapper
+@torch.no_grad()
 def dotproduct_filter(data, args):
     """ create multi-head dot-product attention filter """
 
@@ -120,7 +123,8 @@ def dotproduct_filter(data, args):
         data.num_features,
         data.num_edges,
         args.ATTN_HEADS,
-        args.ATTN_NORMALIZATION,
+        batch_size=args.FILTER_BATCH_SIZE,
+        row_norm=args.ATTN_NORMALIZATION,
     )
 
     return model(data.x, data.edge_index)

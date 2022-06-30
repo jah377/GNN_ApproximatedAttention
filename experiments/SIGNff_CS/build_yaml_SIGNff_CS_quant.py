@@ -62,7 +62,7 @@ args = parser.parse_args()
 def main(args):
     """ save sweep yaml to file """
     assert args.METHOD.lower() in ['grid', 'random', 'bayes']
-    assert args.DATASET.lower() in ['pubmed', 'cora', 'arxiv', 'products']
+    assert args.DATASET.lower() in ['pubmed', 'cora', 'arxiv', 'products', 'arxiv_new']
     assert args.MODEL != None
     assert args.TRAIN_FILE != None
     assert args.YAML_FILE != None
@@ -141,6 +141,9 @@ def main(args):
         # },
         'ATTN_NORMALIZATION': {
             'values': [0, 1],
+        },
+        'FILTER_BATCH_SIZE': {
+            'values': [100000],
         },
     }
 
