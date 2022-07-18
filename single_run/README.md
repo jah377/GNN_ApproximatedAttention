@@ -2,7 +2,7 @@
 
 This repository contains the code corresponding to the thesis analysis presented in "An Approximate Attention Filter For the Efficient Precomputation of Scalable Graph Convolutions" submitted in partial fulfillment for the degree of MSc. in Data Science at the University of Amsterdam. 
 
-![Imgur](https://imgur.com/dJH0yWy)
+<blockquote class="imgur-embed-pub" lang="en" data-id="a/y9sOOOH" data-context="false" ><a href="//imgur.com/a/y9sOOOH"></a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
 
 ## Requirements
 
