@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="gpu_trial"
+#SBATCH --job-name="GPU_Trial"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:05:00
+#SBATCH --time=01:00:00
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_shared
 #SBATCH --output=%x.%j.out
@@ -14,7 +14,7 @@ START=`date +%s`                # will record .job runtime
 dataset='pubmed'
 method='random'              # sweep type (grid, bayes, random)
 run_trial=true               # if True, reduce param values for quick test
-sweep_iterations=5           # number of sweep iterations
+sweep_iterations=2           # number of sweep iterations
 FOLDER='gpu_dump'            # name of folder on scratch
 
 
@@ -46,7 +46,8 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # perform sweep
-for model in  'SIGN_MHA' 
+for model in  'SIGN' 'SIGN_MHA' 'SIGN_SHA' 'SIGN_CosineSimilarity' 'SIGN_SamplerGAT' 
+
 do 
     yaml_file=$model'.yaml'         # yaml name to write to
     train_file='hps_'$model'.py'    # model-specific py file used in sweep
@@ -92,5 +93,5 @@ let DIFF=END-START
 let HOURS=DIFF/3600
 let MINUTES=(DIFF/60)%60
 
-printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $hours $minutes
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

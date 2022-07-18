@@ -1,0 +1,1581 @@
+Wed 29 Jun 2022 02:25:16 AM CEST
+r33n3.lisa.surfsara.nl
+uid=55639(jharris) gid=55199(jharris) groups=55199(jharris),46457(lisa_uva_gpu),50488(ssh_forwarding)
+/home/jharris/Desktop/approx_attention
+/home/jharris/Desktop/approx_attention/venvs/GPU_venv/bin/python
+
+Check if packages installed correctly
+Torch: 1.11.0+cu113
+PyG: 2.0.4
+
+==================================================
+================= SIGN+MHA =======================
+==================================================
+Using backend: pytorch
+
+===== PRODUCTS =====
+
+Namespace(DATASET='products', ATTN_FILTER='dot_product', EPOCHS=200, EVAL_EVERY=10, RUN_SEEDS=[0, 4, 8, 42, 64, 128, 256, 512, 1024, 2048], HOPS=3, BATCH_SIZE=4096, LEARNING_RATE=0.01, WEIGHT_DECAY=1e-05, INCEPTION_LAYERS=3, INCEPTION_UNITS=1024, CLASSIFICATION_LAYERS=3, CLASSIFICATION_UNITS=1024, FEATURE_DROPOUT=0.1, NODE_DROPOUT=0.4, BATCH_NORMALIZATION=1, FILTER_BATCH_SIZE=100000, ATTN_HEADS=4, ATTN_NORMALIZATION=1, GAT_EPOCHS=10, GAT_BATCH_SIZE=1024, GAT_LEARNING_RATE=0.01, GAT_WEIGHT_DECAY=0.001, GAT_HIDDEN_UNITS=8, GAT_NODE_DROPOUT=0.6, GAT_LAYERS=2, GAT_HEADS_IN=8, GAT_HEADS_OUT=8, GAT_NEIGHBORS=150, GAT_LR_PATIENCE=5)
+
+RUN #0: seed=0
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.002750938758254051
+coalesce scoo: 1.812e-05
+convert to csr_matrix: 3.596
+calc min-max per row: 0.7745
+vectorization: 1.573
+Normalization Time: 8.3282
+DOT_PRODUCT
+Attention Filter (n=123577305): 0.182 +\- 0.255 [0.000-1.000]
+Filter Time: 474.5299
+Diffusion Time: 77.2735
+Total Transformation Time: 596.8845
+Epoch 10:, Train 0.9170, Val 0.8932, Test 0.7205
+Epoch 20:, Train 0.9270, Val 0.8984, Test 0.7383
+Epoch 30:, Train 0.9272, Val 0.8962, Test 0.7426
+Epoch 40:, Train 0.9266, Val 0.8988, Test 0.7349
+Epoch 50:, Train 0.9295, Val 0.8993, Test 0.7356
+Epoch 60:, Train 0.9372, Val 0.9064, Test 0.7596
+Epoch 70:, Train 0.9360, Val 0.9033, Test 0.7459
+Epoch 80:, Train 0.9385, Val 0.9027, Test 0.7510
+Epoch 90:, Train 0.9393, Val 0.9080, Test 0.7506
+Epoch 100:, Train 0.9393, Val 0.9073, Test 0.7528
+Epoch 110:, Train 0.9370, Val 0.9029, Test 0.7484
+Epoch 120:, Train 0.9380, Val 0.9047, Test 0.7466
+Epoch 130:, Train 0.9405, Val 0.9068, Test 0.7460
+Epoch 140:, Train 0.9404, Val 0.9075, Test 0.7428
+Epoch 150:, Train 0.9380, Val 0.9035, Test 0.7418
+Epoch 160:, Train 0.9413, Val 0.9061, Test 0.7492
+Epoch 170:, Train 0.9415, Val 0.9089, Test 0.7526
+Epoch 180:, Train 0.9421, Val 0.9086, Test 0.7602
+Epoch 190:, Train 0.9433, Val 0.9076, Test 0.7562
+Epoch 200:, Train 0.9386, Val 0.9072, Test 0.7496
+BEST: Epoch 170, Train 0.9415, Val 0.9089, Test 0.7526
+
+RUN #1: seed=4
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.006151767447590828
+coalesce scoo: 2.027e-05
+convert to csr_matrix: 3.262
+calc min-max per row: 0.7562
+vectorization: 1.78
+Normalization Time: 7.6432
+DOT_PRODUCT
+Attention Filter (n=123590278): 0.182 +\- 0.256 [0.000-1.000]
+Filter Time: 436.4807
+Diffusion Time: 69.2984
+Total Transformation Time: 550.8564
+Epoch 10:, Train 0.9196, Val 0.8968, Test 0.7173
+Epoch 20:, Train 0.9288, Val 0.9008, Test 0.7285
+Epoch 30:, Train 0.9285, Val 0.9009, Test 0.7392
+Epoch 40:, Train 0.9214, Val 0.8917, Test 0.7279
+Epoch 50:, Train 0.9318, Val 0.8997, Test 0.7460
+Epoch 60:, Train 0.9291, Val 0.8960, Test 0.7401
+Epoch 70:, Train 0.9351, Val 0.9046, Test 0.7445
+Epoch 80:, Train 0.9380, Val 0.9084, Test 0.7459
+Epoch 90:, Train 0.9382, Val 0.9032, Test 0.7506
+Epoch 100:, Train 0.9371, Val 0.9045, Test 0.7424
+Epoch 110:, Train 0.9371, Val 0.9034, Test 0.7529
+Epoch 120:, Train 0.9407, Val 0.9082, Test 0.7512
+Epoch 130:, Train 0.9288, Val 0.8924, Test 0.7310
+Epoch 140:, Train 0.9270, Val 0.8969, Test 0.7304
+Epoch 150:, Train 0.9272, Val 0.8953, Test 0.7349
+Epoch 160:, Train 0.9379, Val 0.9055, Test 0.7516
+Epoch 170:, Train 0.9402, Val 0.9065, Test 0.7481
+Epoch 180:, Train 0.9402, Val 0.9068, Test 0.7448
+Epoch 190:, Train 0.9406, Val 0.9071, Test 0.7562
+Epoch 200:, Train 0.9317, Val 0.8968, Test 0.7368
+BEST: Epoch 80, Train 0.9380, Val 0.9084, Test 0.7459
+
+RUN #2: seed=8
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.0024782554246485233
+coalesce scoo: 1.717e-05
+convert to csr_matrix: 3.109
+calc min-max per row: 0.7631
+vectorization: 1.572
+Normalization Time: 8.0322
+DOT_PRODUCT
+Attention Filter (n=123595488): 0.178 +\- 0.253 [0.000-1.000]
+Filter Time: 433.2496
+Diffusion Time: 76.4403
+Total Transformation Time: 555.5132
+Epoch 10:, Train 0.9102, Val 0.8876, Test 0.7209
+Epoch 20:, Train 0.9195, Val 0.8912, Test 0.7311
+Epoch 30:, Train 0.9296, Val 0.9023, Test 0.7462
+Epoch 40:, Train 0.9326, Val 0.9020, Test 0.7474
+Epoch 50:, Train 0.9308, Val 0.9008, Test 0.7474
+Epoch 60:, Train 0.9329, Val 0.9033, Test 0.7468
+Epoch 70:, Train 0.9238, Val 0.8962, Test 0.7309
+Epoch 80:, Train 0.9370, Val 0.9059, Test 0.7446
+Epoch 90:, Train 0.9375, Val 0.9047, Test 0.7520
+Epoch 100:, Train 0.9365, Val 0.9026, Test 0.7475
+Epoch 110:, Train 0.9415, Val 0.9071, Test 0.7564
+Epoch 120:, Train 0.9395, Val 0.9081, Test 0.7516
+Epoch 130:, Train 0.9379, Val 0.9067, Test 0.7524
+Epoch 140:, Train 0.9381, Val 0.9060, Test 0.7514
+Epoch 150:, Train 0.9423, Val 0.9084, Test 0.7571
+Epoch 160:, Train 0.9418, Val 0.9058, Test 0.7549
+Epoch 170:, Train 0.9383, Val 0.9056, Test 0.7626
+Epoch 180:, Train 0.9315, Val 0.8994, Test 0.7366
+Epoch 190:, Train 0.9369, Val 0.9030, Test 0.7465
+Epoch 200:, Train 0.9373, Val 0.9028, Test 0.7506
+BEST: Epoch 150, Train 0.9423, Val 0.9084, Test 0.7571
+
+RUN #3: seed=42
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.004516818560659885
+coalesce scoo: 1.717e-05
+convert to csr_matrix: 3.112
+calc min-max per row: 0.7681
+vectorization: 1.77
+Normalization Time: 8.7237
+DOT_PRODUCT
+Attention Filter (n=123586101): 0.182 +\- 0.253 [0.000-1.000]
+Filter Time: 433.1122
+Diffusion Time: 76.8283
+Total Transformation Time: 555.7865
+Epoch 10:, Train 0.9151, Val 0.8929, Test 0.7223
+Epoch 20:, Train 0.9178, Val 0.8921, Test 0.7219
+Epoch 30:, Train 0.9194, Val 0.8920, Test 0.7197
+Epoch 40:, Train 0.9310, Val 0.9024, Test 0.7462
+Epoch 50:, Train 0.9212, Val 0.8934, Test 0.7284
+Epoch 60:, Train 0.9368, Val 0.9051, Test 0.7483
+Epoch 70:, Train 0.9343, Val 0.9012, Test 0.7467
+Epoch 80:, Train 0.9376, Val 0.9061, Test 0.7544
+Epoch 90:, Train 0.9402, Val 0.9070, Test 0.7487
+Epoch 100:, Train 0.9306, Val 0.9015, Test 0.7429
+Epoch 110:, Train 0.9397, Val 0.9094, Test 0.7590
+Epoch 120:, Train 0.9340, Val 0.9037, Test 0.7512
+Epoch 130:, Train 0.9380, Val 0.9056, Test 0.7461
+Epoch 140:, Train 0.9380, Val 0.9046, Test 0.7494
+Epoch 150:, Train 0.9438, Val 0.9086, Test 0.7567
+Epoch 160:, Train 0.9396, Val 0.9061, Test 0.7524
+Epoch 170:, Train 0.9396, Val 0.9048, Test 0.7541
+Epoch 180:, Train 0.9413, Val 0.9065, Test 0.7500
+Epoch 190:, Train 0.9424, Val 0.9070, Test 0.7476
+Epoch 200:, Train 0.9329, Val 0.8988, Test 0.7332
+BEST: Epoch 110, Train 0.9397, Val 0.9094, Test 0.7590
+
+RUN #4: seed=64
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.00530599569901824
+coalesce scoo: 1.454e-05
+convert to csr_matrix: 3.045
+calc min-max per row: 0.7695
+vectorization: 1.698
+Normalization Time: 8.8681
+DOT_PRODUCT
+Attention Filter (n=123577334): 0.179 +\- 0.254 [0.000-1.000]
+Filter Time: 431.7681
+Diffusion Time: 76.7544
+Total Transformation Time: 554.4620
+Epoch 10:, Train 0.9182, Val 0.8973, Test 0.7258
+Epoch 20:, Train 0.9227, Val 0.8994, Test 0.7424
+Epoch 30:, Train 0.9278, Val 0.8978, Test 0.7462
+Epoch 40:, Train 0.9333, Val 0.9018, Test 0.7524
+Epoch 50:, Train 0.9311, Val 0.8993, Test 0.7394
+Epoch 60:, Train 0.9363, Val 0.9047, Test 0.7509
+Epoch 70:, Train 0.9285, Val 0.8999, Test 0.7377
+Epoch 80:, Train 0.9350, Val 0.9025, Test 0.7411
+Epoch 90:, Train 0.9319, Val 0.8996, Test 0.7455
+Epoch 100:, Train 0.9407, Val 0.9064, Test 0.7484
+Epoch 110:, Train 0.9388, Val 0.9083, Test 0.7596
+Epoch 120:, Train 0.9367, Val 0.9051, Test 0.7424
+Epoch 130:, Train 0.9337, Val 0.8990, Test 0.7427
+Epoch 140:, Train 0.9349, Val 0.8979, Test 0.7445
+Epoch 150:, Train 0.9397, Val 0.9067, Test 0.7502
+Epoch 160:, Train 0.9337, Val 0.9009, Test 0.7425
+Epoch 170:, Train 0.9410, Val 0.9075, Test 0.7524
+Epoch 180:, Train 0.9432, Val 0.9100, Test 0.7578
+Epoch 190:, Train 0.9362, Val 0.9008, Test 0.7456
+Epoch 200:, Train 0.9380, Val 0.9011, Test 0.7484
+BEST: Epoch 180, Train 0.9432, Val 0.9100, Test 0.7578
+
+RUN #5: seed=128
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.0013660663971677423
+coalesce scoo: 1.264e-05
+convert to csr_matrix: 2.98
+calc min-max per row: 0.7637
+vectorization: 1.632
+Normalization Time: 7.9850
+DOT_PRODUCT
+Attention Filter (n=123597625): 0.179 +\- 0.252 [0.000-1.000]
+Filter Time: 431.5840
+Diffusion Time: 77.8197
+Total Transformation Time: 555.7755
+Epoch 10:, Train 0.8982, Val 0.8773, Test 0.7050
+Epoch 20:, Train 0.9218, Val 0.8979, Test 0.7285
+Epoch 30:, Train 0.9280, Val 0.8990, Test 0.7339
+Epoch 40:, Train 0.9337, Val 0.9061, Test 0.7483
+Epoch 50:, Train 0.9238, Val 0.8922, Test 0.7233
+Epoch 60:, Train 0.9304, Val 0.8987, Test 0.7380
+Epoch 70:, Train 0.9356, Val 0.9039, Test 0.7486
+Epoch 80:, Train 0.9377, Val 0.9053, Test 0.7457
+Epoch 90:, Train 0.9386, Val 0.9063, Test 0.7591
+Epoch 100:, Train 0.9349, Val 0.9004, Test 0.7410
+Epoch 110:, Train 0.9403, Val 0.9074, Test 0.7525
+Epoch 120:, Train 0.9358, Val 0.9035, Test 0.7486
+Epoch 130:, Train 0.9405, Val 0.9078, Test 0.7439
+Epoch 140:, Train 0.9403, Val 0.9091, Test 0.7536
+Epoch 150:, Train 0.9373, Val 0.9050, Test 0.7509
+Epoch 160:, Train 0.9393, Val 0.9058, Test 0.7464
+Epoch 170:, Train 0.9361, Val 0.9021, Test 0.7370
+Epoch 180:, Train 0.9411, Val 0.9089, Test 0.7528
+Epoch 190:, Train 0.9421, Val 0.9083, Test 0.7561
+Epoch 200:, Train 0.9377, Val 0.9019, Test 0.7395
+BEST: Epoch 140, Train 0.9403, Val 0.9091, Test 0.7536
+
+RUN #6: seed=256
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.001952421385794878
+coalesce scoo: 1.526e-05
+convert to csr_matrix: 2.975
+calc min-max per row: 0.759
+vectorization: 1.627
+Normalization Time: 9.0728
+DOT_PRODUCT
+Attention Filter (n=123598013): 0.185 +\- 0.257 [0.000-1.000]
+Filter Time: 431.9055
+Diffusion Time: 78.1385
+Total Transformation Time: 556.9950
+Epoch 10:, Train 0.9220, Val 0.8996, Test 0.7306
+Epoch 20:, Train 0.9270, Val 0.9003, Test 0.7325
+Epoch 30:, Train 0.9305, Val 0.9024, Test 0.7439
+Epoch 40:, Train 0.9305, Val 0.9035, Test 0.7447
+Epoch 50:, Train 0.9336, Val 0.9035, Test 0.7480
+Epoch 60:, Train 0.9337, Val 0.9025, Test 0.7332
+Epoch 70:, Train 0.9344, Val 0.9033, Test 0.7467
+Epoch 80:, Train 0.9358, Val 0.9047, Test 0.7436
+Epoch 90:, Train 0.9359, Val 0.9036, Test 0.7451
+Epoch 100:, Train 0.9378, Val 0.9071, Test 0.7487
+Epoch 110:, Train 0.9340, Val 0.9020, Test 0.7352
+Epoch 120:, Train 0.9369, Val 0.9054, Test 0.7498
+Epoch 130:, Train 0.9418, Val 0.9097, Test 0.7522
+Epoch 140:, Train 0.9399, Val 0.9060, Test 0.7420
+Epoch 150:, Train 0.9389, Val 0.9055, Test 0.7586
+Epoch 160:, Train 0.9386, Val 0.9079, Test 0.7414
+Epoch 170:, Train 0.9387, Val 0.9061, Test 0.7488
+Epoch 180:, Train 0.9367, Val 0.9060, Test 0.7457
+Epoch 190:, Train 0.9424, Val 0.9105, Test 0.7538
+Epoch 200:, Train 0.9346, Val 0.9030, Test 0.7507
+BEST: Epoch 190, Train 0.9424, Val 0.9105, Test 0.7538
+
+RUN #7: seed=512
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.005771292373538017
+coalesce scoo: 1.597e-05
+convert to csr_matrix: 2.957
+calc min-max per row: 0.767
+vectorization: 1.626
+Normalization Time: 7.5936
+DOT_PRODUCT
+Attention Filter (n=123589343): 0.180 +\- 0.253 [0.000-1.000]
+Filter Time: 430.2302
+Diffusion Time: 76.2337
+Total Transformation Time: 553.5754
+Epoch 10:, Train 0.9023, Val 0.8829, Test 0.7102
+Epoch 20:, Train 0.9237, Val 0.8988, Test 0.7287
+Epoch 30:, Train 0.9328, Val 0.9033, Test 0.7450
+Epoch 40:, Train 0.9299, Val 0.8985, Test 0.7327
+Epoch 50:, Train 0.9352, Val 0.9038, Test 0.7428
+Epoch 60:, Train 0.9370, Val 0.9054, Test 0.7546
+Epoch 70:, Train 0.9319, Val 0.9004, Test 0.7444
+Epoch 80:, Train 0.9322, Val 0.9016, Test 0.7424
+Epoch 90:, Train 0.9378, Val 0.9057, Test 0.7518
+Epoch 100:, Train 0.9329, Val 0.9008, Test 0.7351
+Epoch 110:, Train 0.9395, Val 0.9061, Test 0.7571
+Epoch 120:, Train 0.9375, Val 0.9038, Test 0.7498
+Epoch 130:, Train 0.9366, Val 0.9031, Test 0.7582
+Epoch 140:, Train 0.9394, Val 0.9070, Test 0.7477
+Epoch 150:, Train 0.9409, Val 0.9091, Test 0.7489
+Epoch 160:, Train 0.9341, Val 0.8981, Test 0.7369
+Epoch 170:, Train 0.9424, Val 0.9068, Test 0.7551
+Epoch 180:, Train 0.9408, Val 0.9086, Test 0.7518
+Epoch 190:, Train 0.9433, Val 0.9086, Test 0.7607
+Epoch 200:, Train 0.9400, Val 0.9066, Test 0.7476
+BEST: Epoch 150, Train 0.9409, Val 0.9091, Test 0.7489
+
+RUN #8: seed=1024
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.0017024658154696226
+coalesce scoo: 1.621e-05
+convert to csr_matrix: 3.05
+calc min-max per row: 0.7654
+vectorization: 1.774
+Normalization Time: 7.7545
+DOT_PRODUCT
+Attention Filter (n=123576447): 0.180 +\- 0.255 [0.000-1.000]
+Filter Time: 433.3511
+Diffusion Time: 78.2085
+Total Transformation Time: 559.5245
+Epoch 10:, Train 0.9072, Val 0.8847, Test 0.7039
+Epoch 20:, Train 0.9189, Val 0.8940, Test 0.7401
+Epoch 30:, Train 0.9231, Val 0.8952, Test 0.7258
+Epoch 40:, Train 0.9255, Val 0.8988, Test 0.7334
+Epoch 50:, Train 0.9355, Val 0.9075, Test 0.7492
+Epoch 60:, Train 0.9317, Val 0.9009, Test 0.7541
+Epoch 70:, Train 0.9374, Val 0.9050, Test 0.7467
+Epoch 80:, Train 0.9363, Val 0.9059, Test 0.7568
+Epoch 90:, Train 0.9350, Val 0.9025, Test 0.7492
+Epoch 100:, Train 0.9360, Val 0.9033, Test 0.7522
+Epoch 110:, Train 0.9368, Val 0.9041, Test 0.7503
+Epoch 120:, Train 0.9349, Val 0.9012, Test 0.7382
+Epoch 130:, Train 0.9339, Val 0.8993, Test 0.7441
+Epoch 140:, Train 0.9379, Val 0.9038, Test 0.7508
+Epoch 150:, Train 0.9384, Val 0.9035, Test 0.7501
+Epoch 160:, Train 0.9387, Val 0.9049, Test 0.7486
+Epoch 170:, Train 0.9425, Val 0.9082, Test 0.7503
+Epoch 180:, Train 0.9418, Val 0.9072, Test 0.7530
+Epoch 190:, Train 0.9391, Val 0.9044, Test 0.7446
+Epoch 200:, Train 0.9400, Val 0.9061, Test 0.7430
+BEST: Epoch 170, Train 0.9425, Val 0.9082, Test 0.7503
+
+RUN #9: seed=2048
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.0056320615112781525
+coalesce scoo: 1.407e-05
+convert to csr_matrix: 2.98
+calc min-max per row: 0.7891
+vectorization: 1.779
+Normalization Time: 7.4732
+DOT_PRODUCT
+Attention Filter (n=123580491): 0.183 +\- 0.255 [0.000-1.000]
+Filter Time: 430.0540
+Diffusion Time: 76.6630
+Total Transformation Time: 555.3381
+Epoch 10:, Train 0.9225, Val 0.8994, Test 0.7259
+Epoch 20:, Train 0.9215, Val 0.8944, Test 0.7259
+Epoch 30:, Train 0.9304, Val 0.9035, Test 0.7371
+Epoch 40:, Train 0.9351, Val 0.9052, Test 0.7495
+Epoch 50:, Train 0.9362, Val 0.9066, Test 0.7551
+Epoch 60:, Train 0.9333, Val 0.9022, Test 0.7385
+Epoch 70:, Train 0.9376, Val 0.9048, Test 0.7471
+Epoch 80:, Train 0.9344, Val 0.9043, Test 0.7381
+Epoch 90:, Train 0.9397, Val 0.9073, Test 0.7518
+Epoch 100:, Train 0.9372, Val 0.9066, Test 0.7424
+Epoch 110:, Train 0.9389, Val 0.9049, Test 0.7584
+Epoch 120:, Train 0.9386, Val 0.9060, Test 0.7475
+Epoch 130:, Train 0.9359, Val 0.9044, Test 0.7524
+Epoch 140:, Train 0.9365, Val 0.9050, Test 0.7409
+Epoch 150:, Train 0.9414, Val 0.9076, Test 0.7641
+Epoch 160:, Train 0.9373, Val 0.9042, Test 0.7470
+Epoch 170:, Train 0.9439, Val 0.9091, Test 0.7649
+Epoch 180:, Train 0.9435, Val 0.9089, Test 0.7664
+Epoch 190:, Train 0.9423, Val 0.9090, Test 0.7626
+Epoch 200:, Train 0.9365, Val 0.9033, Test 0.7470
+BEST: Epoch 170, Train 0.9439, Val 0.9091, Test 0.7649
+
+
+
+
+==================================================
+Model Parameters: 14124085
+
+Avg. Filter Time (s): 436.6265 +/- 12.7538
+Avg. Diffusion Time (s): 76.3658 +/- 2.4474
+Avg. Preaggregation Time (s): 559.4711 +/- 12.6489
+Avg. Training Time (epoch) (s): 4.5827 +/- 0.0807
+Avg. Inference Time (s): 1.2679 +/- 0.0263
+
+Avg. Training Acc: 0.9415 +/- 0.0017
+Avg. Validation Acc: 0.9091 +/- 0.0007
+Avg. Test Acc: 0.7544 +/- 0.0052
+
+==================================================
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+TOTAL RUNTIME = 5 hours 20 minutes
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+==================================================
+================= SIGN ===========================
+==================================================
+Using backend: pytorch
+
+===== PRODUCTS =====
+
+Namespace(DATASET='products', ATTN_FILTER='sign', EPOCHS=200, EVAL_EVERY=10, RUN_SEEDS=[0, 4, 8, 42, 64, 128, 256, 512, 1024, 2048], HOPS=3, BATCH_SIZE=4096, LEARNING_RATE=0.01, WEIGHT_DECAY=1e-05, INCEPTION_LAYERS=3, INCEPTION_UNITS=1024, CLASSIFICATION_LAYERS=3, CLASSIFICATION_UNITS=1024, FEATURE_DROPOUT=0.1, NODE_DROPOUT=0.4, BATCH_NORMALIZATION=1, FILTER_BATCH_SIZE=100000, ATTN_HEADS=2, ATTN_NORMALIZATION=True, GAT_EPOCHS=10, GAT_BATCH_SIZE=1024, GAT_LEARNING_RATE=0.01, GAT_WEIGHT_DECAY=0.001, GAT_HIDDEN_UNITS=8, GAT_NODE_DROPOUT=0.6, GAT_LAYERS=2, GAT_HEADS_IN=8, GAT_HEADS_OUT=8, GAT_NEIGHBORS=150, GAT_LR_PATIENCE=5)
+
+RUN #0: seed=0
+SIGN
+Attention Filter (n=123718152): 1.000 +\- 0.001 [1.000-2.000]
+Filter Time: 0.0000
+Diffusion Time: 65.0169
+Total Transformation Time: 109.4070
+Epoch 10:, Train 0.9375, Val 0.9162, Test 0.7204
+Epoch 20:, Train 0.9432, Val 0.9214, Test 0.7509
+Epoch 30:, Train 0.9405, Val 0.9180, Test 0.7228
+Epoch 40:, Train 0.9409, Val 0.9194, Test 0.7229
+Epoch 50:, Train 0.9438, Val 0.9218, Test 0.7508
+Epoch 60:, Train 0.9440, Val 0.9190, Test 0.7410
+Epoch 70:, Train 0.9443, Val 0.9205, Test 0.7575
+Epoch 80:, Train 0.9449, Val 0.9198, Test 0.7236
+Epoch 90:, Train 0.9457, Val 0.9221, Test 0.7332
+Epoch 100:, Train 0.9402, Val 0.9180, Test 0.7304
+Epoch 110:, Train 0.9452, Val 0.9207, Test 0.7470
+Epoch 120:, Train 0.9452, Val 0.9209, Test 0.7509
+Epoch 130:, Train 0.9449, Val 0.9202, Test 0.7382
+Epoch 140:, Train 0.9466, Val 0.9212, Test 0.7405
+Epoch 150:, Train 0.9478, Val 0.9223, Test 0.7395
+Epoch 160:, Train 0.9470, Val 0.9237, Test 0.7449
+Epoch 170:, Train 0.9481, Val 0.9234, Test 0.7453
+Epoch 180:, Train 0.9473, Val 0.9216, Test 0.7478
+Epoch 190:, Train 0.9489, Val 0.9234, Test 0.7525
+Epoch 200:, Train 0.9478, Val 0.9211, Test 0.7491
+BEST: Epoch 160, Train 0.9470, Val 0.9237, Test 0.7449
+
+RUN #1: seed=4
+SIGN
+Attention Filter (n=123718152): 1.000 +\- 0.001 [1.000-2.000]
+Filter Time: 0.0000
+Diffusion Time: 65.8075
+Total Transformation Time: 110.2344
+Epoch 10:, Train 0.9357, Val 0.9171, Test 0.7515
+Epoch 20:, Train 0.9403, Val 0.9191, Test 0.7404
+Epoch 30:, Train 0.9429, Val 0.9213, Test 0.7295
+Epoch 40:, Train 0.9434, Val 0.9204, Test 0.7352
+Epoch 50:, Train 0.9441, Val 0.9206, Test 0.7538
+Epoch 60:, Train 0.9442, Val 0.9180, Test 0.7263
+Epoch 70:, Train 0.9426, Val 0.9198, Test 0.7539
+Epoch 80:, Train 0.9448, Val 0.9208, Test 0.7354
+Epoch 90:, Train 0.9445, Val 0.9198, Test 0.7191
+Epoch 100:, Train 0.9431, Val 0.9194, Test 0.7405
+Epoch 110:, Train 0.9462, Val 0.9236, Test 0.7403
+Epoch 120:, Train 0.9449, Val 0.9214, Test 0.7493
+Epoch 130:, Train 0.9464, Val 0.9226, Test 0.7635
+Epoch 140:, Train 0.9475, Val 0.9226, Test 0.7488
+Epoch 150:, Train 0.9472, Val 0.9231, Test 0.7466
+Epoch 160:, Train 0.9476, Val 0.9227, Test 0.7527
+Epoch 170:, Train 0.9485, Val 0.9236, Test 0.7690
+Epoch 180:, Train 0.9449, Val 0.9219, Test 0.7597
+Epoch 190:, Train 0.9485, Val 0.9227, Test 0.7402
+Epoch 200:, Train 0.9484, Val 0.9244, Test 0.7498
+BEST: Epoch 200, Train 0.9484, Val 0.9244, Test 0.7498
+
+RUN #2: seed=8
+SIGN
+Attention Filter (n=123718152): 1.000 +\- 0.001 [1.000-2.000]
+Filter Time: 0.0000
+Diffusion Time: 65.7897
+Total Transformation Time: 110.2563
+Epoch 10:, Train 0.9388, Val 0.9190, Test 0.7217
+Epoch 20:, Train 0.9326, Val 0.9083, Test 0.7123
+Epoch 30:, Train 0.9426, Val 0.9217, Test 0.7463
+Epoch 40:, Train 0.9429, Val 0.9197, Test 0.7477
+Epoch 50:, Train 0.9433, Val 0.9213, Test 0.7433
+Epoch 60:, Train 0.9436, Val 0.9190, Test 0.7442
+Epoch 70:, Train 0.9437, Val 0.9205, Test 0.7365
+Epoch 80:, Train 0.9427, Val 0.9196, Test 0.7312
+Epoch 90:, Train 0.9458, Val 0.9205, Test 0.7349
+Epoch 100:, Train 0.9440, Val 0.9189, Test 0.7197
+Epoch 110:, Train 0.9458, Val 0.9216, Test 0.7389
+Epoch 120:, Train 0.9469, Val 0.9226, Test 0.7505
+Epoch 130:, Train 0.9467, Val 0.9231, Test 0.7550
+Epoch 140:, Train 0.9469, Val 0.9216, Test 0.7461
+Epoch 150:, Train 0.9474, Val 0.9234, Test 0.7514
+Epoch 160:, Train 0.9462, Val 0.9228, Test 0.7490
+Epoch 170:, Train 0.9496, Val 0.9220, Test 0.7475
+Epoch 180:, Train 0.9474, Val 0.9213, Test 0.7479
+Epoch 190:, Train 0.9485, Val 0.9224, Test 0.7469
+Epoch 200:, Train 0.9494, Val 0.9247, Test 0.7633
+BEST: Epoch 200, Train 0.9494, Val 0.9247, Test 0.7633
+
+RUN #3: seed=42
+SIGN
+Attention Filter (n=123718152): 1.000 +\- 0.001 [1.000-2.000]
+Filter Time: 0.0000
+Diffusion Time: 64.9943
+Total Transformation Time: 109.4290
+Epoch 10:, Train 0.9370, Val 0.9184, Test 0.7481
+Epoch 20:, Train 0.9444, Val 0.9222, Test 0.7511
+Epoch 30:, Train 0.9395, Val 0.9180, Test 0.7518
+Epoch 40:, Train 0.9414, Val 0.9194, Test 0.7431
+Epoch 50:, Train 0.9407, Val 0.9176, Test 0.7472
+Epoch 60:, Train 0.9433, Val 0.9198, Test 0.7524
+Epoch 70:, Train 0.9426, Val 0.9190, Test 0.7450
+Epoch 80:, Train 0.9446, Val 0.9201, Test 0.7396
+Epoch 90:, Train 0.9441, Val 0.9197, Test 0.7350
+Epoch 100:, Train 0.9465, Val 0.9226, Test 0.7465
+Epoch 110:, Train 0.9459, Val 0.9213, Test 0.7535
+Epoch 120:, Train 0.9445, Val 0.9194, Test 0.7434
+Epoch 130:, Train 0.9473, Val 0.9240, Test 0.7626
+Epoch 140:, Train 0.9463, Val 0.9201, Test 0.7317
+Epoch 150:, Train 0.9474, Val 0.9224, Test 0.7438
+Epoch 160:, Train 0.9496, Val 0.9249, Test 0.7569
+Epoch 170:, Train 0.9485, Val 0.9245, Test 0.7498
+Epoch 180:, Train 0.9477, Val 0.9233, Test 0.7543
+Epoch 190:, Train 0.9483, Val 0.9239, Test 0.7495
+Epoch 200:, Train 0.9497, Val 0.9240, Test 0.7498
+BEST: Epoch 160, Train 0.9496, Val 0.9249, Test 0.7569
+
+RUN #4: seed=64
+SIGN
+Attention Filter (n=123718152): 1.000 +\- 0.001 [1.000-2.000]
+Filter Time: 0.0000
+Diffusion Time: 65.7692
+Total Transformation Time: 110.1800
+Epoch 10:, Train 0.9376, Val 0.9177, Test 0.7392
+Epoch 20:, Train 0.9397, Val 0.9173, Test 0.7176
+Epoch 30:, Train 0.9379, Val 0.9144, Test 0.7280
+Epoch 40:, Train 0.9452, Val 0.9228, Test 0.7449
+Epoch 50:, Train 0.9409, Val 0.9178, Test 0.7352
+Epoch 60:, Train 0.9427, Val 0.9196, Test 0.7480
+Epoch 70:, Train 0.9442, Val 0.9216, Test 0.7411
+Epoch 80:, Train 0.9446, Val 0.9207, Test 0.7432
+Epoch 90:, Train 0.9449, Val 0.9221, Test 0.7492
+Epoch 100:, Train 0.9468, Val 0.9198, Test 0.7280
+Epoch 110:, Train 0.9458, Val 0.9205, Test 0.7369
+Epoch 120:, Train 0.9436, Val 0.9178, Test 0.7446
+Epoch 130:, Train 0.9456, Val 0.9219, Test 0.7601
+Epoch 140:, Train 0.9454, Val 0.9188, Test 0.7505
+Epoch 150:, Train 0.9458, Val 0.9218, Test 0.7412
+Epoch 160:, Train 0.9482, Val 0.9237, Test 0.7589
+Epoch 170:, Train 0.9471, Val 0.9212, Test 0.7494
+Epoch 180:, Train 0.9482, Val 0.9200, Test 0.7456
+Epoch 190:, Train 0.9485, Val 0.9240, Test 0.7614
+Epoch 200:, Train 0.9484, Val 0.9227, Test 0.7446
+BEST: Epoch 190, Train 0.9485, Val 0.9240, Test 0.7614
+
+RUN #5: seed=128
+SIGN
+Attention Filter (n=123718152): 1.000 +\- 0.001 [1.000-2.000]
+Filter Time: 0.0000
+Diffusion Time: 64.9924
+Total Transformation Time: 109.3638
+Epoch 10:, Train 0.9381, Val 0.9190, Test 0.7352
+Epoch 20:, Train 0.9428, Val 0.9216, Test 0.7445
+Epoch 30:, Train 0.9434, Val 0.9218, Test 0.7425
+Epoch 40:, Train 0.9428, Val 0.9215, Test 0.7393
+Epoch 50:, Train 0.9447, Val 0.9200, Test 0.7382
+Epoch 60:, Train 0.9428, Val 0.9216, Test 0.7481
+Epoch 70:, Train 0.9428, Val 0.9200, Test 0.7298
+Epoch 80:, Train 0.9441, Val 0.9224, Test 0.7485
+Epoch 90:, Train 0.9467, Val 0.9213, Test 0.7449
+Epoch 100:, Train 0.9439, Val 0.9209, Test 0.7470
+Epoch 110:, Train 0.9460, Val 0.9226, Test 0.7526
+Epoch 120:, Train 0.9449, Val 0.9192, Test 0.7361
+Epoch 130:, Train 0.9469, Val 0.9213, Test 0.7600
+Epoch 140:, Train 0.9469, Val 0.9233, Test 0.7561
+Epoch 150:, Train 0.9460, Val 0.9211, Test 0.7537
+Epoch 160:, Train 0.9491, Val 0.9228, Test 0.7470
+Epoch 170:, Train 0.9479, Val 0.9231, Test 0.7448
+Epoch 180:, Train 0.9496, Val 0.9232, Test 0.7581
+Epoch 190:, Train 0.9494, Val 0.9235, Test 0.7487
+Epoch 200:, Train 0.9487, Val 0.9214, Test 0.7369
+BEST: Epoch 190, Train 0.9494, Val 0.9235, Test 0.7487
+
+RUN #6: seed=256
+SIGN
+Attention Filter (n=123718152): 1.000 +\- 0.001 [1.000-2.000]
+Filter Time: 0.0000
+Diffusion Time: 66.4036
+Total Transformation Time: 110.8038
+Epoch 10:, Train 0.9396, Val 0.9179, Test 0.7419
+Epoch 20:, Train 0.9414, Val 0.9199, Test 0.7529
+Epoch 30:, Train 0.9438, Val 0.9193, Test 0.7395
+Epoch 40:, Train 0.9437, Val 0.9210, Test 0.7425
+Epoch 50:, Train 0.9424, Val 0.9192, Test 0.7374
+Epoch 60:, Train 0.9452, Val 0.9230, Test 0.7463
+Epoch 70:, Train 0.9443, Val 0.9214, Test 0.7520
+Epoch 80:, Train 0.9400, Val 0.9177, Test 0.7415
+Epoch 90:, Train 0.9443, Val 0.9210, Test 0.7384
+Epoch 100:, Train 0.9457, Val 0.9216, Test 0.7309
+Epoch 110:, Train 0.9449, Val 0.9224, Test 0.7424
+Epoch 120:, Train 0.9454, Val 0.9216, Test 0.7462
+Epoch 130:, Train 0.9446, Val 0.9225, Test 0.7488
+Epoch 140:, Train 0.9462, Val 0.9209, Test 0.7502
+Epoch 150:, Train 0.9460, Val 0.9223, Test 0.7394
+Epoch 160:, Train 0.9477, Val 0.9239, Test 0.7427
+Epoch 170:, Train 0.9480, Val 0.9240, Test 0.7562
+Epoch 180:, Train 0.9483, Val 0.9225, Test 0.7520
+Epoch 190:, Train 0.9462, Val 0.9194, Test 0.7433
+Epoch 200:, Train 0.9486, Val 0.9220, Test 0.7509
+BEST: Epoch 170, Train 0.9480, Val 0.9240, Test 0.7562
+
+RUN #7: seed=512
+SIGN
+Attention Filter (n=123718152): 1.000 +\- 0.001 [1.000-2.000]
+Filter Time: 0.0000
+Diffusion Time: 65.1671
+Total Transformation Time: 109.5451
+Epoch 10:, Train 0.9371, Val 0.9165, Test 0.7366
+Epoch 20:, Train 0.9421, Val 0.9206, Test 0.7480
+Epoch 30:, Train 0.9408, Val 0.9182, Test 0.7333
+Epoch 40:, Train 0.9396, Val 0.9162, Test 0.7396
+Epoch 50:, Train 0.9446, Val 0.9214, Test 0.7368
+Epoch 60:, Train 0.9452, Val 0.9194, Test 0.7383
+Epoch 70:, Train 0.9439, Val 0.9211, Test 0.7445
+Epoch 80:, Train 0.9450, Val 0.9213, Test 0.7525
+Epoch 90:, Train 0.9467, Val 0.9230, Test 0.7523
+Epoch 100:, Train 0.9440, Val 0.9199, Test 0.7506
+Epoch 110:, Train 0.9471, Val 0.9236, Test 0.7454
+Epoch 120:, Train 0.9463, Val 0.9219, Test 0.7366
+Epoch 130:, Train 0.9465, Val 0.9228, Test 0.7458
+Epoch 140:, Train 0.9461, Val 0.9225, Test 0.7637
+Epoch 150:, Train 0.9475, Val 0.9213, Test 0.7432
+Epoch 160:, Train 0.9466, Val 0.9214, Test 0.7337
+Epoch 170:, Train 0.9483, Val 0.9224, Test 0.7402
+Epoch 180:, Train 0.9492, Val 0.9239, Test 0.7590
+Epoch 190:, Train 0.9478, Val 0.9218, Test 0.7515
+Epoch 200:, Train 0.9468, Val 0.9200, Test 0.7385
+BEST: Epoch 180, Train 0.9492, Val 0.9239, Test 0.7590
+
+RUN #8: seed=1024
+SIGN
+Attention Filter (n=123718152): 1.000 +\- 0.001 [1.000-2.000]
+Filter Time: 0.0000
+Diffusion Time: 64.7837
+Total Transformation Time: 109.1733
+Epoch 10:, Train 0.9358, Val 0.9173, Test 0.7211
+Epoch 20:, Train 0.9410, Val 0.9192, Test 0.7344
+Epoch 30:, Train 0.9429, Val 0.9173, Test 0.7225
+Epoch 40:, Train 0.9409, Val 0.9184, Test 0.7311
+Epoch 50:, Train 0.9446, Val 0.9215, Test 0.7356
+Epoch 60:, Train 0.9440, Val 0.9208, Test 0.7426
+Epoch 70:, Train 0.9408, Val 0.9147, Test 0.7305
+Epoch 80:, Train 0.9429, Val 0.9170, Test 0.7117
+Epoch 90:, Train 0.9445, Val 0.9210, Test 0.7358
+Epoch 100:, Train 0.9423, Val 0.9172, Test 0.7355
+Epoch 110:, Train 0.9436, Val 0.9197, Test 0.7457
+Epoch 120:, Train 0.9441, Val 0.9189, Test 0.7223
+Epoch 130:, Train 0.9443, Val 0.9234, Test 0.7472
+Epoch 140:, Train 0.9473, Val 0.9221, Test 0.7484
+Epoch 150:, Train 0.9460, Val 0.9210, Test 0.7447
+Epoch 160:, Train 0.9488, Val 0.9244, Test 0.7510
+Epoch 170:, Train 0.9487, Val 0.9227, Test 0.7578
+Epoch 180:, Train 0.9468, Val 0.9227, Test 0.7449
+Epoch 190:, Train 0.9484, Val 0.9242, Test 0.7499
+Epoch 200:, Train 0.9473, Val 0.9238, Test 0.7562
+BEST: Epoch 160, Train 0.9488, Val 0.9244, Test 0.7510
+
+RUN #9: seed=2048
+SIGN
+Attention Filter (n=123718152): 1.000 +\- 0.001 [1.000-2.000]
+Filter Time: 0.0000
+Diffusion Time: 64.8946
+Total Transformation Time: 109.2551
+Epoch 10:, Train 0.9352, Val 0.9155, Test 0.7331
+Epoch 20:, Train 0.9401, Val 0.9192, Test 0.7525
+Epoch 30:, Train 0.9433, Val 0.9203, Test 0.7415
+Epoch 40:, Train 0.9431, Val 0.9191, Test 0.7552
+Epoch 50:, Train 0.9422, Val 0.9200, Test 0.7362
+Epoch 60:, Train 0.9427, Val 0.9168, Test 0.7443
+Epoch 70:, Train 0.9449, Val 0.9227, Test 0.7558
+Epoch 80:, Train 0.9438, Val 0.9201, Test 0.7366
+Epoch 90:, Train 0.9451, Val 0.9211, Test 0.7376
+Epoch 100:, Train 0.9458, Val 0.9222, Test 0.7408
+Epoch 110:, Train 0.9444, Val 0.9241, Test 0.7537
+Epoch 120:, Train 0.9457, Val 0.9227, Test 0.7515
+Epoch 130:, Train 0.9476, Val 0.9220, Test 0.7478
+Epoch 140:, Train 0.9450, Val 0.9191, Test 0.7347
+Epoch 150:, Train 0.9483, Val 0.9239, Test 0.7514
+Epoch 160:, Train 0.9471, Val 0.9224, Test 0.7515
+Epoch 170:, Train 0.9480, Val 0.9221, Test 0.7509
+Epoch 180:, Train 0.9476, Val 0.9225, Test 0.7539
+Epoch 190:, Train 0.9487, Val 0.9224, Test 0.7321
+Epoch 200:, Train 0.9494, Val 0.9245, Test 0.7424
+BEST: Epoch 200, Train 0.9494, Val 0.9245, Test 0.7424
+
+
+
+
+==================================================
+Model Parameters: 14124085
+
+Avg. Filter Time (s): 0.0000 +/- 0.0000
+Avg. Diffusion Time (s): 65.3619 +/- 0.5113
+Avg. Preaggregation Time (s): 109.7648 +/- 0.5267
+Avg. Training Time (epoch) (s): 4.3149 +/- 0.0543
+Avg. Inference Time (s): 1.2707 +/- 0.0176
+
+Avg. Training Acc: 0.9488 +/- 0.0008
+Avg. Validation Acc: 0.9242 +/- 0.0004
+Avg. Test Acc: 0.7534 +/- 0.0067
+
+==================================================
+
+==================================================
+================= SIGN+CS ========================
+==================================================
+Using backend: pytorch
+/scratch/TIME_products/utils.py:147: RuntimeWarning: divide by zero encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+/scratch/TIME_products/utils.py:147: RuntimeWarning: invalid value encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+
+===== PRODUCTS =====
+
+Namespace(DATASET='products', ATTN_FILTER='cosine', EPOCHS=200, EVAL_EVERY=10, RUN_SEEDS=[0, 4, 8, 42, 64, 128, 256, 512, 1024, 2048], HOPS=3, BATCH_SIZE=4096, LEARNING_RATE=0.01, WEIGHT_DECAY=1e-05, INCEPTION_LAYERS=3, INCEPTION_UNITS=1024, CLASSIFICATION_LAYERS=3, CLASSIFICATION_UNITS=1024, FEATURE_DROPOUT=0.1, NODE_DROPOUT=0.4, BATCH_NORMALIZATION=1, FILTER_BATCH_SIZE=100000, ATTN_HEADS=2, ATTN_NORMALIZATION=1, GAT_EPOCHS=10, GAT_BATCH_SIZE=1024, GAT_LEARNING_RATE=0.01, GAT_WEIGHT_DECAY=0.001, GAT_HIDDEN_UNITS=8, GAT_NODE_DROPOUT=0.6, GAT_LAYERS=2, GAT_HEADS_IN=8, GAT_HEADS_OUT=8, GAT_NEIGHBORS=150, GAT_LR_PATIENCE=5)
+
+RUN #0: seed=0
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.21465368568897247
+coalesce scoo: 1.836e-05
+convert to csr_matrix: 2.763
+calc min-max per row: 0.7529
+vectorization: 1.663
+Total Normalization: 6.7014
+COSINE
+Attention Filter (n=122799606): nan +\- nan [nan-nan]
+Filter Time: 191.2840
+Diffusion Time: 64.9222
+Total Transformation Time: 300.8657
+Epoch 10:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 20:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 30:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 40:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 50:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 60:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 70:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 80:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 90:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 100:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 110:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 120:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 130:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 140:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 150:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 160:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 170:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 180:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 190:, Train 0.0576, Val 0.0583, Test 0.0455
+/scratch/TIME_products/utils.py:147: RuntimeWarning: divide by zero encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+/scratch/TIME_products/utils.py:147: RuntimeWarning: invalid value encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+Epoch 200:, Train 0.0576, Val 0.0583, Test 0.0455
+BEST: Epoch 10, Train 0.0576, Val 0.0583, Test 0.0455
+
+RUN #1: seed=4
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.21465368568897247
+coalesce scoo: 1.788e-05
+convert to csr_matrix: 2.691
+calc min-max per row: 0.7491
+vectorization: 1.762
+Total Normalization: 6.7353
+COSINE
+Attention Filter (n=122799606): nan +\- nan [nan-nan]
+Filter Time: 189.1890
+Diffusion Time: 65.1759
+Total Transformation Time: 298.7107
+Epoch 10:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 20:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 30:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 40:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 50:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 60:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 70:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 80:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 90:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 100:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 110:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 120:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 130:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 140:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 150:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 160:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 170:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 180:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 190:, Train 0.0576, Val 0.0583, Test 0.0455
+/scratch/TIME_products/utils.py:147: RuntimeWarning: divide by zero encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+/scratch/TIME_products/utils.py:147: RuntimeWarning: invalid value encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+Epoch 200:, Train 0.0576, Val 0.0583, Test 0.0455
+BEST: Epoch 10, Train 0.0576, Val 0.0583, Test 0.0455
+
+RUN #2: seed=8
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.21465368568897247
+coalesce scoo: 1.931e-05
+convert to csr_matrix: 2.684
+calc min-max per row: 0.7353
+vectorization: 1.758
+Total Normalization: 6.7007
+COSINE
+Attention Filter (n=122799606): nan +\- nan [nan-nan]
+Filter Time: 185.3593
+Diffusion Time: 64.8514
+Total Transformation Time: 294.4843
+Epoch 10:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 20:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 30:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 40:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 50:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 60:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 70:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 80:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 90:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 100:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 110:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 120:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 130:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 140:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 150:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 160:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 170:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 180:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 190:, Train 0.0576, Val 0.0583, Test 0.0455
+/scratch/TIME_products/utils.py:147: RuntimeWarning: divide by zero encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+/scratch/TIME_products/utils.py:147: RuntimeWarning: invalid value encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+Epoch 200:, Train 0.0576, Val 0.0583, Test 0.0455
+BEST: Epoch 10, Train 0.0576, Val 0.0583, Test 0.0455
+
+RUN #3: seed=42
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.21465368568897247
+coalesce scoo: 3.076e-05
+convert to csr_matrix: 2.702
+calc min-max per row: 0.7583
+vectorization: 1.761
+Total Normalization: 6.7520
+COSINE
+Attention Filter (n=122799606): nan +\- nan [nan-nan]
+Filter Time: 191.9905
+Diffusion Time: 65.8947
+Total Transformation Time: 302.2963
+Epoch 10:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 20:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 30:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 40:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 50:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 60:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 70:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 80:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 90:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 100:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 110:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 120:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 130:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 140:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 150:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 160:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 170:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 180:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 190:, Train 0.0576, Val 0.0583, Test 0.0455
+/scratch/TIME_products/utils.py:147: RuntimeWarning: divide by zero encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+/scratch/TIME_products/utils.py:147: RuntimeWarning: invalid value encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+Epoch 200:, Train 0.0576, Val 0.0583, Test 0.0455
+BEST: Epoch 10, Train 0.0576, Val 0.0583, Test 0.0455
+
+RUN #4: seed=64
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.21465368568897247
+coalesce scoo: 1.574e-05
+convert to csr_matrix: 2.692
+calc min-max per row: 0.7492
+vectorization: 1.763
+Total Normalization: 6.7357
+COSINE
+Attention Filter (n=122799606): nan +\- nan [nan-nan]
+Filter Time: 191.9437
+Diffusion Time: 65.8862
+Total Transformation Time: 302.2480
+Epoch 10:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 20:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 30:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 40:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 50:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 60:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 70:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 80:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 90:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 100:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 110:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 120:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 130:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 140:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 150:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 160:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 170:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 180:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 190:, Train 0.0576, Val 0.0583, Test 0.0455
+/scratch/TIME_products/utils.py:147: RuntimeWarning: divide by zero encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+/scratch/TIME_products/utils.py:147: RuntimeWarning: invalid value encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+Epoch 200:, Train 0.0576, Val 0.0583, Test 0.0455
+BEST: Epoch 10, Train 0.0576, Val 0.0583, Test 0.0455
+
+RUN #5: seed=128
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.21465368568897247
+coalesce scoo: 1.335e-05
+convert to csr_matrix: 2.696
+calc min-max per row: 0.7539
+vectorization: 1.765
+Total Normalization: 6.7434
+COSINE
+Attention Filter (n=122799606): nan +\- nan [nan-nan]
+Filter Time: 189.8150
+Diffusion Time: 65.1904
+Total Transformation Time: 299.4116
+Epoch 10:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 20:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 30:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 40:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 50:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 60:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 70:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 80:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 90:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 100:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 110:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 120:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 130:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 140:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 150:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 160:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 170:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 180:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 190:, Train 0.0576, Val 0.0583, Test 0.0455
+/scratch/TIME_products/utils.py:147: RuntimeWarning: divide by zero encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+/scratch/TIME_products/utils.py:147: RuntimeWarning: invalid value encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+Epoch 200:, Train 0.0576, Val 0.0583, Test 0.0455
+BEST: Epoch 10, Train 0.0576, Val 0.0583, Test 0.0455
+
+RUN #6: seed=256
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.21465368568897247
+coalesce scoo: 1.407e-05
+convert to csr_matrix: 2.695
+calc min-max per row: 0.7535
+vectorization: 1.76
+Total Normalization: 6.7306
+COSINE
+Attention Filter (n=122799606): nan +\- nan [nan-nan]
+Filter Time: 191.4090
+Diffusion Time: 65.9865
+Total Transformation Time: 301.8054
+Epoch 10:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 20:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 30:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 40:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 50:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 60:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 70:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 80:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 90:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 100:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 110:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 120:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 130:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 140:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 150:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 160:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 170:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 180:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 190:, Train 0.0576, Val 0.0583, Test 0.0455
+/scratch/TIME_products/utils.py:147: RuntimeWarning: divide by zero encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+/scratch/TIME_products/utils.py:147: RuntimeWarning: invalid value encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+Epoch 200:, Train 0.0576, Val 0.0583, Test 0.0455
+BEST: Epoch 10, Train 0.0576, Val 0.0583, Test 0.0455
+
+RUN #7: seed=512
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.21465368568897247
+coalesce scoo: 1.884e-05
+convert to csr_matrix: 2.698
+calc min-max per row: 0.7455
+vectorization: 1.761
+Total Normalization: 6.7344
+COSINE
+Attention Filter (n=122799606): nan +\- nan [nan-nan]
+Filter Time: 186.6905
+Diffusion Time: 65.8755
+Total Transformation Time: 297.2096
+Epoch 10:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 20:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 30:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 40:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 50:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 60:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 70:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 80:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 90:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 100:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 110:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 120:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 130:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 140:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 150:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 160:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 170:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 180:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 190:, Train 0.0576, Val 0.0583, Test 0.0455
+/scratch/TIME_products/utils.py:147: RuntimeWarning: divide by zero encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+/scratch/TIME_products/utils.py:147: RuntimeWarning: invalid value encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+Epoch 200:, Train 0.0576, Val 0.0583, Test 0.0455
+BEST: Epoch 10, Train 0.0576, Val 0.0583, Test 0.0455
+
+RUN #8: seed=1024
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.21465368568897247
+coalesce scoo: 1.454e-05
+convert to csr_matrix: 2.699
+calc min-max per row: 0.7537
+vectorization: 1.763
+Total Normalization: 6.7852
+COSINE
+Attention Filter (n=122799606): nan +\- nan [nan-nan]
+Filter Time: 191.6406
+Diffusion Time: 65.8824
+Total Transformation Time: 301.9262
+Epoch 10:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 20:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 30:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 40:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 50:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 60:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 70:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 80:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 90:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 100:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 110:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 120:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 130:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 140:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 150:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 160:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 170:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 180:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 190:, Train 0.0576, Val 0.0583, Test 0.0455
+/scratch/TIME_products/utils.py:147: RuntimeWarning: divide by zero encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+/scratch/TIME_products/utils.py:147: RuntimeWarning: invalid value encountered in true_divide
+  value=torch.tensor((v-min_m)/(max_m-min_m)),
+Epoch 200:, Train 0.0576, Val 0.0583, Test 0.0455
+BEST: Epoch 10, Train 0.0576, Val 0.0583, Test 0.0455
+
+RUN #9: seed=2048
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.21465368568897247
+coalesce scoo: 1.645e-05
+convert to csr_matrix: 2.689
+calc min-max per row: 0.7287
+vectorization: 1.759
+Total Normalization: 6.7063
+COSINE
+Attention Filter (n=122799606): nan +\- nan [nan-nan]
+Filter Time: 189.1063
+Diffusion Time: 64.9586
+Total Transformation Time: 298.4789
+Epoch 10:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 20:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 30:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 40:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 50:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 60:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 70:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 80:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 90:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 100:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 110:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 120:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 130:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 140:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 150:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 160:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 170:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 180:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 190:, Train 0.0576, Val 0.0583, Test 0.0455
+Epoch 200:, Train 0.0576, Val 0.0583, Test 0.0455
+BEST: Epoch 10, Train 0.0576, Val 0.0583, Test 0.0455
+
+
+
+
+==================================================
+Model Parameters: 14124085
+
+Avg. Filter Time (s): 189.8428 +/- 2.1863
+Avg. Diffusion Time (s): 65.4624 +/- 0.4542
+Avg. Preaggregation Time (s): 299.7437 +/- 2.4479
+Avg. Training Time (epoch) (s): 4.2396 +/- 0.0539
+Avg. Inference Time (s): 1.2704 +/- 0.0153
+
+Avg. Training Acc: 0.0576 +/- 0.0000
+Avg. Validation Acc: 0.0583 +/- 0.0000
+Avg. Test Acc: 0.0455 +/- 0.0000
+
+==================================================
+
+==================================================
+================= SIGN+SHA =======================
+==================================================
+Using backend: pytorch
+
+===== PRODUCTS =====
+
+Namespace(DATASET='products', ATTN_FILTER='dot_product', EPOCHS=200, EVAL_EVERY=10, RUN_SEEDS=[0, 4, 8, 42, 64, 128, 256, 512, 1024, 2048], HOPS=3, BATCH_SIZE=4096, LEARNING_RATE=0.01, WEIGHT_DECAY=1e-05, INCEPTION_LAYERS=3, INCEPTION_UNITS=1024, CLASSIFICATION_LAYERS=3, CLASSIFICATION_UNITS=1024, FEATURE_DROPOUT=0.1, NODE_DROPOUT=0.4, BATCH_NORMALIZATION=1, FILTER_BATCH_SIZE=100000, ATTN_HEADS=1, ATTN_NORMALIZATION=1, GAT_EPOCHS=10, GAT_BATCH_SIZE=1024, GAT_LEARNING_RATE=0.01, GAT_WEIGHT_DECAY=0.001, GAT_HIDDEN_UNITS=8, GAT_NODE_DROPOUT=0.6, GAT_LAYERS=2, GAT_HEADS_IN=8, GAT_HEADS_OUT=8, GAT_NEIGHBORS=150, GAT_LR_PATIENCE=5)
+
+RUN #0: seed=0
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.0003807349130511284
+coalesce scoo: 1.788e-05
+convert to csr_matrix: 2.568
+calc min-max per row: 0.7474
+vectorization: 1.66
+Normalization Time: 6.5140
+DOT_PRODUCT
+Attention Filter (n=122947251): 0.151 +\- 0.234 [0.000-1.000]
+Filter Time: 103.9468
+Diffusion Time: 70.2924
+Total Transformation Time: 218.7359
+Epoch 10:, Train 0.9058, Val 0.8819, Test 0.7108
+Epoch 20:, Train 0.9239, Val 0.8915, Test 0.7310
+Epoch 30:, Train 0.9206, Val 0.8922, Test 0.7363
+Epoch 40:, Train 0.9240, Val 0.8905, Test 0.7256
+Epoch 50:, Train 0.9269, Val 0.8942, Test 0.7415
+Epoch 60:, Train 0.9305, Val 0.8946, Test 0.7362
+Epoch 70:, Train 0.9317, Val 0.8978, Test 0.7397
+Epoch 80:, Train 0.9248, Val 0.8904, Test 0.7331
+Epoch 90:, Train 0.9330, Val 0.8985, Test 0.7361
+Epoch 100:, Train 0.9361, Val 0.8985, Test 0.7461
+Epoch 110:, Train 0.9323, Val 0.8958, Test 0.7395
+Epoch 120:, Train 0.9342, Val 0.8969, Test 0.7427
+Epoch 130:, Train 0.9310, Val 0.8943, Test 0.7398
+Epoch 140:, Train 0.9347, Val 0.8973, Test 0.7429
+Epoch 150:, Train 0.9318, Val 0.8965, Test 0.7410
+Epoch 160:, Train 0.9376, Val 0.8983, Test 0.7466
+Epoch 170:, Train 0.9340, Val 0.8967, Test 0.7414
+Epoch 180:, Train 0.9326, Val 0.8973, Test 0.7453
+Epoch 190:, Train 0.9349, Val 0.8977, Test 0.7426
+Epoch 200:, Train 0.9360, Val 0.8975, Test 0.7471
+BEST: Epoch 100, Train 0.9361, Val 0.8985, Test 0.7461
+
+RUN #1: seed=4
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.004695733543485403
+coalesce scoo: 2.575e-05
+convert to csr_matrix: 2.695
+calc min-max per row: 0.7527
+vectorization: 1.763
+Normalization Time: 6.7552
+DOT_PRODUCT
+Attention Filter (n=122825229): 0.152 +\- 0.232 [0.000-1.000]
+Filter Time: 104.5173
+Diffusion Time: 71.7048
+Total Transformation Time: 220.5608
+Epoch 10:, Train 0.9106, Val 0.8868, Test 0.7274
+Epoch 20:, Train 0.9115, Val 0.8817, Test 0.7212
+Epoch 30:, Train 0.9216, Val 0.8901, Test 0.7329
+Epoch 40:, Train 0.9258, Val 0.8935, Test 0.7409
+Epoch 50:, Train 0.9303, Val 0.8970, Test 0.7483
+Epoch 60:, Train 0.9301, Val 0.8953, Test 0.7425
+Epoch 70:, Train 0.9306, Val 0.8936, Test 0.7470
+Epoch 80:, Train 0.9311, Val 0.8967, Test 0.7399
+Epoch 90:, Train 0.9310, Val 0.8956, Test 0.7433
+Epoch 100:, Train 0.9350, Val 0.8980, Test 0.7491
+Epoch 110:, Train 0.9360, Val 0.8971, Test 0.7541
+Epoch 120:, Train 0.9291, Val 0.8934, Test 0.7332
+Epoch 130:, Train 0.9334, Val 0.8957, Test 0.7505
+Epoch 140:, Train 0.9377, Val 0.9000, Test 0.7502
+Epoch 150:, Train 0.9343, Val 0.8979, Test 0.7496
+Epoch 160:, Train 0.9375, Val 0.8985, Test 0.7515
+Epoch 170:, Train 0.9381, Val 0.8977, Test 0.7520
+Epoch 180:, Train 0.9367, Val 0.8972, Test 0.7469
+Epoch 190:, Train 0.9393, Val 0.9017, Test 0.7563
+Epoch 200:, Train 0.9364, Val 0.8971, Test 0.7479
+BEST: Epoch 190, Train 0.9393, Val 0.9017, Test 0.7563
+
+RUN #2: seed=8
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.0016792048700153828
+coalesce scoo: 2.432e-05
+convert to csr_matrix: 2.702
+calc min-max per row: 0.7403
+vectorization: 1.764
+Normalization Time: 6.7467
+DOT_PRODUCT
+Attention Filter (n=123020289): 0.147 +\- 0.229 [0.000-1.000]
+Filter Time: 95.6007
+Diffusion Time: 71.4644
+Total Transformation Time: 211.6126
+Epoch 10:, Train 0.9142, Val 0.8898, Test 0.7265
+Epoch 20:, Train 0.9218, Val 0.8915, Test 0.7279
+Epoch 30:, Train 0.9238, Val 0.8927, Test 0.7278
+Epoch 40:, Train 0.9184, Val 0.8872, Test 0.7406
+Epoch 50:, Train 0.9221, Val 0.8894, Test 0.7288
+Epoch 60:, Train 0.9319, Val 0.8970, Test 0.7420
+Epoch 70:, Train 0.9294, Val 0.8922, Test 0.7451
+Epoch 80:, Train 0.9326, Val 0.8994, Test 0.7525
+Epoch 90:, Train 0.9212, Val 0.8856, Test 0.7216
+Epoch 100:, Train 0.9263, Val 0.8903, Test 0.7390
+Epoch 110:, Train 0.9309, Val 0.8936, Test 0.7422
+Epoch 120:, Train 0.9301, Val 0.8933, Test 0.7327
+Epoch 130:, Train 0.9354, Val 0.8971, Test 0.7458
+Epoch 140:, Train 0.9278, Val 0.8924, Test 0.7335
+Epoch 150:, Train 0.9331, Val 0.8971, Test 0.7386
+Epoch 160:, Train 0.9361, Val 0.8987, Test 0.7449
+Epoch 170:, Train 0.9364, Val 0.8983, Test 0.7507
+Epoch 180:, Train 0.9339, Val 0.8949, Test 0.7426
+Epoch 190:, Train 0.9340, Val 0.8967, Test 0.7362
+Epoch 200:, Train 0.9335, Val 0.8940, Test 0.7426
+BEST: Epoch 80, Train 0.9326, Val 0.8994, Test 0.7525
+
+RUN #3: seed=42
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.0031600971706211567
+coalesce scoo: 2.456e-05
+convert to csr_matrix: 2.699
+calc min-max per row: 0.746
+vectorization: 1.759
+Normalization Time: 6.7530
+DOT_PRODUCT
+Attention Filter (n=123001819): 0.148 +\- 0.229 [0.000-1.000]
+Filter Time: 95.4796
+Diffusion Time: 71.4346
+Total Transformation Time: 212.0038
+Epoch 10:, Train 0.9134, Val 0.8871, Test 0.7183
+Epoch 20:, Train 0.9185, Val 0.8895, Test 0.7212
+Epoch 30:, Train 0.9209, Val 0.8892, Test 0.7204
+Epoch 40:, Train 0.9300, Val 0.8969, Test 0.7382
+Epoch 50:, Train 0.9309, Val 0.8966, Test 0.7377
+Epoch 60:, Train 0.9248, Val 0.8906, Test 0.7256
+Epoch 70:, Train 0.9319, Val 0.8976, Test 0.7402
+Epoch 80:, Train 0.9230, Val 0.8883, Test 0.7237
+Epoch 90:, Train 0.9327, Val 0.8978, Test 0.7383
+Epoch 100:, Train 0.9280, Val 0.8918, Test 0.7385
+Epoch 110:, Train 0.9353, Val 0.8987, Test 0.7372
+Epoch 120:, Train 0.9328, Val 0.8956, Test 0.7439
+Epoch 130:, Train 0.9330, Val 0.8933, Test 0.7319
+Epoch 140:, Train 0.9319, Val 0.8962, Test 0.7362
+Epoch 150:, Train 0.9334, Val 0.8968, Test 0.7444
+Epoch 160:, Train 0.9355, Val 0.8990, Test 0.7424
+Epoch 170:, Train 0.9363, Val 0.8972, Test 0.7464
+Epoch 180:, Train 0.9320, Val 0.8935, Test 0.7347
+Epoch 190:, Train 0.9326, Val 0.8937, Test 0.7421
+Epoch 200:, Train 0.9354, Val 0.8976, Test 0.7458
+BEST: Epoch 160, Train 0.9355, Val 0.8990, Test 0.7424
+
+RUN #4: seed=64
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.004785676021128893
+coalesce scoo: 2.384e-05
+convert to csr_matrix: 2.703
+calc min-max per row: 0.7273
+vectorization: 1.759
+Normalization Time: 6.7313
+DOT_PRODUCT
+Attention Filter (n=123009438): 0.151 +\- 0.234 [0.000-1.000]
+Filter Time: 96.5350
+Diffusion Time: 71.6780
+Total Transformation Time: 213.5623
+Epoch 10:, Train 0.9091, Val 0.8826, Test 0.7226
+Epoch 20:, Train 0.9197, Val 0.8879, Test 0.7323
+Epoch 30:, Train 0.9244, Val 0.8905, Test 0.7327
+Epoch 40:, Train 0.9239, Val 0.8882, Test 0.7299
+Epoch 50:, Train 0.9280, Val 0.8932, Test 0.7410
+Epoch 60:, Train 0.9295, Val 0.8942, Test 0.7373
+Epoch 70:, Train 0.9300, Val 0.8903, Test 0.7285
+Epoch 80:, Train 0.9252, Val 0.8895, Test 0.7343
+Epoch 90:, Train 0.9277, Val 0.8893, Test 0.7295
+Epoch 100:, Train 0.9232, Val 0.8871, Test 0.7261
+Epoch 110:, Train 0.9333, Val 0.8959, Test 0.7416
+Epoch 120:, Train 0.9329, Val 0.8942, Test 0.7315
+Epoch 130:, Train 0.9323, Val 0.8889, Test 0.7334
+Epoch 140:, Train 0.9337, Val 0.8936, Test 0.7451
+Epoch 150:, Train 0.9387, Val 0.8982, Test 0.7448
+Epoch 160:, Train 0.9352, Val 0.8967, Test 0.7457
+Epoch 170:, Train 0.9336, Val 0.8922, Test 0.7365
+Epoch 180:, Train 0.8568, Val 0.8268, Test 0.6889
+Epoch 190:, Train 0.9344, Val 0.8938, Test 0.7343
+Epoch 200:, Train 0.9356, Val 0.8971, Test 0.7426
+BEST: Epoch 150, Train 0.9387, Val 0.8982, Test 0.7448
+
+RUN #5: seed=128
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.00019998301286250353
+coalesce scoo: 2.36e-05
+convert to csr_matrix: 2.583
+calc min-max per row: 0.7256
+vectorization: 1.654
+Normalization Time: 6.4826
+DOT_PRODUCT
+Attention Filter (n=122841277): 0.151 +\- 0.233 [0.000-1.000]
+Filter Time: 93.3963
+Diffusion Time: 72.1919
+Total Transformation Time: 210.7161
+Epoch 10:, Train 0.9049, Val 0.8768, Test 0.7019
+Epoch 20:, Train 0.9134, Val 0.8843, Test 0.7136
+Epoch 30:, Train 0.9189, Val 0.8879, Test 0.7226
+Epoch 40:, Train 0.9249, Val 0.8923, Test 0.7369
+Epoch 50:, Train 0.9275, Val 0.8956, Test 0.7398
+Epoch 60:, Train 0.9294, Val 0.8950, Test 0.7349
+Epoch 70:, Train 0.9282, Val 0.8945, Test 0.7302
+Epoch 80:, Train 0.9260, Val 0.8928, Test 0.7264
+Epoch 90:, Train 0.9326, Val 0.8957, Test 0.7463
+Epoch 100:, Train 0.9334, Val 0.8990, Test 0.7329
+Epoch 110:, Train 0.9275, Val 0.8906, Test 0.7315
+Epoch 120:, Train 0.9336, Val 0.8980, Test 0.7389
+Epoch 130:, Train 0.9326, Val 0.8965, Test 0.7383
+Epoch 140:, Train 0.9376, Val 0.8998, Test 0.7432
+Epoch 150:, Train 0.9345, Val 0.8968, Test 0.7411
+Epoch 160:, Train 0.9341, Val 0.8996, Test 0.7433
+Epoch 170:, Train 0.9366, Val 0.8994, Test 0.7443
+Epoch 180:, Train 0.9329, Val 0.8941, Test 0.7281
+Epoch 190:, Train 0.9330, Val 0.8967, Test 0.7343
+Epoch 200:, Train 0.9327, Val 0.8944, Test 0.7365
+BEST: Epoch 140, Train 0.9376, Val 0.8998, Test 0.7432
+
+RUN #6: seed=256
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.0025518205948174
+coalesce scoo: 2.146e-05
+convert to csr_matrix: 2.913
+calc min-max per row: 0.7495
+vectorization: 1.662
+Normalization Time: 7.1080
+DOT_PRODUCT
+Attention Filter (n=123037660): 0.162 +\- 0.240 [0.000-1.000]
+Filter Time: 92.8264
+Diffusion Time: 73.8972
+Total Transformation Time: 211.7710
+Epoch 10:, Train 0.9152, Val 0.8885, Test 0.7255
+Epoch 20:, Train 0.9217, Val 0.8906, Test 0.7276
+Epoch 30:, Train 0.9254, Val 0.8902, Test 0.7319
+Epoch 40:, Train 0.9238, Val 0.8897, Test 0.7346
+Epoch 50:, Train 0.9323, Val 0.8962, Test 0.7494
+Epoch 60:, Train 0.9316, Val 0.8964, Test 0.7491
+Epoch 70:, Train 0.9304, Val 0.8968, Test 0.7329
+Epoch 80:, Train 0.9329, Val 0.8983, Test 0.7444
+Epoch 90:, Train 0.9362, Val 0.8982, Test 0.7516
+Epoch 100:, Train 0.9356, Val 0.9000, Test 0.7448
+Epoch 110:, Train 0.9374, Val 0.9005, Test 0.7481
+Epoch 120:, Train 0.9362, Val 0.8986, Test 0.7434
+Epoch 130:, Train 0.9368, Val 0.8998, Test 0.7425
+Epoch 140:, Train 0.9374, Val 0.8998, Test 0.7411
+Epoch 150:, Train 0.9355, Val 0.8974, Test 0.7370
+Epoch 160:, Train 0.9355, Val 0.8980, Test 0.7354
+Epoch 170:, Train 0.9379, Val 0.8980, Test 0.7505
+Epoch 180:, Train 0.9388, Val 0.8970, Test 0.7507
+Epoch 190:, Train 0.9378, Val 0.8970, Test 0.7373
+Epoch 200:, Train 0.9417, Val 0.9015, Test 0.7557
+BEST: Epoch 200, Train 0.9417, Val 0.9015, Test 0.7557
+
+RUN #7: seed=512
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.002371214795857668
+coalesce scoo: 1.574e-05
+convert to csr_matrix: 2.482
+calc min-max per row: 0.7266
+vectorization: 1.554
+Normalization Time: 6.2809
+DOT_PRODUCT
+Attention Filter (n=122883286): 0.149 +\- 0.230 [0.000-1.000]
+Filter Time: 92.0541
+Diffusion Time: 76.6293
+Total Transformation Time: 213.5876
+Epoch 10:, Train 0.9117, Val 0.8844, Test 0.7194
+Epoch 20:, Train 0.9229, Val 0.8929, Test 0.7318
+Epoch 30:, Train 0.9235, Val 0.8921, Test 0.7319
+Epoch 40:, Train 0.9261, Val 0.8957, Test 0.7334
+Epoch 50:, Train 0.9263, Val 0.8926, Test 0.7304
+Epoch 60:, Train 0.9336, Val 0.8980, Test 0.7463
+Epoch 70:, Train 0.9296, Val 0.8961, Test 0.7364
+Epoch 80:, Train 0.9314, Val 0.8951, Test 0.7400
+Epoch 90:, Train 0.9337, Val 0.8966, Test 0.7347
+Epoch 100:, Train 0.9366, Val 0.8999, Test 0.7454
+Epoch 110:, Train 0.9324, Val 0.8979, Test 0.7384
+Epoch 120:, Train 0.9351, Val 0.8986, Test 0.7449
+Epoch 130:, Train 0.9364, Val 0.8998, Test 0.7427
+Epoch 140:, Train 0.9371, Val 0.8998, Test 0.7488
+Epoch 150:, Train 0.9362, Val 0.9002, Test 0.7447
+Epoch 160:, Train 0.9369, Val 0.8998, Test 0.7471
+Epoch 170:, Train 0.9343, Val 0.8969, Test 0.7430
+Epoch 180:, Train 0.9386, Val 0.8991, Test 0.7483
+Epoch 190:, Train 0.9377, Val 0.9004, Test 0.7361
+Epoch 200:, Train 0.9365, Val 0.8999, Test 0.7358
+BEST: Epoch 190, Train 0.9377, Val 0.9004, Test 0.7361
+
+RUN #8: seed=1024
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.000924520893022418
+coalesce scoo: 1.597e-05
+convert to csr_matrix: 2.488
+calc min-max per row: 0.7457
+vectorization: 1.562
+Normalization Time: 6.3577
+DOT_PRODUCT
+Attention Filter (n=122896656): 0.151 +\- 0.233 [0.000-1.000]
+Filter Time: 92.1955
+Diffusion Time: 77.5943
+Total Transformation Time: 216.0574
+Epoch 10:, Train 0.9084, Val 0.8811, Test 0.7118
+Epoch 20:, Train 0.9152, Val 0.8867, Test 0.7381
+Epoch 30:, Train 0.9201, Val 0.8877, Test 0.7177
+Epoch 40:, Train 0.9189, Val 0.8870, Test 0.7336
+Epoch 50:, Train 0.9253, Val 0.8909, Test 0.7316
+Epoch 60:, Train 0.9293, Val 0.8941, Test 0.7323
+Epoch 70:, Train 0.9271, Val 0.8933, Test 0.7358
+Epoch 80:, Train 0.9277, Val 0.8914, Test 0.7368
+Epoch 90:, Train 0.9305, Val 0.8912, Test 0.7319
+Epoch 100:, Train 0.9310, Val 0.8965, Test 0.7437
+Epoch 110:, Train 0.9293, Val 0.8936, Test 0.7355
+Epoch 120:, Train 0.9289, Val 0.8911, Test 0.7322
+Epoch 130:, Train 0.9304, Val 0.8951, Test 0.7435
+Epoch 140:, Train 0.9332, Val 0.8960, Test 0.7455
+Epoch 150:, Train 0.9293, Val 0.8911, Test 0.7389
+Epoch 160:, Train 0.9263, Val 0.8906, Test 0.7329
+Epoch 170:, Train 0.9337, Val 0.8954, Test 0.7367
+Epoch 180:, Train 0.9345, Val 0.8979, Test 0.7456
+Epoch 190:, Train 0.9364, Val 0.8986, Test 0.7456
+Epoch 200:, Train 0.9329, Val 0.8967, Test 0.7415
+BEST: Epoch 190, Train 0.9364, Val 0.8986, Test 0.7456
+
+RUN #9: seed=2048
+Attn Summary:
+len(r): 123718152
+len(c): 123718152
+len(v): 123718152
+dtype(v): torch.FloatTensor, 0.00865280069410801
+coalesce scoo: 1.669e-05
+convert to csr_matrix: 2.724
+calc min-max per row: 0.8676
+vectorization: 1.563
+Normalization Time: 7.0620
+DOT_PRODUCT
+Attention Filter (n=123018678): 0.153 +\- 0.235 [0.000-1.000]
+Filter Time: 93.1265
+Diffusion Time: 76.9050
+Total Transformation Time: 215.2796
+Epoch 10:, Train 0.9097, Val 0.8830, Test 0.7127
+Epoch 20:, Train 0.9155, Val 0.8855, Test 0.7323
+Epoch 30:, Train 0.9270, Val 0.8941, Test 0.7367
+Epoch 40:, Train 0.9225, Val 0.8899, Test 0.7239
+Epoch 50:, Train 0.9259, Val 0.8916, Test 0.7249
+Epoch 60:, Train 0.9308, Val 0.8972, Test 0.7299
+Epoch 70:, Train 0.9318, Val 0.8959, Test 0.7392
+Epoch 80:, Train 0.9312, Val 0.8928, Test 0.7351
+Epoch 90:, Train 0.9284, Val 0.8928, Test 0.7232
+Epoch 100:, Train 0.9314, Val 0.8938, Test 0.7369
+Epoch 110:, Train 0.9293, Val 0.8905, Test 0.7255
+Epoch 120:, Train 0.9347, Val 0.8993, Test 0.7436
+Epoch 130:, Train 0.9325, Val 0.8927, Test 0.7273
+Epoch 140:, Train 0.9318, Val 0.8937, Test 0.7379
+Epoch 150:, Train 0.9367, Val 0.8970, Test 0.7419
+Epoch 160:, Train 0.9323, Val 0.8949, Test 0.7293
+Epoch 170:, Train 0.9361, Val 0.8996, Test 0.7393
+Epoch 180:, Train 0.9329, Val 0.8941, Test 0.7333
+Epoch 190:, Train 0.9366, Val 0.8982, Test 0.7454
+Epoch 200:, Train 0.9382, Val 0.8970, Test 0.7310
+BEST: Epoch 170, Train 0.9361, Val 0.8996, Test 0.7393
+
+
+
+
+==================================================
+Model Parameters: 14124085
+
+Avg. Filter Time (s): 95.9678 +/- 4.3767
+Avg. Diffusion Time (s): 73.3792 +/- 2.5518
+Avg. Preaggregation Time (s): 214.3887 +/- 3.0924
+Avg. Training Time (epoch) (s): 4.4223 +/- 0.0816
+Avg. Inference Time (s): 1.2773 +/- 0.0201
+
+Avg. Training Acc: 0.9372 +/- 0.0023
+Avg. Validation Acc: 0.8997 +/- 0.0012
+Avg. Test Acc: 0.7462 +/- 0.0064
+
+==================================================
+

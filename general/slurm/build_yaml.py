@@ -33,18 +33,21 @@ def main(args):
         saved yaml file
     """
     assert args.METHOD.lower() in ['grid', 'random', 'bayes']
-    assert args.DATASET.lower() in ['pubmed', 'cora']
+    assert args.DATASET.lower() in ['pubmed', 'cora', 'arxiv', 'products']
     assert args.MODEL != None
     assert args.TRAIN_FILE != None
     assert args.YAML_FILE != None
 
-    GAT_models = ['gat_fullbatch', 'gat_loader']
-    SIGN_models = ['sign', 'sign_sha', 'sign_mha']
+    GAT_models = ['fullbatchgat', 'samplergat']
+    SIGN_models = ['sign', 'sign_fullbatchgat',
+                   'sign_samplergat', 'sign_sha', 'sign_mha']
     DPA_models = ['sign_sha', 'sign_mha']
+    CS_models = ['sign_cs']
 
     include_gat_params = args.MODEL.lower() in GAT_models
     include_sign_params = args.MODEL.lower() in SIGN_models
     include_dpa_params = args.MODEL.lower() in DPA_models
+    include_cs_params = args.MODEL.lower() in CS_models
 
     # outline config dictionary
     sweep_config = {
@@ -66,10 +69,6 @@ def main(args):
         'seed': {
             'distribution': 'constant',
             'value': 42
-        },
-        'optimizer_type': {
-            'distribution': 'constant',
-            'value': 'Adam'
         },
         'optimizer_lr': {
             'distribution': 'uniform',
@@ -120,8 +119,27 @@ def main(args):
             },
         })
 
+        if args.MODEL.lower() == 'sign_samplergat':
+            param_dict.update({
+                'heads_in': {
+                    'distribution': 'int_uniform',
+                    'min': 1,
+                    'max': 9,
+                },
+                'heads_out': {
+                    'distribution': 'int_uniform',
+                    'min': 1,
+                    'max': 9,
+                },
+                'nlayers': {
+                    'distribution': 'int_uniform',
+                    'min': 2,
+                    'max': 4,
+                },
+            })
+
     if include_gat_params:
-        if args.MODEL.lower() == 'gat_loader':
+        if args.MODEL.lower() == 'samplergat':
             param_dict.update({
                 'batch_size': {
                     'distribution': 'q_uniform',
@@ -149,29 +167,35 @@ def main(args):
         })
 
     if include_dpa_params:
-        if args.MODEL.lower()=='sign_mha':
+        param_dict.update({
+            'norm': {
+                'values': ['min_max', None]
+            },
+        })
+
+        if args.MODEL.lower() == 'sign_mha':
             param_dict.update({
                 'attn_heads': {
                     'distribution': 'int_uniform',
                     'min': 1,
-                    'max': 9,
+                    'max': 5,
                 },
             })
-        elif args.MODEL.lower()=='sign_sha':
+        elif args.MODEL.lower() == 'sign_sha':
             param_dict.update({
-                'seed': {
+                'attn_heads': {
                     'distribution': 'constant',
                     'value': 1
                 },
             })
 
+    if include_cs_params:
         param_dict.update({
-            'mha_bias': {
-                'distribution': 'int_uniform',
-                'min': 0,
-                'max': 1,
+            'cs_batch_size': {
+                'distribution': 'constant',
+                'value': 50000
             },
-        }) 
+        })
 
     # reduce complexity for trialing
     if args.RUN_TRIAL:

@@ -1,0 +1,99 @@
+#!/bin/bash
+#SBATCH --job-name='arxMHA'
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --time=20:00:00
+#SBATCH --gpus=1
+#SBATCH --partition=gpu_shared
+#SBATCH --output=%x.%j.out
+#SBATCH --mail-user=jon.harris@student.uva.nl
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+date;hostname;id;pwd
+START=`date +%s`                # will record .job runtime
+
+# sweep variables 
+dataset='arxiv'
+method='random'                # sweep type (grid, bayes, random)
+run_trial=false                # if True, reduce param values for quick test
+sweep_iterations=100           # number of sweep iterations
+FOLDER=$dataset'_MHAgpu'                # name of folder on scratch
+
+
+# copy files to scratch
+mkdir -p $TMPDIR/$FOLDER/data
+cp -r data/$dataset/* $TMPDIR/$FOLDER/data
+cp -r general venvs $TMPDIR/$FOLDER
+cp -r experiments/sweeps/* $TMPDIR/$FOLDER
+cd $TMPDIR/$FOLDER
+
+
+
+# activate venv
+module load 2021
+module load CUDA/11.3.1
+source $TMPDIR/$FOLDER/venvs/GPU_venv/bin/activate
+which python
+
+echo ''
+echo 'Check if packages installed correctly'
+python -c "import torch; print(f'Torch: {torch.__version__}')"
+python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
+echo ''
+
+
+# build start-agent.sh for sweep 
+echo '#!/bin/bash' >> start_agent.sh
+echo 'wandb agent --count '$sweep_iterations' $1 --project $2' >> start_agent.sh
+chmod u+x start_agent.sh        # need permission to use .sh file
+
+
+# perform sweep
+for model in  'SIGN_MHA' 
+do 
+    yaml_file=$model'.yaml'         # yaml name to write to
+    train_file='hps_'$model'.py'    # model-specific py file used in sweep
+    project_name=$FOLDER             # wandb project name
+
+    echo ''
+    echo '=================================================='
+    echo '============== START SWEEP: '$model' =================='
+    echo '=================================================='
+    
+    echo 'dataset': $dataset
+    echo 'method': $method
+    echo 'model': $model
+    echo 'iterations': $sweep_iterations
+    echo 'run_trial': $run_trial
+    echo 'config:' $yaml_file
+    echo 'train_file:' $train_file
+    echo 'project_name:' $project_name
+    echo ''
+
+    # build yaml file 
+    python general/slurm/build_yaml.py \
+        --DATASET $dataset \
+        --MODEL $model \
+        --METHOD $method \
+        --TRAIN_FILE $train_file \
+        --YAML_FILE $yaml_file \
+        --RUN_TRIAL $run_trial 
+
+    echo '=================================================='
+    echo ''
+
+    # initialize and run sweep
+    python general/slurm/run_slurm.py \
+        --YAML_FILE $yaml_file \
+        --PROJ_NAME $project_name
+done
+
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
+END=`date +%s`;
+
+let DIFF=END-START
+let HOURS=DIFF/3600
+let MINUTES=(DIFF/60)%60
+
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

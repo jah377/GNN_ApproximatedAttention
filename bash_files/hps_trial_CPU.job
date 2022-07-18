@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="trial"
+#SBATCH --job-name="cpu_trial"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=00:10:00
+#SBATCH --time=00:15:00
 #SBATCH --partition=normal
 #SBATCH --output=%x.%j.out
 
@@ -12,11 +12,11 @@ START=`date +%s`                # will record .job runtime
 
 
 # sweep variables 
-dataset='pubmed'
+dataset='arxiv'
 method='random'              # sweep type (grid, bayes, random)
 run_trial=true               # if True, reduce param values for quick test
-sweep_iterations=5           # number of sweep iterations
-FOLDER='gpu_dump'            # name of folder on scratch
+sweep_iterations=3           # number of sweep iterations
+FOLDER='cpu_dump'            # name of folder on scratch
 
 
 # copy files to scratch
@@ -28,9 +28,7 @@ cd $TMPDIR/$FOLDER
 
 
 # activate venv
-module load 2021
-module load CUDA/11.3.1
-source $TMPDIR/$FOLDER/venvs/GPU_venv/bin/activate
+source $TMPDIR/$FOLDER/venvs/CPU_venv/bin/activate
 which python
 
 echo ''
@@ -47,7 +45,7 @@ chmod u+x start_agent.sh        # need permission to use .sh file
 
 
 # PERFORM SWEEP
-for model in  'SIGN' 
+for model in  'SIGN_MHA' 
 do 
     # sweep inputs
     yaml_file=$model'.yaml'         # desired yaml name; built later
@@ -85,6 +83,7 @@ do
         --PROJ_NAME $project_name
 done
 
+echo ''
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
 END=`date +%s`;
 
@@ -92,5 +91,5 @@ let DIFF=END-START
 let HOURS=DIFF/3600
 let MINUTES=(DIFF/60)%60
 
-printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $hours $minutes
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
 echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

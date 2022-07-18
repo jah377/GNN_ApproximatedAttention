@@ -1,0 +1,141 @@
+#!/bin/bash
+#SBATCH --job-name="prodGAT"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --time=1:00:00
+#SBATCH --gpus=1
+#SBATCH --cpus-per-task=12
+#SBATCH --partition=gpu
+
+date;hostname;id;pwd
+START=`date +%s`                # will record .job runtime
+
+# variables
+dataset='products'
+FOLDER='dump'
+num_runs=1
+num_workers=1
+
+# copy files to scratch
+mkdir -p $TMPDIR/$FOLDER
+cp -r experiments/single_run/* $TMPDIR/$FOLDER
+cp -r general venvs $TMPDIR/$FOLDER
+cd $TMPDIR/$FOLDER
+echo ' -- FILES COPIED'
+
+# activate venv
+module load 2021
+module load CUDA/11.3.1
+source $TMPDIR/$FOLDER/venvs/GPU_venv/bin/activate
+which python
+echo ' -- VENV ACTIVATED'
+
+echo ''
+echo 'Check if packages installed correctly'
+python -c "import torch; print(f'Torch: {torch.__version__}')"
+python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
+echo ''
+
+
+# run file 
+python productsGAT.py \
+    --dataset $dataset \
+    --seed 42 \
+    --optimizer_lr 0.09911 \
+    --optimizer_decay 0.05004 \
+    --epochs 33 \
+    --hidden_channel 579 \
+    --dropout 0.3852 \
+    --K 2 \
+    --batch_norm 1 \
+    --batch_size 1338 \
+    --n_runs $num_runs \
+    --num_workers $num_workers \
+    --return_results 1
+echo 'SIGN Complete'
+echo ''
+echo ''
+
+# python run_SIGN_SamplerGAT.py \
+#     --dataset $dataset \
+#     --seed 42 \
+#     --optimizer_lr 0.09911 \
+#     --optimizer_decay 0.05004 \
+#     --epochs 33 \
+#     --hidden_channel 579 \
+#     --dropout 0.3852 \
+#     --K 2 \
+#     --batch_norm 1 \
+#     --batch_size 1338 \
+#     --n_runs $num_runs \
+#     --num_workers $num_workers \
+#     --return_results 1
+# echo 'SIGN-GAT Complete'
+
+
+python run_SIGN_SHA.py \
+    --dataset $dataset \
+    --seed 42 \
+    --optimizer_lr 0.09911 \
+    --optimizer_decay 0.05004 \
+    --epochs 33 \
+    --hidden_channel 579 \
+    --dropout 0.3852 \
+    --K 2 \
+    --batch_norm 1 \
+    --batch_size 1338 \
+    --n_runs $num_runs \
+    --num_workers $num_workers \
+    --attn_heads 1 \
+    --return_results 1
+echo 'SIGN-SHA Complete'
+echo ''
+echo ''
+
+python run_SIGN_MHA.py \
+    --dataset $dataset \
+    --seed 42 \
+    --optimizer_lr 0.09911 \
+    --optimizer_decay 0.05004 \
+    --epochs 33 \
+    --hidden_channel 579 \
+    --dropout 0.3852 \
+    --K 2 \
+    --batch_norm 1 \
+    --batch_size 1338 \
+    --n_runs $num_runs \
+    --num_workers $num_workers \
+    --attn_heads 3 \
+    --return_results 1
+echo 'SIGN-MHA Complete'
+echo ''
+echo ''
+
+python run_SIGN_CosineSimilarity.py \
+    --dataset $dataset \
+    --seed 42 \
+    --optimizer_lr 0.09911 \
+    --optimizer_decay 0.05004 \
+    --epochs 33 \
+    --hidden_channel 579 \
+    --dropout 0.3852 \
+    --K 2 \
+    --batch_norm 1 \
+    --batch_size 1338 \
+    --n_runs $num_runs \
+    --num_workers $num_workers \
+    --cs_batch_size 1000 \
+    --return_results 1
+echo 'SIGN-CosineSimilarity Complete'
+echo ''
+echo ''
+
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
+END=`date +%s`;
+
+let DIFF=END-START
+let HOURS=DIFF/3600
+let MINUTES=(DIFF/60)%60
+
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'

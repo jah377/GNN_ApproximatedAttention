@@ -1,0 +1,100 @@
+#!/bin/bash
+#SBATCH --job-name="products_SIGN_MHAseed"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --time=12:00:00
+#SBATCH --gpus=1
+#SBATCH --partition=gpu
+#SBATCH --output=%x.%j.out
+# SBATCH --mail-user=jon.harris@student.uva.nl
+# SBATCH --mail-type=BEGIN,END,FAIL
+
+date;hostname;id;pwd
+START=`date +%s`    # will record .job runtime
+
+
+# variables 
+FOLDER='SIGN_SHAseed'   # name of folder on scratch
+dataset='products'
+optimizer_type='Adam'
+optimizer_lr=0.0001
+optimizer_decay=0.0001
+epochs=20
+hidden_channel=512
+dropout=0.5
+K=1
+batch_norm=true
+batch_size=4096
+attn_heads=1
+
+
+# copy files to scratch
+mkdir -p $TMPDIR/$FOLDER/data
+cp -r data/$dataset/* $TMPDIR/$FOLDER/data
+cp -r general venvs $TMPDIR/$FOLDER
+cp -r experiments/single_run/* $TMPDIR/$FOLDER
+cd $TMPDIR/$FOLDER
+
+
+# activate venv
+module load 2021
+module load CUDA/11.3.1
+source $TMPDIR/$FOLDER/venvs/GPU_venv/bin/activate
+which python
+
+echo ''
+echo 'Check if packages installed correctly'
+python -c "import torch; print(f'Torch: {torch.__version__}')"
+python -c "import torch_geometric; print(f'PyG: {torch_geometric.__version__}')"
+echo ''
+
+echo ''
+echo '=================================================='
+echo '============== '$model' =================='
+echo '=================================================='
+echo ''
+echo 'dataset': $dataset
+echo 'optimizer_type': $optimizer_type
+echo 'optimizer_lr': $optimizer_lr
+echo 'optimizer_decay': $optimizer_decay
+echo 'epochs:' $epochs
+echo 'hidden_channel:' $hidden_channel
+echo 'dropout:' $dropout
+echo 'K:' $K
+echo 'batch_norm:' $batch_norm
+echo 'batch_size:' $batch_size
+echo 'attn_heads:' $attn_heads
+echo ''
+echo '=================================================='
+echo ''
+
+# perform sweep
+for seed in 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100;
+do 
+    echo ''
+    echo '############# ' $seed ' #############'
+    echo ''
+
+    python run_SIGN.py \
+        --dataset $dataset \
+        --seed $seed \
+        --optimimzer_type $optimimzer_type \
+        --optimimzer_lr $optimimzer_lr \
+        --optimizer_decay $optimizer_decay \
+        --epochs $epochs \
+        --hidden_channel $hidden_channel \
+        --dropout $dropout \
+        --K $K \
+        --batch_norm $batch_norm \
+        --batch_size $batch_size \
+        --attn_heads $attn_heads
+
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
+END=`date +%s`;
+
+let DIFF=END-START
+let HOURS=DIFF/3600
+let MINUTES=(DIFF/60)%60
+
+printf 'TOTAL RUNTIME = %d hours %02d minutes\n' $HOURS $MINUTES
+echo '++++++++++++++++++++++++++++++++++++++++++++++++++++'
