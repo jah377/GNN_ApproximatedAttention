@@ -11,9 +11,9 @@ import torch.nn.functional as F
 from torch_sparse import SparseTensor
 
 from model import SIGN
-from filter_cosine import cosine_filter
-from filter_dotprod import dotproduct_filter
-from filter_gat import gat_filter
+from attn_filters.filter_cosine import cosine_filter
+from attn_filters.filter_dotprod import dotproduct_filter
+from attn_filters.filter_gat import gat_filter
 from utils import set_seeds, prep_data, time_wrapper, create_loader, create_evaluator_fn
 
 
