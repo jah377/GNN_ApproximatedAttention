@@ -10,4 +10,10 @@ general_archive/
 =======
 /approx_attn
 /venvs
+<<<<<<< HEAD
 >>>>>>> c8bea8c... remove non-run related folders and documents
+=======
+/__pycache__
+/data
+install_notes.txt
+>>>>>>> 1dbbdd6... final run branch
