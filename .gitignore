@@ -1,0 +1,6 @@
+/approx_attn
+/venvs
+/__pycache__
+/attn_filters/__pycache__
+/data
+*.txt
