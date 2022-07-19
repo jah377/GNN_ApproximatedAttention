@@ -8,7 +8,7 @@ Graph neural networks (GNNs) describe neural architectures generalized to learn 
 
 ## Requirements
 
-Dependencies with python 3.9.5:
+Dependencies with python 3.9.7:
 ```
 torch==1.11.0
 torch_geometric==2.0.4
@@ -16,7 +16,6 @@ torch_scatter==2.0.9
 torch_sparse==0.6.13
 ogb==1.3.3
 einops==0.4.1
-PyYAML==6.0
 ```
 
 ## Setup
