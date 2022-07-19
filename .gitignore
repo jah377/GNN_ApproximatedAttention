@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 data/
 wandb/
 wandb_on_slurm/
@@ -17,3 +18,10 @@ general_archive/
 /data
 install_notes.txt
 >>>>>>> 1dbbdd6... final run branch
+=======
+/approx_attn
+/venvs
+/__pycache__
+/data
+install_notes.txt
+>>>>>>> 24cdf787b7c3e7c7c79765a628e346e8a4ba4398
