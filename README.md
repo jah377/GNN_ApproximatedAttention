@@ -62,7 +62,7 @@ python main.py --VERBOSE 1 --DATASET 'pubmed' --ATTN_FILTER 'gat' --EPOCHS 4 --E
 ```
 
 
-## Results <span id="results"><span>
+## Results
 ### Average Accuracy
 
 | Model         | Pubmed        | ogbn-arXiv    | ogbn-products |
