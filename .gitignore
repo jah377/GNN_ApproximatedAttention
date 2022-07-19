@@ -1,2 +1,5 @@
 /approx_attn
 /venvs
+/__pycache__
+/data
+install_notes.txt

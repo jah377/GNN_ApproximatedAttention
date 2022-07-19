@@ -1,6 +1,5 @@
 import time
 import glob
-import torch
 import random
 
 import numpy as np
@@ -174,8 +173,7 @@ def sparse_min_max_norm(s_coo):
     min_r = np.minimum.reduceat(v, idx)  # min per row
     min_r *= (nnz == shape[1])           # if not fully-connected, min=0
     max_r = np.maximum.reduceat(v, idx)  # max per row
-    max_r = np.where(max_r == min_r, max_r+1, max_r) # cannot divide by 0
-
+    max_r = np.where(max_r == min_r, max_r+1, max_r)  # cannot divide by 0
 
     # create matrices for vectorization
     start = time.time()
@@ -201,4 +199,3 @@ def create_slices(dim_size, batch_size):
         count += int(batch_size)
         if count >= int(dim_size):
             break
-
