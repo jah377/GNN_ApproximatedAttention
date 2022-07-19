@@ -1,8 +1,0 @@
-data/
-wandb/
-wandb_on_slurm/
-venvs/
-HIDDEN/
-archive/
-PLAYGROUND.py
-general_archive/
