@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 data/
 wandb/
 wandb_on_slurm/
@@ -6,3 +7,7 @@ HIDDEN/
 archive/
 PLAYGROUND.py
 general_archive/
+=======
+/approx_attn
+/venvs
+>>>>>>> c8bea8c... remove non-run related folders and documents
