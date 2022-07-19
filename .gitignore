@@ -1,27 +1,6 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-data/
-wandb/
-wandb_on_slurm/
-venvs/
-HIDDEN/
-archive/
-PLAYGROUND.py
-general_archive/
-=======
-/approx_attn
-/venvs
-<<<<<<< HEAD
->>>>>>> c8bea8c... remove non-run related folders and documents
-=======
-/__pycache__
-/data
-install_notes.txt
->>>>>>> 1dbbdd6... final run branch
-=======
 /approx_attn
 /venvs
 /__pycache__
+/attn_filters/__pycache__
 /data
 install_notes.txt
->>>>>>> 24cdf787b7c3e7c7c79765a628e346e8a4ba4398
