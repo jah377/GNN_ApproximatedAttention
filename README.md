@@ -1,6 +1,6 @@
 # An Approximate Attention Filter For The Efficient Precomputation Of Scalable Graph Convolutions
 
-![ScreenShot](https://raw.github.com/jah377/ApproximatedAttention/run/report)
+![ScreenShot](https://raw.github.com/jah377/ApproximatedAttention/run/report.github_image.png)
 
 This repository contains code corresponding to the analyses presented in "An Approximate Attention Filter For the Efficient Precomputation of Scalable Graph Convolutions" submitted in partial fulfillment for the degree of MSc. in Data Science at the University of Amsterdam.
 
