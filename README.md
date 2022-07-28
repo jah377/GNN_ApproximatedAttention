@@ -1,4 +1,5 @@
 # An Approximate Attention Filter For The Efficient Precomputation Of Scalable Graph Convolutions
+*Master Thesis (5294MTD18Y)*
 
 ![ScreenShot](https://raw.github.com/jah377/ApproximatedAttention/main/report/github_image.png)
 
